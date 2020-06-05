@@ -1,0 +1,17 @@
+interface Dummy {}
+
+function testolordo(): unit {
+
+}
+
+function testolordo2(a: int list, b: nat): nat {
+
+}
+
+enum states = CIAO | MONDO;
+
+type test_tuple = (int, nat);
+
+type test_tuple_map = (int, nat) map;
+
+// type test_tuple_map = (int, nat option) map;

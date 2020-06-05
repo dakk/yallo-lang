@@ -1,0 +1,17 @@
+(executable
+ (public_name yallo)
+ (name yallo)
+ (preprocess (pps ppx_deriving.show))
+ (libraries ppx_deriving menhirLib)
+ (modules yallo parse_tree parser lexer ast compiler))
+
+(ocamllex lexer)
+
+(menhir 
+ (modules parser)
+ (flags --explain --inspection --table --dump)
+)
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

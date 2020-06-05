@@ -1,0 +1,31 @@
+import "test/dummy_import.yallo";
+
+interface Fa12 extends ciao {
+	entry transfer();
+	entry transfer(a: unit);
+	entry transfer(a: unit, b: unit);
+	entry transfer(a: unit, b: unit) @ciao;
+}
+
+interface T {
+
+}
+
+contract C {
+	
+}
+
+
+contract C1 extends C {
+	
+}
+
+
+contract C2 extends C implements Fa12 {
+	
+}
+
+
+contract C3 implements Fa12 {
+	
+}
