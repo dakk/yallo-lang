@@ -39,6 +39,8 @@ type cenv = string list
 
 (* create a list assoc from name to basetype, raise if unknown type *)
 type tenv = (string * atype) list
+[@@deriving show {with_path = false}]
+
 let base_tenv = [
   ("address",  TBAddress);
   ("unit",     TBUnit);
@@ -53,27 +55,36 @@ let base_tenv = [
   ("operation",TBOperation)
 ]
 
-open Parse_tree
+
+let get_type t te = try List.assoc t te with | _ -> failwith ("Unknown type: " ^ t)
 
 let rec unroll_type t (te: tenv) = match t with 
-| PTBase (id) -> List.assoc id te
-| PTTuple (tl) -> TCTuple (List.map (fun x -> List.assoc x te) tl)
-| PTRecord (tl) -> TCRecord (List.map (fun (a,b) -> (a, unroll_type b te)) tl)
-| PTCont (ctype, ptype) -> ( match ctype with
+| Parse_tree.PTBase (id) -> get_type id te
+| Parse_tree.PTTuple (tl) -> TCTuple (List.map (fun x -> get_type x te) tl)
+| Parse_tree.PTRecord (tl) -> TCRecord (List.map (fun (a,b) -> (a, unroll_type b te)) tl)
+| Parse_tree.PTCont (ctype, ptype) -> ( match ctype with
   | "list" -> TCList (unroll_type ptype te)
-  (* | "map" -> TCMap (unroll_type ptype te)
-  | "big_map" -> TCBigMap (unroll_type ptype te) *)
+  | "map" -> (match ptype with 
+    | Parse_tree.PTTuple ([a;b]) -> TCMap (get_type a te, get_type b te)
+    | _ -> failwith ("Invalid type for map"))
+  | "big_map" -> (match ptype with 
+    | Parse_tree.PTTuple ([a;b]) -> TCBigMap (get_type a te, get_type b te)
+    | _ -> failwith ("Invalid type for big_map"))
   | "option" -> TCOption (unroll_type ptype te)
   | c -> failwith ("Invalid container type: " ^ c)
 )
-| PTEnum (el) -> TEnum (el)
+| Parse_tree.PTEnum (el) -> TEnum (el)
 
 let rec _from_parse_tree pt (te: tenv) (ce: cenv) (ie: ienv) = match pt with 
-| [] -> TCTuple [TBBool; TBNat]
-| DType (id, t) :: pt' -> _from_parse_tree pt' ((id, unroll_type t te)::te) ce ie
-| DInterface (id, eid, sl) :: pt' -> _from_parse_tree pt' te ce ie
-| DContract (id, eid, iid, ul) :: pt' -> _from_parse_tree pt' te ce ie
-| DFunction (id, pl, rt, body) :: pt' -> _from_parse_tree pt' te ce ie
+| [] -> 
+  print_endline (show_tenv te);
+  TCTuple [TBBool; TBNat]
+| Parse_tree.DType (id, t) :: pt' -> 
+  if List.assoc_opt id te <> None then failwith ("Duplicate type declaration for: " ^ id)
+  else _from_parse_tree pt' ((id, unroll_type t te)::te) ce ie
+| Parse_tree.DInterface (id, eid, sl) :: pt' -> _from_parse_tree pt' te ce ie
+| Parse_tree.DContract (id, eid, iid, ul) :: pt' -> _from_parse_tree pt' te ce ie
+| Parse_tree.DFunction (id, pl, rt, body) :: pt' -> _from_parse_tree pt' te ce ie
 | invalid :: pt' -> failwith "Invalid declaration"
 
 let from_parse_tree pt = _from_parse_tree pt (base_tenv) [] []

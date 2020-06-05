@@ -15,7 +15,6 @@ type signature = ident * (ident * ptype) list * ident list [@@deriving show]
 type declaration = 
 (* | DModifier of modifier_decl *)
 
-
 (* type declaration *)
 | DType of string * ptype
 
