@@ -1,7 +1,7 @@
 
 
 let main () = 
-  Compiler.compile Sys.argv.(1) Compiler.default_options |> ignore;
+  Compiler.compile Sys.argv.(1) Sys.argv.(2) Compiler.default_options |> ignore;
   Printf.printf "compiled!\n%!"
 
 let () = main ()

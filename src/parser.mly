@@ -3,7 +3,8 @@
 
 %token EOL, EOF
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ
-%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, ENUM, TYPE
+%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION
+%token ENUM, TYPE, RECORD
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -28,8 +29,11 @@
 
   type_sig:
     // container
-    | bt=base_type_sig         { bt }
-    | bt=base_type_sig c=CONT  { Parse_tree.PTCont (c, bt) }
+    | bt=base_type_sig                                              { bt }
+    | bt=base_type_sig c=CONT                                       { Parse_tree.PTCont (c, bt) }
+    | RECORD LBRACE tl=list(terminated(parameter, SEMICOLON)) RBRACE{ Parse_tree.PTRecord (tl)}
+    | ENUM LPAR el=separated_list(PIPE, ident) RPAR                 { Parse_tree.PTEnum (el) }
+    // record?
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
   dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p)}
 
@@ -65,6 +69,6 @@
     | i=dinterface { i }
     | c=dcontract  { c }
     | f=dfunction  { f }
-    | e=denum      { e }
     | t=dtype      { t }
+    // | cc=const { m }
     // | m=modifier  { m }

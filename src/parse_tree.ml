@@ -1,9 +1,11 @@
 type ident = string [@@deriving show {with_path = false}]
 
 type ptype = 
-| PTBase of string (* type name *)
-| PTTuple of string list (* tuple of other types *)
-| PTCont of string * ptype (* container type * inner_type *)
+| PTBase of string                  (* type name *)
+| PTTuple of string list            (* tuple of other types *)
+| PTRecord of (string * ptype) list (* record is (iden * type) list *)
+| PTCont of string * ptype          (* container type * inner_type *)
+| PTEnum of string list
 [@@deriving show {with_path = false}]
 
 (* identifier * (iden * type) list of parameters * modifier list *)
@@ -13,8 +15,6 @@ type signature = ident * (ident * ptype) list * ident list [@@deriving show]
 type declaration = 
 (* | DModifier of modifier_decl *)
 
-(* enum type declaration *)
-| DEnum of string * string list
 
 (* type declaration *)
 | DType of string * ptype

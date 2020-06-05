@@ -40,7 +40,7 @@ let dump_ast (ast: Ast.t) = ast |> Ast.show |> print_endline; print_endline ""; 
 (* conditionally returns f or iden if b or not b *)
 let ap b f = if b then f else (fun x -> x)
 
-let compile (filename: string) opt =
+let compile (filename: string) (contract: string) opt =
   filename
   |> parse_file
   |> ap opt.dump_parse_tree dump_pt

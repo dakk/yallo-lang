@@ -10,7 +10,8 @@
     "implements"; 
     "function"; 
     "type"; 
-    "enum" 
+    "enum";
+    "record";
   ]
 }
 
@@ -47,6 +48,7 @@ rule token = parse
   | "map"                 { CONT "map" }
   | "big_map"             { CONT "big_map" }
   | "option"              { CONT "option" }
+  | "record"              { RECORD }
 
   | "{"                   { LBRACE }
   | "}"                   { RBRACE }
@@ -60,7 +62,7 @@ rule token = parse
   | "="                   { EQ }
 
   | "//"                  { comment_line lexbuf; token lexbuf }
-  
+
   | string as s           { STRING (String.sub s 1 ((String.length s) - 2)) }
   | modifier as m         { MODIFIER m }
   | ident as i            { if List.exists (fun r -> r = i) reserved then failwith "Using reserved word for identifier %s" i else IDENT i }
