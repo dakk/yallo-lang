@@ -23,18 +23,15 @@
     | ENTRY n=IDENT LPAR pl=separated_list(COMMA, parameter) RPAR ml=list(MODIFIER)
       { (n, pl, []) }
 
-  base_type_sig:
-    | t=ident                                           { Parse_tree.PTBase (t) }
-    | LPAR tl=separated_list(COMMA, ident) RPAR         { Parse_tree.PTTuple (tl) }
-
   type_sig:
-    // container
-    | bt=base_type_sig                                              { bt }
-    | bt=base_type_sig c=CONT                                       { Parse_tree.PTCont (c, bt) }
+    | t=ident                                                       { Parse_tree.PTBase (t) }
+    | LPAR tl=separated_list(COMMA, type_sig) RPAR                  { Parse_tree.PTTuple (tl) }
+    | bt=type_expr c=CONT                                           { Parse_tree.PTCont (c, bt) }
     | RECORD LBRACE tl=list(terminated(parameter, SEMICOLON)) RBRACE{ Parse_tree.PTRecord (tl)}
     | ENUM LPAR el=separated_list(PIPE, ident) RPAR                 { Parse_tree.PTEnum (el) }
-    // record?
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+
+  type_expr: | te=type_sig {te}
+
   dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p)}
 
   dfunction:

@@ -48,6 +48,7 @@ rule token = parse
   | "map"                 { CONT "map" }
   | "big_map"             { CONT "big_map" }
   | "option"              { CONT "option" }
+  | "set"                 { CONT "set" }
   | "record"              { RECORD }
 
   | "{"                   { LBRACE }

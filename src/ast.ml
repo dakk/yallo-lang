@@ -22,6 +22,7 @@ type atype =
 | TBOption of atype
 | TEnum of string list
 | TCList of atype
+| TCSet of atype
 | TCMap of atype * atype
 | TCBigMap of atype * atype
 | TCTuple of atype list
@@ -58,17 +59,19 @@ let base_tenv = [
 
 let get_type t te = try List.assoc t te with | _ -> failwith ("Unknown type: " ^ t)
 
+(* transform a parsetree type to an ast type *)
 let rec unroll_type t (te: tenv) = match t with 
 | Parse_tree.PTBase (id) -> get_type id te
-| Parse_tree.PTTuple (tl) -> TCTuple (List.map (fun x -> get_type x te) tl)
+| Parse_tree.PTTuple (tl) -> TCTuple (List.map (fun x -> unroll_type x te) tl)
 | Parse_tree.PTRecord (tl) -> TCRecord (List.map (fun (a,b) -> (a, unroll_type b te)) tl)
 | Parse_tree.PTCont (ctype, ptype) -> ( match ctype with
   | "list" -> TCList (unroll_type ptype te)
+  | "set" -> TCSet (unroll_type ptype te)
   | "map" -> (match ptype with 
-    | Parse_tree.PTTuple ([a;b]) -> TCMap (get_type a te, get_type b te)
+    | Parse_tree.PTTuple ([a;b]) -> TCMap (unroll_type a te, unroll_type b te)
     | _ -> failwith ("Invalid type for map"))
   | "big_map" -> (match ptype with 
-    | Parse_tree.PTTuple ([a;b]) -> TCBigMap (get_type a te, get_type b te)
+    | Parse_tree.PTTuple ([a;b]) -> TCBigMap (unroll_type a te, unroll_type b te)
     | _ -> failwith ("Invalid type for big_map"))
   | "option" -> TCOption (unroll_type ptype te)
   | c -> failwith ("Invalid container type: " ^ c)

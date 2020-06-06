@@ -18,7 +18,7 @@ type test_tuple_map = (int, nat) map;
 type test_tuple_map2 = (int, test_tuple) map;
 
 // qua c'e' il problema che non possiamo usare tipi composti se non in alias
-//type test_tuple_map = (int, nat option) map;
+type test_tuple_map_var = (int, nat option) map;
 
 type c = nat option;
 type test_tuple_map3 = (int, c) map;
