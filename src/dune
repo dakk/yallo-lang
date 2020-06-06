@@ -3,7 +3,7 @@
  (name yallo)
  (preprocess (pps ppx_deriving.show))
  (libraries ppx_deriving menhirLib)
- (modules yallo parse_tree parser lexer ast compiler))
+ (modules yallo parse_tree parser lexer ast typecheck compiler))
 
 (ocamllex lexer)
 

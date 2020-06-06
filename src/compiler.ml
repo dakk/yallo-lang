@@ -35,16 +35,22 @@ let rec inject_import (pt: Parse_tree.t): Parse_tree.t =
 let dump_pt (pt: Parse_tree.t) = pt |> Parse_tree.show |> print_endline; print_endline ""; pt
 
 (* dump the ast tree, debug only *)
-let dump_ast (ast: Ast.t) = ast |> Ast.show |> print_endline; print_endline ""; ast
+(* let dump_ast (ast: Ast.t) = ast |> Ast.show |> print_endline; print_endline ""; ast *)
 
 (* conditionally returns f or iden if b or not b *)
 let ap b f = if b then f else (fun x -> x)
 
 let compile (filename: string) (contract: string) opt =
   filename
-  |> parse_file
+  |> parse_file                       (* parse the starting file *)
+  |> ap opt.dump_parse_tree dump_pt   
+  |> inject_import                    (* parse and inject imports *)
   |> ap opt.dump_parse_tree dump_pt
-  |> inject_import
-  |> ap opt.dump_parse_tree dump_pt
+  |> Typecheck.extract_type_map       (* unroll type declarations and get an assoc of ident * Ast.atype *)
   |> Ast.from_parse_tree
-  |> dump_ast
+  
+  (* |> Typecheck.typecheck               *)
+  (* check types of inner parsetree *)
+  (* typechecker.extract_type_map *)
+  (* typechecker. *)
+  (* |> dump_ast *)
