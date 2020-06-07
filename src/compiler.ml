@@ -42,12 +42,17 @@ let ap b f = if b then f else (fun x -> x)
 
 let compile (filename: string) (contract: string) opt =
   filename
-  |> parse_file                       (* parse the starting file *)
+  (* parse the starting file *)
+  |> parse_file
   |> ap opt.dump_parse_tree dump_pt   
-  |> inject_import                    (* parse and inject imports *)
+  (* parse and inject imports *)
+  |> inject_import
   |> ap opt.dump_parse_tree dump_pt
-  |> Typecheck.extract_type_map       (* unroll type declarations and get an assoc of ident * Ast.atype *)
-  |> Ast.from_parse_tree
+  (* extract type of base, interface, function and contracts *)
+  |> fun pt -> (Typecheck.extract_types pt, pt)
+  |> fun (t, pt) -> t |> Typecheck.show |> print_endline; (t, pt)
+  |> Typecheck.check_contracts_implement_extend
+  (* |> Ast.from_parse_tree *)
   
   (* |> Typecheck.typecheck               *)
   (* check types of inner parsetree *)

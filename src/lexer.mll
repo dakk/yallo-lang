@@ -42,6 +42,7 @@ rule token = parse
   | "implements"          { IMPLEMENTS }
   | "import"              { IMPORT }
   | "function"            { FUNCTION }
+  | "field"				  { FIELD }
   | "type"                { TYPE }
   | "enum"                { ENUM }
   | "list"                { CONT "list" }

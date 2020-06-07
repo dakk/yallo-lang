@@ -3,7 +3,7 @@
 
 %token EOL, EOF
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ
-%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION
+%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD
 %token ENUM, TYPE, RECORD
 %token <string> MODIFIER
 %token <string> IDENT
@@ -44,15 +44,26 @@
     | INTERFACE x=IDENT EXTENDS e=IDENT LBRACE sl=list(terminated(signature, SEMICOLON)) RBRACE  
       { Parse_tree.DInterface (x, Some(e), sl) }
 
+  dcontract_field:
+    | FIELD x=IDENT COLON t=type_sig (* EQ VAL *)
+      { (x, t, ()) }
+
+  dcontract_entry:
+    | ENTRY x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE RBRACE
+      { (x, tl, ()) }
+
+  dcontract_body:
+    | fl=list(terminated(dcontract_field, SEMICOLON)) el=list(dcontract_entry)
+      { (fl, el) }
   dcontract:
-    | CONTRACT x=IDENT EXTENDS e=IDENT IMPLEMENTS i=IDENT LBRACE RBRACE
-      { Parse_tree.DContract (x, Some(e), Some(i), [])}
-    | CONTRACT x=IDENT IMPLEMENTS i=IDENT LBRACE RBRACE
-      { Parse_tree.DContract (x, None, Some(i), [])}
-    | CONTRACT x=IDENT EXTENDS e=IDENT LBRACE RBRACE
-      { Parse_tree.DContract (x, Some(e), None, [])}
-    | CONTRACT x=IDENT LBRACE RBRACE
-      { Parse_tree.DContract (x, None, None, [])}
+    | CONTRACT x=IDENT EXTENDS e=IDENT IMPLEMENTS i=IDENT LBRACE b=dcontract_body RBRACE
+      { Parse_tree.DContract (x, Some(e), Some(i), fst b, snd b)}
+    | CONTRACT x=IDENT IMPLEMENTS i=IDENT LBRACE b=dcontract_body RBRACE
+      { Parse_tree.DContract (x, None, Some(i), fst b, snd b)}
+    | CONTRACT x=IDENT EXTENDS e=IDENT LBRACE b=dcontract_body RBRACE
+      { Parse_tree.DContract (x, Some(e), None, fst b, snd b)}
+    | CONTRACT x=IDENT LBRACE b=dcontract_body RBRACE
+      { Parse_tree.DContract (x, None, None, fst b, snd b)}
 
   denum:
     | ENUM x=IDENT EQ el=separated_list(PIPE, ident) SEMICOLON

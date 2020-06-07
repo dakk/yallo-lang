@@ -7,33 +7,9 @@ type iden = string
   ad esempio, non possiamo avere una map di map, le map devono avere tipo comparabile, etc
 *)
 
-type atype = 
-| TBBool
-| TBAddress
-| TBInt
-| TBNat
-| TBMutez
-| TBTimestamp
-| TBKey
-| TBOperation
-| TBString
-| TBBytes
-| TBUnit
-| TBChainId
-| TBKeyHash
-| TBOption of atype
-| TEnum of string list
-| TCList of atype
-| TCSet of atype
-| TCMap of atype * atype
-| TCBigMap of atype * atype
-| TCTuple of atype list
-| TCOption of atype
-| TCRecord of (iden * atype) list
-[@@deriving show {with_path = false}]
 
 
-let rec from_parse_tree pt (te: (string * atype) list) = ()
+(* let rec from_parse_tree pt (te: (string * atype) list) = () *)
 (* 
 
 let rec _from_parse_tree pt md = match pt with 
