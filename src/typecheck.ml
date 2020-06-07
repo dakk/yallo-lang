@@ -176,6 +176,3 @@ let rec check_contracts_implement_extend (a, pt) =
   (a, pt)
 ;;
 
-
-let rec typecheck (pt, a) = match pt with 
-| _ -> ()

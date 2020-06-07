@@ -50,6 +50,7 @@ rule token = parse
   | "big_map"             { CONT "big_map" }
   | "option"              { CONT "option" }
   | "set"                 { CONT "set" }
+  | "const"				  { CONST }
   | "record"              { RECORD }
 
   | "{"                   { LBRACE }

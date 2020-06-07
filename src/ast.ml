@@ -6,6 +6,7 @@ type atype = Typecheck.atype [@@deriving show {with_path = false}]
 let unroll_type = Typecheck.unroll_type
 
 type t = {
+  constants: (iden * atype * unit) list;
   functions: (iden * (iden * atype) list * atype * unit) list;
   storage: (iden * atype * unit) list;
   entrypoints: (iden * (iden * atype) list * unit) list
@@ -13,6 +14,11 @@ type t = {
 
 let rec _from_parse_tree pt tenv s = match pt with
 | [] -> s
+| (DConst (id, t, value))::pt' -> 
+  let s' = { s with 
+    constants=(id, unroll_type t tenv, value)::s.constants
+  } in
+  _from_parse_tree pt' tenv s'
 | (DFunction (id,pl,rt,body))::pt' -> 
   let s' = { s with 
     functions=(id, List.map (fun (n,p) -> n, unroll_type p tenv) pl, unroll_type rt tenv, body)::s.functions
@@ -26,4 +32,4 @@ let rec _from_parse_tree pt tenv s = match pt with
   _from_parse_tree pt' tenv s'
 | _ -> failwith "Invalid"
 
-let from_parse_tree ((t: Typecheck.t), pt) = _from_parse_tree pt t.types { functions= []; storage= []; entrypoints= [] }
+let from_parse_tree ((t: Typecheck.t), pt) = _from_parse_tree pt t.types { constants= []; functions= []; storage= []; entrypoints= [] }

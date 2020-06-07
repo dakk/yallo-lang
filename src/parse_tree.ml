@@ -21,6 +21,9 @@ type contract_entry = ident * (ident * ptype) list * unit [@@deriving show {with
 type declaration = 
   (* | DModifier of modifier_decl *)
 
+  (* constant value *)
+  | DConst of string * ptype * unit
+
   (* type declaration *)
   | DType of string * ptype
 
@@ -50,6 +53,7 @@ let extract_contract pt contract =
   in
   let rec extract pt cl = match pt with 
     | [] -> []
+    | (DConst (a,b,c))::pt' -> (DConst (a,b,c))::(extract pt' cl)
     | (DFunction (a,b,c,d))::pt' -> (DFunction (a,b,c,d))::(extract pt' cl)
     | (DContract (id,b,c,d,e))::pt' when id<>contract -> extract pt' @@ (id, (id,b,c,d,e))::cl
     | (DContract (id, None, _, d, e))::pt' -> [DContract (id, None, None, d, e)]
@@ -57,8 +61,5 @@ let extract_contract pt contract =
       let (d, e) = unroll_contract (id, Some(ex), None, d, e) cl in
       [DContract (id, None, None, d, e)]
     | _::pt' -> extract pt' cl
-
-
-
   in extract pt []
 ;;

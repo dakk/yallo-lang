@@ -4,7 +4,7 @@
 %token EOL, EOF
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ
 %token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD
-%token ENUM, TYPE, RECORD
+%token ENUM, TYPE, RECORD, CONST
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -73,10 +73,14 @@
     | TYPE x=IDENT EQ tl=type_sig SEMICOLON
       { Parse_tree.DType (x, tl) }
 
+  dconst:
+    | CONST x=IDENT COLON t=type_expr EQ SEMICOLON
+      { Parse_tree.DConst (x, t, ()) }
+
   declaration:
     | i=dinterface { i }
     | c=dcontract  { c }
     | f=dfunction  { f }
     | t=dtype      { t }
-    // | cc=const { m }
+    | cc=dconst    { cc }
     // | m=modifier  { m }
