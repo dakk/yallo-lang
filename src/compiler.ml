@@ -35,27 +35,35 @@ let rec inject_import (pt: Parse_tree.t): Parse_tree.t =
 let dump_pt (pt: Parse_tree.t) = pt |> Parse_tree.show |> print_endline; print_endline ""; pt
 
 (* dump the ast tree, debug only *)
-(* let dump_ast (ast: Ast.t) = ast |> Ast.show |> print_endline; print_endline ""; ast *)
+let dump_ast (ast: Ast.t) = ast |> Ast.show |> print_endline; print_endline ""; ast
 
 (* conditionally returns f or iden if b or not b *)
 let ap b f = if b then f else (fun x -> x)
 
-let compile (filename: string) (contract: string) opt =
-  filename
-  (* parse the starting file *)
-  |> parse_file
-  |> ap opt.dump_parse_tree dump_pt   
-  (* parse and inject imports *)
-  |> inject_import
-  |> ap opt.dump_parse_tree dump_pt
-  (* extract type of base, interface, function and contracts *)
-  |> fun pt -> (Typecheck.extract_types pt, pt)
-  |> fun (t, pt) -> t |> Typecheck.show |> print_endline; (t, pt)
-  |> Typecheck.check_contracts_implement_extend
-  (* |> Ast.from_parse_tree *)
-  
-  (* |> Typecheck.typecheck               *)
-  (* check types of inner parsetree *)
-  (* typechecker.extract_type_map *)
-  (* typechecker. *)
-  (* |> dump_ast *)
+let compile (command: string) (filename: string) (contract: string) opt =
+  let intermediate = filename
+    (* parse the starting file *)
+    |> parse_file
+    |> ap opt.dump_parse_tree dump_pt   
+    (* parse and inject imports *)
+    |> inject_import
+    |> ap opt.dump_parse_tree dump_pt
+    (* extract type of base, interface, function and contracts *)
+    |> fun pt -> (Typecheck.extract_types pt Typecheck.empty, pt)
+    |> fun (t, pt) -> t |> Typecheck.show |> print_endline; print_endline ""; (t, pt)
+    |> Typecheck.check_contracts_implement_extend
+    (* check that the contract we are going to compile exists *)
+    |> fun (t, pt) -> 
+      if List.assoc_opt contract t.contracts = None then 
+        failwith ("Contract " ^ contract ^ " does not exists")
+      else (t, pt)
+    (* extract contract from parsetree, dropping interfaces, types and unused contracts; extended contracts are
+      merged in the final contract *) 
+    |> fun (t, pt) -> (t, Parse_tree.extract_contract pt contract)
+    |> fun (t, pt) -> (t, ap opt.dump_parse_tree dump_pt pt)
+    (* at this point we can extract the ast *)
+    |> Ast.from_parse_tree
+    |> ap opt.dump_ast dump_ast
+  in
+  match command with 
+  | _ -> "Lol"

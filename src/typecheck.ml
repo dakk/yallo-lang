@@ -1,4 +1,5 @@
-type iden = Ast.iden [@@deriving show {with_path = false}]
+type iden = string
+[@@deriving show {with_path = false}]
 
 type atype = 
 | TBBool
@@ -48,9 +49,6 @@ type t = {
 }
 [@@deriving show {with_path = false}]
 
-let empty = { types= []; interfaces= []; contracts= []; functions= []; symbols= []; }
-
-
 (* create a list assoc from name to basetype, raise if unknown type *)
 let base_types = [
   ("address",  TBAddress);
@@ -67,6 +65,12 @@ let base_types = [
   ("chain_id", TBChainId);
   ("operation",TBOperation)
 ]
+
+let empty = {
+  { types= []; interfaces= []; contracts= []; functions= []; symbols= []; }
+  with
+  types=base_types; symbols=(fst @@ List.split base_types)
+}
 
 
 let get_type t te = try List.assoc t te with | _ -> failwith ("Unknown type: " ^ t)
@@ -139,18 +143,14 @@ let extract_contract a (id, ex, im, fl, el) =
   
 
 (* get a map of all type declarations *)
-let rec _extract pt a = match pt with 
+let rec extract_types pt a = match pt with 
 | [] -> a
-| Parse_tree.DContract (id, ex, im, fl, el) :: pt' -> _extract pt' @@ extract_contract a (id, ex, im, fl, el)
-| Parse_tree.DInterface (id, ex, sl) :: pt' -> _extract pt' @@ extract_interface a (id, ex, sl)
-| Parse_tree.DFunction (id, par, ret, _) :: pt' -> _extract pt' @@ extract_function a (id, par, ret)
-| Parse_tree.DType (id, t) :: pt' -> _extract pt' @@ extract_type a (id, t)
-| d :: pt' -> _extract pt' a
+| Parse_tree.DContract (id, ex, im, fl, el) :: pt' -> extract_types pt' @@ extract_contract a (id, ex, im, fl, el)
+| Parse_tree.DInterface (id, ex, sl) :: pt' -> extract_types pt' @@ extract_interface a (id, ex, sl)
+| Parse_tree.DFunction (id, par, ret, _) :: pt' -> extract_types pt' @@ extract_function a (id, par, ret)
+| Parse_tree.DType (id, t) :: pt' -> extract_types pt' @@ extract_type a (id, t)
+| d :: pt' -> extract_types pt' a
 
-
-let extract_types pt = 
-  { empty with types=base_types; symbols=(fst @@ List.split base_types) } 
-  |> _extract pt
 
 
 (* check that contracts implements all the interfaces signatures *)
@@ -172,7 +172,8 @@ let rec check_contracts_implement_extend (a, pt) =
       | Some (si) when s <> si -> failwith ("Contract " ^ id ^ " implements entrypoint " ^ sname ^ " using a wrong signature") 
       | _ -> ()
     ) sl 
-  ) a.contracts
+  ) a.contracts;
+  (a, pt)
 ;;
 
 
