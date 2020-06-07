@@ -11,8 +11,18 @@ type ptype =
 (* identifier * (iden * type) list of parameters * modifier list *)
 type signature = ident * (ident * ptype) list * ident list [@@deriving show {with_path = false}]
 
+(* a value, the type will be defined by declaration *)
+type pvalue = 
+  | PVString of string
+  | PVRef of ident
+  | PVInt of int 
+  | PVEnum of ident * string
+  | PVTuple of pvalue list
+  | PVList of pvalue list
+  | PVTyped of pvalue * ptype
+
 (* contract field: ident * type * initial value *)
-type contract_field = ident * ptype * unit [@@deriving show {with_path = false}]
+type contract_field = ident * ptype * pvalue [@@deriving show {with_path = false}]
 
 (* contract entry: ident * params * commands *)
 type contract_entry = ident * (ident * ptype) list * unit [@@deriving show {with_path = false}]
@@ -22,7 +32,7 @@ type declaration =
   (* | DModifier of modifier_decl *)
 
   (* constant value *)
-  | DConst of string * ptype * unit
+  | DConst of string * ptype * pvalue
 
   (* type declaration *)
   | DType of string * ptype

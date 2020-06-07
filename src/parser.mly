@@ -8,6 +8,7 @@
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
+%token <int> INT
 %token <string> CONT
 
 %start <Parse_tree.t> program
@@ -16,6 +17,18 @@
 	program: il=list(dimport) dl=list(declaration) EOF { il @ dl }
 
   parameter: | i=IDENT COLON t=type_sig { (i, t) }
+
+  value: 
+    | QUOTE x=STRING QUOTE { x } (* a string, a key, a key_hash, an address*)
+    | x=INT { x } 
+    | x=IDENT DOT y=IDENT { x+y } (* enum value *)
+    | x=IDENT { x }
+    | LPAR vl=separated_list(COMMA, value) RPAR { vl }
+    | LSQUARE vl=separated_list(COMMA, value) RSQUARE { vl }
+  
+  typed_value:
+    | v=value { v }
+    | v=value COLON t=type_sig { v }
 
   ident: | i=IDENT { i }
 
@@ -74,7 +87,7 @@
       { Parse_tree.DType (x, tl) }
 
   dconst:
-    | CONST x=IDENT COLON t=type_expr EQ SEMICOLON
+    | CONST x=IDENT COLON t=type_expr EQ v=value SEMICOLON
       { Parse_tree.DConst (x, t, ()) }
 
   declaration:

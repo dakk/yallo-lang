@@ -55,12 +55,17 @@ rule token = parse
 
   | "{"                   { LBRACE }
   | "}"                   { RBRACE }
+  | "["					  { LSQUARE }
+  | "]"					  { RSQUARE }
+  | "."					  { DOT }
   | "("                   { LPAR }
+  | "@"					  { AT }
   | ")"                   { RPAR }
   | ","                   { COMMA }
   | ":"                   { COLON }
   | ";"                   { SEMICOLON }
   | "|"                   { PIPE }
+  | "\""				  { QUOTE }
 
   | "="                   { EQ }
 

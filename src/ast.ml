@@ -15,9 +15,7 @@ type t = {
 let rec _from_parse_tree pt tenv s = match pt with
 | [] -> s
 | (DConst (id, t, value))::pt' -> 
-  let s' = { s with 
-    constants=(id, unroll_type t tenv, value)::s.constants
-  } in
+  let s' = { s with constants=(id, unroll_type t tenv, value)::s.constants } in
   _from_parse_tree pt' tenv s'
 | (DFunction (id,pl,rt,body))::pt' -> 
   let s' = { s with 
