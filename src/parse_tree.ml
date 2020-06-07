@@ -1,4 +1,4 @@
-type ident = string [@@deriving show {with_path = false}]
+type iden = string [@@deriving show {with_path = false}]
 
 type ptype = 
   | PTBase of string                  (* type name *)
@@ -9,23 +9,24 @@ type ptype =
   [@@deriving show {with_path = false}]
 
 (* identifier * (iden * type) list of parameters * modifier list *)
-type signature = ident * (ident * ptype) list * ident list [@@deriving show {with_path = false}]
+type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_path = false}]
 
 (* a value, the type will be defined by declaration *)
 type pvalue = 
   | PVString of string
-  | PVRef of ident
+  | PVRef of iden
   | PVInt of int 
-  | PVEnum of ident * string
+  | PVEnum of iden * string
   | PVTuple of pvalue list
   | PVList of pvalue list
   | PVTyped of pvalue * ptype
+  [@@deriving show {with_path = false}]
 
-(* contract field: ident * type * initial value *)
-type contract_field = ident * ptype * pvalue [@@deriving show {with_path = false}]
+(* contract field: iden * type * initial value *)
+type contract_field = iden * ptype * pvalue [@@deriving show {with_path = false}]
 
-(* contract entry: ident * params * commands *)
-type contract_entry = ident * (ident * ptype) list * unit [@@deriving show {with_path = false}]
+(* contract entry: iden * params * commands *)
+type contract_entry = iden * (iden * ptype) list * unit [@@deriving show {with_path = false}]
 
 (* a declaration could be a type alias, a modifier, an interface or a contract *)
 type declaration = 
@@ -41,13 +42,13 @@ type declaration =
   | DImport of string
 
   (* identifier * extends * signatures *)
-  | DInterface of ident * ident option * (signature list)
+  | DInterface of iden * iden option * (signature list)
 
   (* identifier * extends * implements * entrypoints *)
-  | DContract of ident * ident option * ident option * contract_field list * contract_entry list
+  | DContract of iden * iden option * iden option * contract_field list * contract_entry list
 
-  (* pure function, ident * params * rettype * body? *)
-  | DFunction of ident * (ident * ptype) list * ptype * unit (* command list *)
+  (* pure function, iden * params * rettype * body? *)
+  | DFunction of iden * (iden * ptype) list * ptype * unit (* command list *)
 [@@deriving show {with_path = false}]
 
 (* a parse tree is a list of declarations; includes are unrolled by the parser *)

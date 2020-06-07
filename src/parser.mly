@@ -1,8 +1,8 @@
 %{
 %}
 
-%token EOL, EOF
-%token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ
+%token EOF
+%token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, QUOTE, LSQUARE, RSQUARE, AT
 %token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD
 %token ENUM, TYPE, RECORD, CONST
 %token <string> MODIFIER
@@ -19,14 +19,14 @@
   parameter: | i=IDENT COLON t=type_sig { (i, t) }
 
   value: 
-    | QUOTE x=STRING QUOTE { x } (* a string, a key, a key_hash, an address*)
-    | x=INT { x } 
-    | x=IDENT DOT y=IDENT { x+y } (* enum value *)
-    | x=IDENT { x }
-    | LPAR vl=separated_list(COMMA, value) RPAR { vl }
-    | LSQUARE vl=separated_list(COMMA, value) RSQUARE { vl }
+    | x=STRING { Parse_tree.PVString (x) } (* a string, a key, a key_hash, an address*)
+    | x=INT { Parse_tree.PVInt (x) } 
+    | x=IDENT DOT y=IDENT { Parse_tree.PVEnum (x, y) } (* enum value *)
+    | x=IDENT { Parse_tree.PVRef (x) }
+    | LPAR vl=separated_list(COMMA, value) RPAR { Parse_tree.PVTuple (vl) }
+    | LSQUARE vl=separated_list(COMMA, value) RSQUARE { Parse_tree.PVList (vl) }
   
-  typed_value:
+  tvalue:
     | v=value { v }
     | v=value COLON t=type_sig { v }
 
@@ -58,8 +58,8 @@
       { Parse_tree.DInterface (x, Some(e), sl) }
 
   dcontract_field:
-    | FIELD x=IDENT COLON t=type_sig (* EQ VAL *)
-      { (x, t, ()) }
+    | FIELD x=IDENT COLON t=type_sig EQ v=tvalue
+      { (x, t, v) }
 
   dcontract_entry:
     | ENTRY x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE RBRACE
@@ -68,6 +68,7 @@
   dcontract_body:
     | fl=list(terminated(dcontract_field, SEMICOLON)) el=list(dcontract_entry)
       { (fl, el) }
+
   dcontract:
     | CONTRACT x=IDENT EXTENDS e=IDENT IMPLEMENTS i=IDENT LBRACE b=dcontract_body RBRACE
       { Parse_tree.DContract (x, Some(e), Some(i), fst b, snd b)}
@@ -78,17 +79,13 @@
     | CONTRACT x=IDENT LBRACE b=dcontract_body RBRACE
       { Parse_tree.DContract (x, None, None, fst b, snd b)}
 
-  denum:
-    | ENUM x=IDENT EQ el=separated_list(PIPE, ident) SEMICOLON
-      { Parse_tree.DEnum (x, el) }
-
   dtype:
     | TYPE x=IDENT EQ tl=type_sig SEMICOLON
       { Parse_tree.DType (x, tl) }
 
   dconst:
-    | CONST x=IDENT COLON t=type_expr EQ v=value SEMICOLON
-      { Parse_tree.DConst (x, t, ()) }
+    | CONST x=IDENT COLON t=type_expr EQ v=tvalue SEMICOLON
+      { Parse_tree.DConst (x, t, v) }
 
   declaration:
     | i=dinterface { i }

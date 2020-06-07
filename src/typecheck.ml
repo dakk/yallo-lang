@@ -176,3 +176,4 @@ let rec check_contracts_implement_extend (a, pt) =
   (a, pt)
 ;;
 
+(* check const and fields values *)

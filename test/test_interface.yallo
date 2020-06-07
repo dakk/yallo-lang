@@ -25,12 +25,12 @@ contract C2 extends C implements Fa12 {
 
 
 contract C3 extends C2 {
-	field state: states;
+	field state: states = states.CIAO;
 
 	entry test_entry(c: int list) {}
 }
 
 contract TestContract extends C3 {
-	field ciao: string;
+	field ciao: string = "ciao";
 
 }

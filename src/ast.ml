@@ -14,8 +14,9 @@ type t = {
 
 let rec _from_parse_tree pt tenv s = match pt with
 | [] -> s
-| (DConst (id, t, value))::pt' -> 
-  let s' = { s with constants=(id, unroll_type t tenv, value)::s.constants } in
+| (DConst (id, t, value))::pt' ->  
+  (* todo: value! *)
+  let s' = { s with constants=(id, unroll_type t tenv, ())::s.constants } in
   _from_parse_tree pt' tenv s'
 | (DFunction (id,pl,rt,body))::pt' -> 
   let s' = { s with 
@@ -24,7 +25,8 @@ let rec _from_parse_tree pt tenv s = match pt with
   _from_parse_tree pt' tenv s'
 | (DContract (id,None,None,sl,el))::pt' -> 
   let s' = { s with 
-    storage=List.map (fun (id, ptype, body) -> (id, unroll_type ptype tenv, body)) sl;
+  (* todo: value! *)
+    storage=List.map (fun (id, ptype, value) -> (id, unroll_type ptype tenv, ())) sl;
     entrypoints=List.map (fun (id, pl, body) -> (id, List.map (fun (n,p) -> n, (unroll_type p tenv)) pl, body)) el;
   } in
   _from_parse_tree pt' tenv s'
