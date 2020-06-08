@@ -83,8 +83,8 @@ type declaration =
   (* identifier * extends * signatures *)
   | DInterface of iden * iden option * (signature list)
 
-  (* identifier * extends * implements * entrypoints *)
-  | DContract of iden * iden option * iden option * contract_field list * contract_entry list
+  (* identifier * implements * entrypoints *)
+  | DContract of iden * iden option * contract_field list * contract_entry list
 
   (* pure function, iden * params * rettype * body? *)
   | DFunction of iden * (iden * ptype) list * ptype * statement list
@@ -94,22 +94,11 @@ type declaration =
 type t = declaration list [@@deriving show {with_path = false}]
 
 
-let extract_contract pt contract = 
-  let rec unroll_contract c cl = match c with 
-  | (id, None, _, d, e) -> (d, e)
-  | (id, Some(ex), _, d, e) -> 
-    let (d', e') = unroll_contract (List.assoc ex cl) cl in
-    (d@d', e@e')
-  in
-  let rec extract pt cl = match pt with 
-    | [] -> []
-    | (DConst (a,b,c))::pt' -> (DConst (a,b,c))::(extract pt' cl)
-    | (DFunction (a,b,c,d))::pt' -> (DFunction (a,b,c,d))::(extract pt' cl)
-    | (DContract (id,b,c,d,e))::pt' when id<>contract -> extract pt' @@ (id, (id,b,c,d,e))::cl
-    | (DContract (id, None, _, d, e))::pt' -> [DContract (id, None, None, d, e)]
-    | (DContract (id, Some(ex), _, d, e))::pt' -> 
-      let (d, e) = unroll_contract (id, Some(ex), None, d, e) cl in
-      [DContract (id, None, None, d, e)]
-    | _::pt' -> extract pt' cl
-  in extract pt []
+let rec extract_contract pt contract = match pt with 
+  | [] -> []
+  | (DConst (a,b,c))::pt' -> (DConst (a,b,c))::(extract_contract pt' contract)
+  | (DFunction (a,b,c,d))::pt' -> (DFunction (a,b,c,d))::(extract_contract pt' contract)
+  (* | (DInterface (a,b,c))::pt' -> (DInterface (a,b,c))::(extract_contract pt' contract) *)
+  | (DContract (id, _, d, e))::pt' when id=contract -> [DContract (id, None, d, e)]
+  | _::pt' -> extract_contract pt' contract
 ;;

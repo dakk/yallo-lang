@@ -51,7 +51,7 @@ let compile (command: string) (filename: string) (contract: string) opt =
     (* extract type of base, interface, function and contracts *)
     |> fun pt -> (Typecheck.extract_types pt Typecheck.empty, pt)
     |> fun (t, pt) -> t |> Typecheck.show |> print_endline; print_endline ""; (t, pt)
-    |> Typecheck.check_contracts_implement_extend
+    |> Typecheck.check_contracts_implement
     (* check that the contract we are going to compile exists *)
     |> fun (t, pt) -> 
       if List.assoc_opt contract t.contracts = None then 

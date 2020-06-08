@@ -25,7 +25,7 @@ let rec _from_parse_tree pt tenv s = match pt with
     functions=(id, List.map (fun (n,p) -> n, unroll_type p tenv) pl, unroll_type rt tenv, ())::s.functions
   } in
   _from_parse_tree pt' tenv s'
-| (DContract (id,None,None,sl,el))::pt' -> 
+| (DContract (id,_,sl,el))::pt' -> 
   let s' = { s with 
   (* todo: value! *)
     storage=List.map (fun (id, ptype, value) -> (id, unroll_type ptype tenv, ())) sl;

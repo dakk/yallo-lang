@@ -141,14 +141,10 @@
       { (fl, el) }
 
   dcontract:
-    | CONTRACT x=IDENT EXTENDS e=IDENT IMPLEMENTS i=IDENT LBRACE b=dcontract_body RBRACE
-      { Parse_tree.DContract (x, Some(e), Some(i), fst b, snd b)}
     | CONTRACT x=IDENT IMPLEMENTS i=IDENT LBRACE b=dcontract_body RBRACE
-      { Parse_tree.DContract (x, None, Some(i), fst b, snd b)}
-    | CONTRACT x=IDENT EXTENDS e=IDENT LBRACE b=dcontract_body RBRACE
-      { Parse_tree.DContract (x, Some(e), None, fst b, snd b)}
+      { Parse_tree.DContract (x, Some(i), fst b, snd b)}
     | CONTRACT x=IDENT LBRACE b=dcontract_body RBRACE
-      { Parse_tree.DContract (x, None, None, fst b, snd b)}
+      { Parse_tree.DContract (x, None, fst b, snd b)}
 
   dtype:
     | TYPE x=IDENT EQ tl=type_sig SEMICOLON

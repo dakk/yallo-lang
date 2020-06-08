@@ -14,23 +14,23 @@ contract C {
 }
 
 
-contract C1 extends C {
+contract C1 {
 	
 }
 
 
-contract C2 extends C implements Fa12 {
+contract C2 implements Fa12 {
 	entry transfer(b: unit) {}
 }
 
 
-contract C3 extends C2 {
+contract C3 {
 	field state: states = states.CIAO;
 
 	entry test_entry(c: int list) {}
 }
 
-contract TestContract extends C3 {
+contract TestContract {
 	field ciao: string = "ciao";
 
 }

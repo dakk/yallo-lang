@@ -11,16 +11,16 @@ contract tzToken implements FA12 {
 		//if (not this.balances.has (Tezos.sender)) {
 		//	fail "Sender does not own any tokens"
 		//}
-		var b: int = 12; 
+		// var b: int = 12; 
 		//this.balances.get(Tezos.sender);
 		//var bto: int = if this.balances.has (to) then balances.get(to) else 0;
 		//this.balances.get(to) = bto + amount;
 		//this.balances.get(Tezos.sender) = b - amount;
 	}
 
-	//entry getBalance (a: address, cb: int callback) {
+	entry getBalance (adr: address, cb: int callback) {
 	//	<= if this.balances.has (a) then cb(this.balances.get(a)) else cb(0);
-	//}
+	}
 }
 
 
