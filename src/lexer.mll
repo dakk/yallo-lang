@@ -66,6 +66,7 @@ rule token = parse
   | "big_map"             { CONT "big_map" }
   | "option"              { CONT "option" }
   | "set"                 { CONT "set" }
+  | "callback"            { CONT "callback" }
   | "const"				  { CONST }
   | "record"              { RECORD }
   | "var"				  { VAR }
@@ -79,6 +80,10 @@ rule token = parse
   | "not"				  { NOT }
   | "skip"				  { SKIP }
   | "size"				  { SIZE }
+  | "get"				  { GET }
+  | "has"				  { HAS }
+  | "empty"				  { EMPTY }
+  | "Tezos"				  { TEZOS }
 
   | "{"                   { LBRACE }
   | "}"                   { RBRACE }
@@ -93,6 +98,7 @@ rule token = parse
   | ";"                   { SEMICOLON }
   | "|"                   { PIPE }
   | "\""				  { QUOTE }
+  | "?"					  { QUESTION }
 
   | "+"					  { ADD }
   | "-"					  { SUB }

@@ -24,6 +24,7 @@ type atype =
 | TCTuple of atype list
 | TCOption of atype
 | TCRecord of (iden * atype) list
+| TCCallback of atype
 [@@deriving show {with_path = false}]
 
 type itype = iden option * (iden * atype list) list (* extend type * (ident * params) list *)
@@ -87,6 +88,7 @@ let rec unroll_type t te  = match t with
   | "map" -> (match ptype with 
     | Parse_tree.PTTuple ([a;b]) -> TCMap (unroll_type a te, unroll_type b te)
     | _ -> failwith ("Invalid type for map"))
+  | "callback" -> TCCallback (unroll_type ptype te)
   | "big_map" -> (match ptype with 
     | Parse_tree.PTTuple ([a;b]) -> TCBigMap (unroll_type a te, unroll_type b te)
     | _ -> failwith ("Invalid type for big_map"))

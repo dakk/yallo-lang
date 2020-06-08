@@ -6,7 +6,8 @@
 %token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD, VAR
 %token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT
 %token ADD, SUB, DIV, MUL, MOD, TRUE, FALSE, IF, THEN, ELSE, SKIP
-%token LTE, LT, GT, GTE, EQEQ, SIZE
+%token LTE, LT, GT, GTE, EQEQ, SIZE, QUESTION, GET, HAS, EMPTY
+%token TEZOS
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -21,11 +22,13 @@
   parameter: | i=IDENT COLON t=type_sig { (i, t) }
 
   value: 
+    | EMPTY { Parse_tree.PVEmpty }
     | x=STRING { Parse_tree.PVString (x) } (* a string, a key, a key_hash, an address*)
     | x=INT { Parse_tree.PVInt (x) } 
     | x=IDENT DOT y=IDENT { Parse_tree.PVEnum (x, y) } (* enum value *)
     | LPAR vl=separated_list(COMMA, value) RPAR { Parse_tree.PVTuple (vl) }
     | LSQUARE vl=separated_list(COMMA, value) RSQUARE { Parse_tree.PVList (vl) }
+    | TEZOS DOT x=IDENT { Parse_tree.PVTezos (x) }
   
   tvalue:
     | v=value { v }
@@ -48,7 +51,13 @@
 
   dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p)}
 
+  id_or_storage:
+    | x=IDENT                 { Parse_tree.PERef (x) }
+    | THIS DOT x=IDENT        { Parse_tree.PEStorageRef (x) }
+
+
   expr:
+    | IF e=expr THEN e1=expr ELSE e2=expr { Parse_tree.PEIf (e, e1, e2) }
     | LPAR e=expr RPAR        { e }
     | x=STRING { Parse_tree.PEValue (Parse_tree.PVString (x)) } (* a string, a key, a key_hash, an address*)
     | x=INT { Parse_tree.PEValue (Parse_tree.PVInt (x)) } 
@@ -72,20 +81,22 @@
     | e1=expr AND e2=expr     { Parse_tree.PEAnd (e1, e2) }
     | e1=expr OR e2=expr      { Parse_tree.PEOr (e1, e2) }
     | NOT e=expr              { Parse_tree.PENot (e) }
-    | e1=expr LT e2=expr     { Parse_tree.PELt (e1, e2) }
+    | e1=expr LT e2=expr      { Parse_tree.PELt (e1, e2) }
     | e1=expr LTE e2=expr     { Parse_tree.PELte (e1, e2) }
-    | e1=expr GT e2=expr     { Parse_tree.PEGt (e1, e2) }
+    | e1=expr GT e2=expr      { Parse_tree.PEGt (e1, e2) }
     | e1=expr GTE e2=expr     { Parse_tree.PEGte (e1, e2) }
-    | e1=expr EQEQ e2=expr     { Parse_tree.PEEq (e1, e2) }
+    | e1=expr EQEQ e2=expr    { Parse_tree.PEEq (e1, e2) }
 
     // container
-    | x=IDENT DOT SIZE         { Parse_tree.PEContSize (x) }
+    | x=id_or_storage DOT SIZE LPAR RPAR        { Parse_tree.PEContSize (x) }
 
     // list
 
     // set
-    
+
     // map
+    | x=id_or_storage DOT GET LPAR e=expr RPAR  { Parse_tree.PEContGet (x, e) }
+    | x=id_or_storage DOT HAS LPAR e=expr RPAR  { Parse_tree.PEContHas (x, e) }
 
     // function apply
     | x=IDENT LPAR pl=separated_list(COMMA, expr) RPAR { Parse_tree.PEApply(x, pl) }
@@ -97,8 +108,10 @@
     | VAR x=IDENT COLON t=type_sig SEMICOLON { Parse_tree.PSDecl (x, t) }
     | x=IDENT EQ e=expr SEMICOLON { Parse_tree.PSAssign (x, e) }
     | THIS DOT x=IDENT EQ e=expr SEMICOLON { Parse_tree.PSStorageAssign (x, e) }
-    | IF LPAR e=expr RPAR THEN LBRACE ba=list(terminated(statement, SEMICOLON)) RBRACE ELSE LBRACE bb=list(terminated(statement, SEMICOLON)) RBRACE
+    | IF LPAR e=expr RPAR LBRACE ba=list(terminated(statement, SEMICOLON)) RBRACE ELSE LBRACE bb=list(terminated(statement, SEMICOLON)) RBRACE
       { Parse_tree.PSIfThenElse (e, ba, bb) }
+    | IF LPAR e=expr RPAR LBRACE ba=list(terminated(statement, SEMICOLON)) RBRACE
+      { Parse_tree.PSIfThen (e, ba) }
     | RETURN x=expr SEMICOLON { Parse_tree.PSReturn (x) }
     | SKIP SEMICOLON { Parse_tree.PSSkip } 
 

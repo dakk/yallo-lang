@@ -13,6 +13,8 @@ type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_p
 
 (* a value, the type will be defined by declaration *)
 type pvalue = 
+  | PVEmpty
+  | PVTezos of iden
   | PVString of string
   | PVInt of int 
   | PVBool of bool
@@ -23,6 +25,7 @@ type pvalue =
   [@@deriving show {with_path = false}]
 
 type pexpr = 
+  | PEIf of pexpr * pexpr * pexpr
   | PEValue of pvalue
   | PEStorageRef of iden
   | PERef of iden
@@ -40,7 +43,9 @@ type pexpr =
   | PEOr of pexpr * pexpr
   | PEAnd of pexpr * pexpr
   | PEApply of iden * pexpr list
-  | PEContSize of iden
+  | PEContSize of pexpr
+  | PEContHas of pexpr * pexpr
+  | PEContGet of pexpr * pexpr
   [@@deriving show {with_path = false}]
 
 type statement =
@@ -51,6 +56,7 @@ type statement =
   | PSAssign of iden * pexpr
   | PSStorageAssign of iden * pexpr
   | PSIfThenElse of pexpr * statement list * statement list
+  | PSIfThen of pexpr * statement list
   | PSReturn of pexpr
   | PSSkip
   [@@deriving show {with_path = false}]
