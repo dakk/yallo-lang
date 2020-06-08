@@ -101,8 +101,7 @@
     // function apply
     | x=IDENT LPAR pl=separated_list(COMMA, expr) RPAR { Parse_tree.PEApply(x, pl) }
   
-
-    
+  
   statement:
     | VAR x=IDENT COLON t=type_sig EQ e=expr SEMICOLON { Parse_tree.PSDeclAssig (x, t, e) }
     | VAR x=IDENT COLON t=type_sig SEMICOLON { Parse_tree.PSDecl (x, t) }
