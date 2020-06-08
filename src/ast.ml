@@ -6,6 +6,7 @@ type atype = Typecheck.atype [@@deriving show {with_path = false}]
 let unroll_type = Typecheck.unroll_type
 
 type t = {
+  (* we also need interfaces, for calling sugar *)
   constants: (iden * atype * unit) list;
   functions: (iden * (iden * atype) list * atype * unit) list;
   storage: (iden * atype * unit) list;
@@ -20,7 +21,8 @@ let rec _from_parse_tree pt tenv s = match pt with
   _from_parse_tree pt' tenv s'
 | (DFunction (id,pl,rt,body))::pt' -> 
   let s' = { s with 
-    functions=(id, List.map (fun (n,p) -> n, unroll_type p tenv) pl, unroll_type rt tenv, body)::s.functions
+    (* todo: body! *)
+    functions=(id, List.map (fun (n,p) -> n, unroll_type p tenv) pl, unroll_type rt tenv, ())::s.functions
   } in
   _from_parse_tree pt' tenv s'
 | (DContract (id,None,None,sl,el))::pt' -> 

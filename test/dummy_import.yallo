@@ -5,7 +5,10 @@ function testolordo(): unit {
 }
 
 function testolordo2(a: int list, b: nat): nat {
-
+	this.ciao = 12;
+	var a: int = 12 + 13 + tesolordo(12);
+	//if (13 + 12) then { return 12; } else {return b;}
+	return b;
 }
 
 const a : string = "ciao";

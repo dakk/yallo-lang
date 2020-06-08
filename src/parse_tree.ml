@@ -14,12 +14,45 @@ type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_p
 (* a value, the type will be defined by declaration *)
 type pvalue = 
   | PVString of string
-  | PVRef of iden
   | PVInt of int 
+  | PVBool of bool
   | PVEnum of iden * string
   | PVTuple of pvalue list
   | PVList of pvalue list
   | PVTyped of pvalue * ptype
+  [@@deriving show {with_path = false}]
+
+type pexpr = 
+  | PEValue of pvalue
+  | PEStorageRef of iden
+  | PERef of iden
+  | PEAdd of pexpr * pexpr
+  | PESub of pexpr * pexpr
+  | PEMul of pexpr * pexpr
+  | PEDiv of pexpr * pexpr
+  | PEMod of pexpr * pexpr
+  | PENot of pexpr
+  | PEEq of pexpr * pexpr
+  | PELt of pexpr * pexpr
+  | PELte of pexpr * pexpr
+  | PEGt of pexpr * pexpr
+  | PEGte of pexpr * pexpr
+  | PEOr of pexpr * pexpr
+  | PEAnd of pexpr * pexpr
+  | PEApply of iden * pexpr list
+  | PEContSize of iden
+  [@@deriving show {with_path = false}]
+
+type statement =
+  | PSPush of iden * pexpr
+  | PSUpdate of iden * pexpr * pexpr 
+  | PSDecl of iden * ptype
+  | PSDeclAssig of iden * ptype * pexpr
+  | PSAssign of iden * pexpr
+  | PSStorageAssign of iden * pexpr
+  | PSIfThenElse of pexpr * statement list * statement list
+  | PSReturn of pexpr
+  | PSSkip
   [@@deriving show {with_path = false}]
 
 (* contract field: iden * type * initial value *)
@@ -48,7 +81,7 @@ type declaration =
   | DContract of iden * iden option * iden option * contract_field list * contract_entry list
 
   (* pure function, iden * params * rettype * body? *)
-  | DFunction of iden * (iden * ptype) list * ptype * unit (* command list *)
+  | DFunction of iden * (iden * ptype) list * ptype * statement list
 [@@deriving show {with_path = false}]
 
 (* a parse tree is a list of declarations; includes are unrolled by the parser *)

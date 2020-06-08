@@ -12,6 +12,21 @@
     "type"; 
     "enum";
     "record";
+	"this";
+	"const";
+	"var";
+	"list";
+	"map";
+	"set";
+	"option";
+	"true";
+	"false";
+	"bool";
+	"and";
+	"or";
+	"not";
+	"skip";
+	"size";
   ]
 }
 
@@ -35,6 +50,7 @@ let string = quote (letter | '_' | '.' | '/')* quote
 rule token = parse 
   | newline               { Lexing.new_line lexbuf; token lexbuf }
   | blank+                { token lexbuf }
+  | int as i 			  { INT (int_of_string i) }
   | "interface"           { INTERFACE }
   | "contract"            { CONTRACT }
   | "entry"               { ENTRY }
@@ -52,6 +68,17 @@ rule token = parse
   | "set"                 { CONT "set" }
   | "const"				  { CONST }
   | "record"              { RECORD }
+  | "var"				  { VAR }
+  | "return"			  { RETURN }
+  | "this"				  { THIS }
+  | "if"				  { IF }
+  | "then"				  { THEN }
+  | "else"				  { ELSE }
+  | "and"				  { AND }
+  | "or"				  { OR }
+  | "not"				  { NOT }
+  | "skip"				  { SKIP }
+  | "size"				  { SIZE }
 
   | "{"                   { LBRACE }
   | "}"                   { RBRACE }
@@ -67,7 +94,19 @@ rule token = parse
   | "|"                   { PIPE }
   | "\""				  { QUOTE }
 
+  | "+"					  { ADD }
+  | "-"					  { SUB }
+  | "/"					  { DIV }
+  | "*"					  { MUL }
+  | "%"					  { MOD }
   | "="                   { EQ }
+  | "=="                  { EQEQ }
+  | ">"					  { GT }
+  | "<"					  { LT }
+  | "<="			      { LTE }
+  | ">="			      { GTE }
+  | "true"				  { TRUE }
+  | "false"				  { FALSE }
 
   | "//"                  { comment_line lexbuf; token lexbuf }
 
