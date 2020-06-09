@@ -3,29 +3,67 @@ interface FA12 {
 	entry getBalance(of: address, cb: int callback);
 }
 
+const b: int option = (None: int option);
+const b: int option = None;
+
+type getBalanceCallback = nat callback;
+
+function aFunction(c: int callback, z: nat option): nat {
+
+}
 
 contract tzToken implements FA12 {
-	field balances : (address, int) map = empty;
+	field balances 	: (address, nat) map;
+	field supply 	: nat;
+	field symbol 	: string;
+
+	// the constructor is used only to create an initial storage, or to create a parametrized contract 
+	// storage from create_contract
+	constructor(sup: nat) {
+		this.supply = None;
+		this.balances = empty;
+		this.symbol = None;
+	}
 
 	entry transfer (to: address, amount: int) {
+		// var a;
 		//if (not this.balances.has (Tezos.sender)) {
 		//	fail "Sender does not own any tokens"
 		//}
-		var b: int = 12; 
+		// var b: int = 12; 
 		//this.balances.get(Tezos.sender);
 		//var bto: int = if this.balances.has (to) then balances.get(to) else 0;
 		//this.balances.get(to) = bto + amount;
 		//this.balances.get(Tezos.sender) = b - amount;
 	}
 
-	//entry getBalance (a: address, cb: int callback) {
-	//	<= if this.balances.has (a) then cb(this.balances.get(a)) else cb(0);
-	//}
+	entry getBalance (adr: address, callBack: int callback) {
+	//	if this.balances.has (a) then callBack(this.balances.get(a)) else callBack(0);
+	}
 }
 
 
 
+const tzTokenAddress: address = None;
 
 contract usingTezToken {
+	entry getb() {
+		// get an instance of contract, call getbalance passing address and the handleBalance entry
+		//tzToken.of(tzTokenAddress).getBalance(address, this.handleBalance);
+	}
 
+	entry handleBalance(bal: nat) {
+
+	}
+}
+
+
+contract creatingContract {
+	entry test () {
+		// create a new instance of tzToken (storage is inferred by field declaration) 
+		// transferring 100tz, without a delegate
+		// var address = Tezos.createContract (tzToken(12), 100tz, None);
+
+		// transaction are autmatically pushed at the end of the entrypoint
+	}
 }
