@@ -27,6 +27,8 @@
 	"not";
 	"skip";
 	"size";
+	"assert";
+	"constructor";
   ]
 }
 
@@ -39,8 +41,7 @@ let ident = letter (letter | digit | '_')*
 let modifier = "@" ident
 let nat = digit digit* "n"
 let int = digit digit*
-let tez = digit digit* "tz"
-let unit = "()"
+let mtz = digit digit* "mtz"
 
 let blank = [' ' '\t' '\r']
 let newline = '\n'
@@ -51,6 +52,9 @@ rule token = parse
   | newline               { Lexing.new_line lexbuf; token lexbuf }
   | blank+                { token lexbuf }
   | int as i 			  { INT (int_of_string i) }
+  | nat as i 			  { NAT (int_of_string (String.sub i 0 ((String.length i) - 1))) }
+  | mtz as i 			  { MTZ (int_of_string (String.sub i 0 ((String.length i) - 3))) } 
+
   | "interface"           { INTERFACE }
   | "contract"            { CONTRACT }
   | "entry"               { ENTRY }
@@ -83,8 +87,12 @@ rule token = parse
   | "get"				  { GET }
   | "has"				  { HAS }
   | "empty"				  { EMPTY }
+  | "assert"			  { ASSERT }
+  | "Some"				  { SOME }
+  | "None"				  { NONE }
   | "Tezos"				  { TEZOS }
-
+  | "constructor"		  { CONSTRUCTOR }
+  
   | "{"                   { LBRACE }
   | "}"                   { RBRACE }
   | "["					  { LSQUARE }
