@@ -52,6 +52,9 @@
 
   dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p)}
 
+  expr:
+    | SEMICOLON { Parse_tree.PEVal (Parse_tree.None)}
+  
   statement:
     | SEMICOLON { Parse_tree.PSSkip }
 
@@ -98,11 +101,11 @@
 
   dtype:
     | TYPE x=IDENT EQ tl=type_sig SEMICOLON
-      { Parse_tree.DType (x, tl) }
+      { Parse_tree.DType ({ id=x; t=tl }) }
 
   dconst:
     | CONST x=IDENT COLON t=type_expr EQ v=tvalue SEMICOLON
-      { Parse_tree.DConst (x, t, v) }
+      { Parse_tree.DConst ({ id=x; t=t; v=v }) }
 
   declaration:
     | i=dinterface { i }

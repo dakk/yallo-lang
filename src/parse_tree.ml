@@ -16,8 +16,30 @@ type pvalue =
   | PVEmpty
   | PVNone
   | PVSome of pvalue
+  | PVEnum of iden * string
   | PVTyped of pvalue * ptype
   [@@deriving show {with_path = false}]
+
+type pexpr =
+  | PEVal of pvalue
+  | PERef of iden
+  | PEStorageRef of iden
+
+  (* aritmetic *)
+  | PEAdd of pexpr * pexpr
+  | PESub of pexpr * pexpr
+  | PEMul of pexpr * pexpr
+  | PEDiv of pexpr * pexpr
+  | PEMod of pexpr * pexpr
+
+  (* bool *)
+  | PEAnd of pexpr * pexpr
+  | PEOr of pexpr * pexpr
+  | PENot of pexpr
+
+  (* accessor (used for map, big map) *)
+  | PEGet of pexpr * pexpr
+
 
 type statement =
   | PSSkip
@@ -33,25 +55,37 @@ type contract_constructor = (iden * ptype) list * (iden * pvalue) list [@@derivi
 
 (* a declaration could be a type alias, a modifier, an interface or a contract *)
 type declaration = 
-  (* | DModifier of modifier_decl *)
-
-  (* constant value *)
-  | DConst of string * ptype * pvalue
-
-  (* type declaration *)
-  | DType of string * ptype
-
   (* path import *)
   | DImport of string
 
-  (* identifier * extends * signatures *)
-  | DInterface of {
+  (* a modifier, a pure function that assert a proprierty *)
+  (* | DModifier of {
+    id: iden;
+    params: (iden * ptype) list;
+    expression: unit;
+  } *)
+
+  (* constant value *)
+  | DConst of { 
+    id: iden; 
+    t: ptype; 
+    v: pvalue; 
+  }
+
+  (* type declaration *)
+  | DType of { 
+    id: iden; 
+    t: ptype; 
+  }
+
+  (* interface *)
+  | DInterface of { 
     id: iden;
     extends: iden option;
     signatures: signature list;
   }
 
-  (* identifier * implements * entrypoints *)
+  (* contract *)
   | DContract of {
     id: iden;
     implements: iden option;
@@ -60,7 +94,7 @@ type declaration =
     constructor: contract_constructor option;
   }
 
-  (* pure function, iden * params * rettype * body? *)
+  (* pure function *)
   | DFunction of {
     id: iden;
     params: (iden * ptype) list;
