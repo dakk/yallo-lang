@@ -118,8 +118,8 @@ rule token = parse
   | "<"					  { LT }
   | "<="			      { LTE }
   | ">="			      { GTE }
-  | "true"				  { TRUE }
-  | "false"				  { FALSE }
+  | "true"				  			{ TRUE }
+  | "false"				  			{ FALSE }
 
   | "//"                  { comment_line lexbuf; token lexbuf }
 

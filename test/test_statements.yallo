@@ -30,4 +30,8 @@ contract Test {
 		failwith("error");
 		assert(12 > 14);
 	}
+	
+	entry testReturn () {
+		return [(12: operation)];
+	}
 }

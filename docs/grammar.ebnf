@@ -2,27 +2,6 @@
 
 <parameter> ::= IDENT COLON <type_sig>
 
-<vmap_element> ::= LPAR <tvalue> COLON <tvalue> RPAR
-
-<vrec_element> ::= IDENT EQ <expr>
-
-<value> ::= NONE
-          | SOME LPAR <value> RPAR
-          | EMPTY
-          | STRING
-          | MTZ
-          | NAT
-          | INT
-          | LBRACE <vrec_element> (SEMICOLON <vrec_element>)* RBRACE
-          | LSQUARE <value> (COMMA <value>)* RSQUARE
-          | LPAR <tvalue> COMMA <tvalue> (COMMA <tvalue>)* RPAR
-          | LSQUARE <vmap_element> (COMMA <vmap_element>)* RSQUARE
-          | LPAR <parameter> (COMMA <parameter>)* RPAR LAMBDAB LPAR <expr>
-            RPAR
-
-<tvalue> ::= <value>
-           | LPAR <value> COLON <type_sig> RPAR
-
 <ident> ::= IDENT
 
 <signature> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
@@ -41,8 +20,26 @@
 
 <dimport> ::= IMPORT STRING SEMICOLON
 
-<expr> ::= IDENT
-         | <value>
+<emap_element> ::= LPAR <expr> COLON <expr> RPAR
+
+<erec_element> ::= IDENT EQ <expr>
+
+<expr> ::= NONE
+         | EMPTY
+         | TRUE
+         | FALSE
+         | STRING
+         | MTZ
+         | NAT
+         | INT
+         | SOME LPAR <expr> RPAR
+         | LBRACE <erec_element> (SEMICOLON <erec_element>)* RBRACE
+         | LSQUARE [<expr> (COMMA <expr>)*] RSQUARE
+         | LPAR <expr> COMMA <expr> (COMMA <expr>)* RPAR
+         | LSQUARE <emap_element> (COMMA <emap_element>)* RSQUARE
+         | LPAR <parameter> (COMMA <parameter>)* RPAR LAMBDAB LPAR <expr>
+           RPAR
+         | IDENT
          | <expr> ADD <expr>
          | <expr> SUB <expr>
          | <expr> DIV <expr>
@@ -60,6 +57,7 @@
          | IF <expr> THEN <expr> ELSE <expr>
          | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
          | LPAR <expr> RPAR
+         | LPAR <expr> COLON <type_sig> RPAR
 
 <left_hand> ::= IDENT
               | THIS DOT IDENT
@@ -92,7 +90,7 @@
 <dcontract_entry> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*]
                       RPAR LBRACE <fun_body> RBRACE
 
-<dcontract_constructor_assign> ::= THIS DOT IDENT EQ <tvalue> SEMICOLON
+<dcontract_constructor_assign> ::= THIS DOT IDENT EQ <expr> SEMICOLON
 
 <dcontract_constructor> ::= CONSTRUCTOR LPAR [<parameter> (COMMA
                             <parameter>)*] RPAR LBRACE
@@ -108,7 +106,7 @@
 
 <dtype> ::= TYPE IDENT EQ <type_sig> SEMICOLON
 
-<dconst> ::= CONST IDENT COLON <type_expr> EQ <tvalue> SEMICOLON
+<dconst> ::= CONST IDENT COLON <type_expr> EQ <expr> SEMICOLON
 
 <declaration> ::= <dinterface>
                 | <dcontract>

@@ -63,7 +63,7 @@ contract usingAToken {
 }
 ```
 
-Or, if we want to deploy a toke contract from another contract:
+Or, if we want to deploy a token contract from another contract:
 
 ```java
 #import "Token.yallo";

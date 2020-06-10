@@ -1,7 +1,7 @@
 type iden = string [@@deriving show {with_path = false}]
 
 type ptype = 
-  | PTBase of string                  (* type name *)
+  | PTBuiltin of string                  (* type name *)
   | PTTuple of ptype list             (* tuple of other types *)
   | PTRecord of (string * ptype) list (* record is (iden * type) list *)
   | PTCont of string * ptype          (* container type * inner_type *)
@@ -13,26 +13,24 @@ type ptype =
 (* identifier * (iden * type) list of parameters * modifier list *)
 type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_path = false}]
 
-(* a value, the type will be defined by declaration *)
-type plit = 
-  | PVEmpty
-  | PVNone
-  | PVNat of int 
-  | PVInt of int 
-  | PVMutez of int
-  | PVString of string
-  | PVSome of plit
-  | PVEnum of iden * string
-  | PVTyped of plit * ptype
-  | PVList of plit list 
-  | PVMap of (plit * plit) list
-  | PVTuple of plit list
-  | PVLambda of (iden * ptype) list * pexpr
-  | PVRecord of (iden * pexpr) list
-  [@@deriving show {with_path = false}]
 
 and pexpr =
-  | PELit of plit
+  | PEEmpty
+  | PENone
+  | PEBool of bool
+  | PENat of int 
+  | PEInt of int 
+  | PEMutez of int
+  | PEString of string
+  | PESome of pexpr
+  | PEEnum of iden * string
+  | PETyped of pexpr * ptype
+  | PEList of pexpr list 
+  | PEMap of (pexpr * pexpr) list
+  | PETuple of pexpr list
+  | PELambda of (iden * ptype) list * pexpr
+  | PERecord of (iden * pexpr) list
+
   | PERef of iden
   | PESRef of iden
   | PETRef of iden
@@ -94,7 +92,7 @@ type contract_field = iden * ptype [@@deriving show {with_path = false}]
 (* contract entry: iden * params * commands *)
 type contract_entry = iden * (iden * ptype) list * statement list [@@deriving show {with_path = false}]
 
-type contract_constructor = (iden * ptype) list * (iden * plit) list [@@deriving show {with_path = false}]
+type contract_constructor = (iden * ptype) list * (iden * pexpr) list [@@deriving show {with_path = false}]
 
 (* a declaration could be a type alias, a modifier, an interface or a contract *)
 type declaration = 
@@ -112,7 +110,7 @@ type declaration =
   | DConst of { 
     id: iden; 
     t: ptype; 
-    v: plit; 
+    v: pexpr; 
   }
 
   (* type declaration *)
