@@ -64,10 +64,13 @@
 
   type_sig:
     | t=ident                                                       { Parse_tree.PTBase (t) }
-    | LPAR t1=type_sig COMMA tl=separated_nonempty_list(COMMA, type_sig) RPAR         { Parse_tree.PTTuple (t1::tl) }
+    | LPAR t1=type_sig COMMA tl=separated_nonempty_list(COMMA, type_sig) RPAR         
+																	{ Parse_tree.PTTuple (t1::tl) }
 	| p=type_sig LAMBDA pr=type_sig									{ Parse_tree.PTLambda (p, pr) }
     | bt=type_expr c=CONT                                           { Parse_tree.PTCont (c, bt) }
-    | RECORD LBRACE tl=separated_nonempty_list(SEMICOLON, parameter) RBRACE{ Parse_tree.PTRecord (tl)}
+    | bt=type_expr CONTRACT                                         { Parse_tree.PTCont ("contract", bt) }
+    | RECORD LBRACE tl=separated_nonempty_list(SEMICOLON, parameter) RBRACE
+																	{ Parse_tree.PTRecord (tl)}
     | ENUM LPAR el=separated_list(PIPE, ident) RPAR                 { Parse_tree.PTEnum (el) }
 	| LPAR t=type_sig RPAR											{ t }
 

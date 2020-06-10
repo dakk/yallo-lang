@@ -7,6 +7,7 @@ type ptype =
   | PTCont of string * ptype          (* container type * inner_type *)
   | PTEnum of string list
   | PTLambda of ptype * ptype
+  | PTContract of ptype
   [@@deriving show {with_path = false}]
 
 (* identifier * (iden * type) list of parameters * modifier list *)

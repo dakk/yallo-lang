@@ -1,0 +1,4 @@
+type a = nat list;
+type a = nat contract;
+type getBalance = (address, nat callback) contract;
+
