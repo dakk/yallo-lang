@@ -12,3 +12,6 @@ const litTyped	: address 				= ("ciao": address);
 const litLambda	: int -> int			= (a: int) => (2);
 const litRec2	: record { a: string; b: int } = { a="ciao"; b=12 };
 const litMap2	: (int, record { a: string; b: int}) map = [(1: { a="ciao"; b=12 })];
+
+type a = enum (Ciao | Mondo);
+const b: a = a.Ciao;

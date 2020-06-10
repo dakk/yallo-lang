@@ -11,7 +11,7 @@
 %token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
 %token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, SKIP
 %token LTE, LT, GT, GTE, EQEQ, SIZE, QUESTION, GET, HAS, EMPTY, NONE, SOME
-%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB, NEQ
+%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB, NEQ, HT
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -57,8 +57,8 @@
   expr:
     | NONE  					{ Parse_tree.PENone }
     | EMPTY 					{ Parse_tree.PEEmpty }
-    | TRUE          { Parse_tree.PEBool (true) }
-    | FALSE          { Parse_tree.PEBool (false) }
+    | TRUE            { Parse_tree.PEBool (true) }
+    | FALSE           { Parse_tree.PEBool (false) }
     | x=STRING 				{ Parse_tree.PEString (x) }
     | x=MTZ 					{ Parse_tree.PEMutez (x) }
     | x=NAT 					{ Parse_tree.PENat (x) }
@@ -74,7 +74,6 @@
                                 { Parse_tree.PEMap (tl) }
     | LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR LAMBDAB LPAR e=expr RPAR
                                 { Parse_tree.PELambda (tl, e) }
-    | i=IDENT 						      { Parse_tree.PERef (i) }
 
     // arithm
     | e1=expr ADD e2=expr 			{ Parse_tree.PEAdd (e1,e2) }
@@ -98,10 +97,26 @@
     | IF c=expr THEN e1=expr ELSE e2=expr 
                                 { Parse_tree.PEIfThenElse (c,e1,e2) }
     // apply a function
-    | f=expr LPAR p=separated_list(COMMA, expr) RPAR 
-                                { Parse_tree.PEApply (f, p) }
+    | i=expr LPAR p=separated_list(COMMA, expr) RPAR 						      { PEApply(i, p) }
+    // | f=expr LPAR p=separated_list(COMMA, expr) RPAR 
+    //                             { Parse_tree.PEApply (f, p) }
     | LPAR e=expr RPAR 				  { e }
     | LPAR v=expr COLON t=type_sig RPAR { Parse_tree.PETyped (v, t) }
+
+
+    // | i=IDENT LPAR p=separated_list(COMMA, expr) RPAR 						      { PEApply(Parse_tree.PERef (i), p) }
+    // | TEZOS DOT i=IDENT LPAR p=separated_list(COMMA, expr) RPAR        { PEApply(Parse_tree.PETRef (i), p) }
+    // | THIS DOT i=IDENT LPAR p=separated_list(COMMA, expr) RPAR         { PEApply(Parse_tree.PESRef (i), p) }
+    | i=IDENT 						      { Parse_tree.PERef (i) }
+    | TEZOS DOT i=IDENT         { Parse_tree.PETRef (i) }
+    | THIS DOT i=IDENT          { Parse_tree.PESRef (i) }
+    // todo: fix tezos.c() and this.c()
+    // | THIS DOT ii=IDENT DOT i=IDENT LPAR p=separated_list(COMMA, expr) RPAR 			
+    //   { PEApply2(Parse_tree.PESRef(ii), i, p) }
+    | e=expr DOT i=IDENT { PEDot (e, i) }
+
+
+
 
   left_hand:
     | x=IDENT           { Parse_tree.I x }

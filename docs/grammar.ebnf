@@ -39,7 +39,6 @@
          | LSQUARE <emap_element> (COMMA <emap_element>)* RSQUARE
          | LPAR <parameter> (COMMA <parameter>)* RPAR LAMBDAB LPAR <expr>
            RPAR
-         | IDENT
          | <expr> ADD <expr>
          | <expr> SUB <expr>
          | <expr> DIV <expr>
@@ -58,6 +57,10 @@
          | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
          | LPAR <expr> RPAR
          | LPAR <expr> COLON <type_sig> RPAR
+         | IDENT
+         | TEZOS DOT IDENT
+         | THIS DOT IDENT
+         | <expr> DOT IDENT
 
 <left_hand> ::= IDENT
               | THIS DOT IDENT

@@ -1,11 +1,13 @@
 type options = {
-  dump_parse_tree: bool;
-  dump_ast: bool;
+  contract: string option;
+  print_pt: bool;
+  print_ast: bool;
 }
 
 let default_options = {
-  dump_parse_tree = true;
-  dump_ast = true;
+  contract = None;
+  print_pt = true;
+  print_ast = true;
 }
 
 let parse s = Lexing.from_string s |> Parser.program Lexer.token
@@ -32,19 +34,19 @@ let rec inject_import (pt: Parse_tree.t): Parse_tree.t =
   ) [] pt
 
 (* dump the parse tree, debug only *)
-let dump_pt (pt: Parse_tree.t) = pt |> Parse_tree.show |> print_endline; print_endline ""; pt
+let print_pt (pt: Parse_tree.t) = pt |> Parse_tree.show |> print_endline; print_endline ""
 
-(* conditionally returns f or iden if b or not b *)
+(* [ap b f] conditionally apply f or iden if b or not b *)
 let ap b f = if b then f else (fun x -> x)
 
-let compile (command: string) (filename: string) (contract: string) opt =
-  let intermediate = filename
-    (* parse the starting file *)
-    |> parse_file
-    (* |> ap opt.dump_parse_tree dump_pt    *)
-    (* parse and inject imports *)
-    |> inject_import
-    |> ap opt.dump_parse_tree dump_pt
-  in
-  match command with 
-  | _ -> "Lol"
+(* [app b f] conditionally apply f or iden if b or not b, return the same value *)
+let app b f = if b then (fun x -> let _: unit = f x in x) else (fun x -> x)
+
+
+let compile (filename: string) opt =
+  filename
+    |> parse_file                   (* parse the starting file *)
+    |> inject_import                (* parse and inject imports *)
+    |> app opt.print_pt print_pt     (* print pt *)
+
+    |> (fun x -> ())

@@ -13,6 +13,12 @@ type ptype =
 (* identifier * (iden * type) list of parameters * modifier list *)
 type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_path = false}]
 
+(* left operator could be an ident or a this.ident *)
+and left_op = 
+  | I of iden     (* i *)
+  | S of iden     (* this.i *)
+  | T of iden     (* Tezos.i *)
+  [@@deriving show {with_path = false}]
 
 and pexpr =
   | PEEmpty
@@ -57,21 +63,12 @@ and pexpr =
   | PEIfThenElse of pexpr * pexpr * pexpr 
 
   (* function apply *)
+  | PEDot of pexpr * iden
   | PEApply of pexpr * pexpr list
+  (* | PEApply2 of pexpr * iden * pexpr list *)
 
-  (* accessor (used for map, big map) *)
-  | PEGet of pexpr * pexpr
-
-  (* of, used for getting an entrypoint of another contract *)
-  | PEOf of iden * pexpr
   [@@deriving show {with_path = false}]
 
-(* left operator could be an ident or a this.ident *)
-type left_op = 
-  | I of iden     (* i *)
-  | S of iden     (* this.i *)
-  | T of iden     (* Tezos.i *)
-  [@@deriving show {with_path = false}]
 
 type statement =
   | PSConst of iden * ptype * pexpr

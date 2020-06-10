@@ -1,9 +1,9 @@
 (executable
  (public_name yallo)
  (name yallo)
- (preprocess (pps ppx_deriving.show))
- (libraries ppx_deriving menhirLib)
- (modules yallo parse_tree parser lexer compiler))
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries core ppx_deriving menhirLib)
+ (modules yallo parse_tree ast parser lexer compiler))
 
 (ocamllex lexer)
 

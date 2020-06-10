@@ -6,11 +6,12 @@ clean:
 	rm -rf _build
 	
 run-test:
-	./_build/default/src/yallo.exe compile test/test_declarations.yallo tzToken
-	./_build/default/src/yallo.exe compile test/test_literal.yallo tzToken
-	./_build/default/src/yallo.exe compile test/test_types.yallo tzToken
-	./_build/default/src/yallo.exe compile test/test_expr.yallo tzToken
-	./_build/default/src/yallo.exe compile test/test_statements.yallo tzToken
+	./_build/default/src/yallo.exe compile test/test_literal.yallo
+	./_build/default/src/yallo.exe compile test/test_types.yallo
+	./_build/default/src/yallo.exe compile test/test_expr.yallo
+	./_build/default/src/yallo.exe compile test/test_statements.yallo
+	./_build/default/src/yallo.exe compile test/test_declarations.yallo
+	./_build/default/src/yallo.exe compile test/test_record.yallo -print-pt
 
 grammar:
 	@echo Pretty-printing grammar... docs/grammar.ebnf

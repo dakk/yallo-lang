@@ -1,0 +1,4 @@
+type r = record { a: int; b: record { c: int }};
+
+const a: r = { a=12; b={ c=13 } };
+const c: int = a.b.c;

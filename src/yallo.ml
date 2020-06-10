@@ -1,5 +1,28 @@
-let main () = 
-  Compiler.compile Sys.argv.(1) Sys.argv.(2) Sys.argv.(3) Compiler.default_options |> ignore;
-  Printf.printf "compiled!\n%!"
+open Core
 
-let () = main ()
+let run action filename opt = 
+  (match action with 
+  | "compile" -> Compiler.compile filename opt
+  );
+  Printf.printf "done!\n%!"
+
+let command =
+  Command.basic
+    ~summary:"Yallo-lang compiler"
+    ~readme:(fun () -> "More detailed information")
+    (let open Command.Let_syntax in
+      let open Command.Param in
+      let%map
+          action      = anon ("action" %: string)
+        and filename  = anon ("filename" %: string)
+        and contract  = flag "-contract" (optional string) ~doc:" selected contract"
+        and past      = flag "-print-ast" no_arg ~doc:" print ast"
+        and ppt       = flag "-print-pt" no_arg ~doc:" print parse-tree"
+      in fun () -> 
+        let opt = Compiler.{
+          contract = contract;
+          print_pt = ppt;
+          print_ast = past;
+        } in run action filename opt)
+
+let () = Command.run ~version:"0.1" ~build_info:"git" command
