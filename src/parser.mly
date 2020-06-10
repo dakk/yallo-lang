@@ -9,9 +9,9 @@
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, QUOTE, LSQUARE, RSQUARE, AT
 %token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD, VAR
 %token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
-%token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, SKIP
-%token LTE, LT, GT, GTE, EQEQ, SIZE, QUESTION, GET, HAS, EMPTY, NONE, SOME
-%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB, NEQ, HT
+%token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, SKIP, WITH, MATCH
+%token LTE, LT, GT, GTE, EQEQ, SIZE, QUESTION, GET, HAS, NONE, SOME
+%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB, NEQ, HT, UNIT
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -53,10 +53,12 @@
     | LPAR a=expr COLON b=expr RPAR { (a, b) }
   erec_element:
     | i=IDENT EQ b=expr { (i, b) }
+	match_case:
+		| PIPE e=expr LAMBDA v=expr { (e, v) }
 
   expr:
+		| UNIT						{ Parse_tree.PEUnit }
     | NONE  					{ Parse_tree.PENone }
-    | EMPTY 					{ Parse_tree.PEEmpty }
     | TRUE            { Parse_tree.PEBool (true) }
     | FALSE           { Parse_tree.PEBool (false) }
     | x=STRING 				{ Parse_tree.PEString (x) }
@@ -96,6 +98,10 @@
     // if then else
     | IF c=expr THEN e1=expr ELSE e2=expr 
                                 { Parse_tree.PEIfThenElse (c,e1,e2) }
+
+		// match with
+		| MATCH c=expr WITH cl=nonempty_list(match_case) 
+																{ Parse_tree.PEMatchWith (c, cl) }
     // apply a function
     | i=expr LPAR p=separated_list(COMMA, expr) RPAR 						      { PEApply(i, p) }
     // | f=expr LPAR p=separated_list(COMMA, expr) RPAR 

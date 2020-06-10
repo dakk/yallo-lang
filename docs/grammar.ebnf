@@ -24,8 +24,10 @@
 
 <erec_element> ::= IDENT EQ <expr>
 
-<expr> ::= NONE
-         | EMPTY
+<match_case> ::= PIPE <expr> LAMBDA <expr>
+
+<expr> ::= UNIT
+         | NONE
          | TRUE
          | FALSE
          | STRING
@@ -54,6 +56,7 @@
          | <expr> EQEQ <expr>
          | <expr> NEQ <expr>
          | IF <expr> THEN <expr> ELSE <expr>
+         | MATCH <expr> WITH <match_case>+
          | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
          | LPAR <expr> RPAR
          | LPAR <expr> COLON <type_sig> RPAR

@@ -21,7 +21,7 @@ and left_op =
   [@@deriving show {with_path = false}]
 
 and pexpr =
-  | PEEmpty
+  | PEUnit
   | PENone
   | PEBool of bool
   | PENat of int 
@@ -62,10 +62,11 @@ and pexpr =
   (* ifthenelse expression *)
   | PEIfThenElse of pexpr * pexpr * pexpr 
 
+  | PEMatchWith of pexpr * (pexpr * pexpr) list
+
   (* function apply *)
   | PEDot of pexpr * iden
   | PEApply of pexpr * pexpr list
-  (* | PEApply2 of pexpr * iden * pexpr list *)
 
   [@@deriving show {with_path = false}]
 

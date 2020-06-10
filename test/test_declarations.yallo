@@ -20,7 +20,7 @@ contract tzToken implements FA12 {
 	// storage from create_contract
 	constructor(sup: nat) {
 		this.supply = None;
-		this.balances = empty;
+		this.balances = Map.empty;
 		this.symbol = None;
 	}
 

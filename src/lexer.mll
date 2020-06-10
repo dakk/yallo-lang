@@ -80,10 +80,12 @@ rule token = parse
   | "or"				  	{ OR }
   | "not"				  	{ NOT }
   | "skip"				  { SKIP }
-  | "empty"				  { EMPTY }
   | "Some"				  { SOME }
   | "None"				  { NONE }
   | "Tezos"				  { TEZOS }
+	| "match"					{ MATCH }
+	| "with"					{ WITH }
+	| "Unit"					{ UNIT }
   | "constructor"		{ CONSTRUCTOR }
   
 	| "#"							{ HT }
