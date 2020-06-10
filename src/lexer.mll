@@ -21,7 +21,6 @@
 	"option";
 	"true";
 	"false";
-	"bool";
 	"and";
 	"or";
 	"not";
@@ -117,6 +116,7 @@ rule token = parse
   | "%"					  { MOD }
   | "="                   { EQ }
   | "=="                  { EQEQ }
+  | "!="				  { NEQ }
   | ">"					  { GT }
   | "<"					  { LT }
   | "<="			      { LTE }

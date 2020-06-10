@@ -34,7 +34,8 @@ type plit =
 and pexpr =
   | PELit of plit
   | PERef of iden
-  | PEStorageRef of iden
+  | PESRef of iden
+  | PETRef of iden
 
   (* aritmetic *)
   | PEAdd of pexpr * pexpr
@@ -69,17 +70,19 @@ and pexpr =
 
 (* left operator could be an ident or a this.ident *)
 type left_op = 
-  | I of iden
-  | S of iden
+  | T             (* Tezos *)
+  | I of iden     (* i *)
+  | S of iden     (* this.i *)
   [@@deriving show {with_path = false}]
 
 type statement =
   | PSConst of iden * ptype * pexpr
   | PSVar of iden * ptype
-  | PSVarAssign of iden * ptype * pexpr
-  | PSAssign of left_op * pexpr
-  | PSRecAssign of left_op * iden * pexpr
-  | PSCall of left_op * iden * pexpr list
+  | PSVarAssignTuple of (iden * ptype) list * pexpr  (* var (a:int,b:int,c:int) = (1,2,3); *)
+  | PSVarAssign of iden * ptype * pexpr              (* var a:int = 12; *)
+  | PSAssign of left_op * pexpr                      (* a = 12; *)
+  | PSRecAssign of left_op * iden * pexpr            (* a.el = 12; | this.a.el = 12; *)
+  | PSCall of left_op * iden * pexpr list            (* m.update(k, 12) *)
   | PSSkip
   [@@deriving show {with_path = false}]
 

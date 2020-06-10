@@ -11,7 +11,7 @@
 %token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT, LAMBDA
 %token ADD, SUB, DIV, MUL, MOD, TRUE, FALSE, IF, THEN, ELSE, SKIP
 %token LTE, LT, GT, GTE, EQEQ, SIZE, QUESTION, GET, HAS, EMPTY, NONE, SOME
-%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB
+%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB, NEQ
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -34,10 +34,10 @@
 	| i=IDENT EQ b=expr { (i, b) }
 
   value: 
-    | NONE  					{ Parse_tree.PVNone }
+  | NONE  					{ Parse_tree.PVNone }
 	| SOME LPAR x=value RPAR 	{ Parse_tree.PVSome (x) }
-    | EMPTY 					{ Parse_tree.PVEmpty }
-	| x=STRING 					{ Parse_tree.PVString (x) }
+  | EMPTY 					{ Parse_tree.PVEmpty }
+	| x=STRING 				{ Parse_tree.PVString (x) }
 	| x=MTZ 					{ Parse_tree.PVMutez (x) }
 	| x=NAT 					{ Parse_tree.PVNat (x) }
 	| x=INT 					{ Parse_tree.PVInt (x) }
@@ -45,15 +45,15 @@
 								{ Parse_tree.PVRecord (tl) }
 	| LSQUARE tl=separated_nonempty_list(COMMA, value) RSQUARE
 								{ Parse_tree.PVList (tl) }
-	| LPAR tl=separated_nonempty_list(COMMA, value) RPAR
-								{ Parse_tree.PVTuple (tl) }
+	| LPAR t=tvalue COMMA tl=separated_nonempty_list(COMMA, tvalue) RPAR
+								{ Parse_tree.PVTuple (t::tl) }
 	| LSQUARE tl=separated_nonempty_list(COMMA, vmap_element) RSQUARE
 								{ Parse_tree.PVMap (tl) }
-	| LPAR tl=separated_nonempty_list(SEMICOLON, parameter) RPAR LAMBDAB LPAR e=expr RPAR
+	| LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR LAMBDAB LPAR e=expr RPAR
 								{ Parse_tree.PVLambda (tl, e) }
   
   tvalue:
-    | v=value { v }
+    | v=value						                 { v }
     | LPAR v=value COLON t=type_sig RPAR { Parse_tree.PVTyped (v, t) }
 
   ident: | i=IDENT { i }
@@ -63,24 +63,52 @@
       { (n, pl, []) }
 
   type_sig:
-    | t=ident                                                       { Parse_tree.PTBase (t) }
+    | t=ident                                       { Parse_tree.PTBase (t) }
     | LPAR t1=type_sig COMMA tl=separated_nonempty_list(COMMA, type_sig) RPAR         
-																	{ Parse_tree.PTTuple (t1::tl) }
-	| p=type_sig LAMBDA pr=type_sig									{ Parse_tree.PTLambda (p, pr) }
-    | bt=type_expr c=CONT                                           { Parse_tree.PTCont (c, bt) }
-    | bt=type_expr CONTRACT                                         { Parse_tree.PTCont ("contract", bt) }
+		                  															{ Parse_tree.PTTuple (t1::tl) }
+	  | p=type_sig LAMBDA pr=type_sig									{ Parse_tree.PTLambda (p, pr) }
+    | bt=type_expr c=CONT                           { Parse_tree.PTCont (c, bt) }
+    | bt=type_expr CONTRACT                         { Parse_tree.PTCont ("contract", bt) }
     | RECORD LBRACE tl=separated_nonempty_list(SEMICOLON, parameter) RBRACE
-																	{ Parse_tree.PTRecord (tl)}
-    | ENUM LPAR el=separated_list(PIPE, ident) RPAR                 { Parse_tree.PTEnum (el) }
-	| LPAR t=type_sig RPAR											{ t }
+																	                  { Parse_tree.PTRecord (tl)}
+    | ENUM LPAR el=separated_list(PIPE, ident) RPAR { Parse_tree.PTEnum (el) }
+	  | LPAR t=type_sig RPAR											    { t }
 
   type_expr: | te=type_sig {te}
 
   dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p)}
 
   expr:
-    | t=tvalue { Parse_tree.PELit (t)}
-  
+	| i=IDENT 						      { Parse_tree.PERef (i) }
+  | t=value 						      { Parse_tree.PELit (t)}
+
+	// arithm
+	| e1=expr ADD e2=expr 			{ Parse_tree.PEAdd (e1,e2) }
+	| e1=expr SUB e2=expr 			{ Parse_tree.PESub (e1,e2) }
+	| e1=expr DIV e2=expr 			{ Parse_tree.PEDiv (e1,e2) }
+	| e1=expr MUL e2=expr 			{ Parse_tree.PEMul (e1,e2) }
+	| e1=expr MOD e2=expr 			{ Parse_tree.PEMod (e1,e2) }
+
+	// boolean
+	| e1=expr AND e2=expr 			{ Parse_tree.PEAnd (e1,e2) }
+	| e1=expr OR e2=expr 			  { Parse_tree.PEOr (e1,e2) }
+	| NOT e=expr 					      { Parse_tree.PENot (e) }
+	| e1=expr LT e2=expr 			  { Parse_tree.PELt (e1,e2) }
+	| e1=expr LTE e2=expr 			{ Parse_tree.PELte (e1,e2) }
+	| e1=expr GT e2=expr 			  { Parse_tree.PEGt (e1,e2) }
+	| e1=expr GTE e2=expr 			{ Parse_tree.PEGte (e1,e2) }
+	| e1=expr EQEQ e2=expr 			{ Parse_tree.PEEq (e1,e2) }
+	| e1=expr NEQ e2=expr 			{ Parse_tree.PENeq (e1,e2) }
+
+  // if then else
+  | IF c=expr THEN e1=expr ELSE e2=expr 
+                              { Parse_tree.PEIfThenElse (c,e1,e2) }
+  // apply a function
+  | f=expr LPAR p=separated_list(COMMA, expr) RPAR 
+                              { Parse_tree.PEApply (f, p) }
+	| LPAR e=expr RPAR 				  { e }
+
+
   statement:
     | SEMICOLON { Parse_tree.PSSkip }
 

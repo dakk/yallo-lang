@@ -1,5 +1,5 @@
 # Yallo-lang
-Yallo is an yet another high level experimental language for Tezos, with the purpose of 
+Yallo is a yet another high level experimental language for Tezos, with the purpose of 
 providing a better abstraction for integrating different contracts.
 
 This is only a research project, is not (yet) intendeed for real usage.
@@ -72,8 +72,8 @@ contract usingAToken {
 	...
 
 	entry deployToken() {
-		var a = Tezos.createContract (Token(100, "ourToken"), None, 0);
-		return [a.snd()];
+		var (a, op) = Tezos.createContract (Token(100, "ourToken"), None, 0);
+		return [op];
 	}
 }
 ```
