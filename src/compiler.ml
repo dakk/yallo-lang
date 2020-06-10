@@ -41,7 +41,7 @@ let compile (command: string) (filename: string) (contract: string) opt =
   let intermediate = filename
     (* parse the starting file *)
     |> parse_file
-    |> ap opt.dump_parse_tree dump_pt   
+    (* |> ap opt.dump_parse_tree dump_pt    *)
     (* parse and inject imports *)
     |> inject_import
     |> ap opt.dump_parse_tree dump_pt

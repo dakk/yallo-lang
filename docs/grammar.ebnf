@@ -1,0 +1,119 @@
+<program> ::= <dimport>* <declaration>* EOF
+
+<parameter> ::= IDENT COLON <type_sig>
+
+<vmap_element> ::= LPAR <tvalue> COLON <tvalue> RPAR
+
+<vrec_element> ::= IDENT EQ <expr>
+
+<value> ::= NONE
+          | SOME LPAR <value> RPAR
+          | EMPTY
+          | STRING
+          | MTZ
+          | NAT
+          | INT
+          | LBRACE <vrec_element> (SEMICOLON <vrec_element>)* RBRACE
+          | LSQUARE <value> (COMMA <value>)* RSQUARE
+          | LPAR <tvalue> COMMA <tvalue> (COMMA <tvalue>)* RPAR
+          | LSQUARE <vmap_element> (COMMA <vmap_element>)* RSQUARE
+          | LPAR <parameter> (COMMA <parameter>)* RPAR LAMBDAB LPAR <expr>
+            RPAR
+
+<tvalue> ::= <value>
+           | LPAR <value> COLON <type_sig> RPAR
+
+<ident> ::= IDENT
+
+<signature> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
+                MODIFIER*
+
+<type_sig> ::= <ident>
+             | LPAR <type_sig> COMMA <type_sig> (COMMA <type_sig>)* RPAR
+             | <type_sig> LAMBDA <type_sig>
+             | <type_expr> CONT
+             | <type_expr> CONTRACT
+             | RECORD LBRACE <parameter> (SEMICOLON <parameter>)* RBRACE
+             | ENUM LPAR [<ident> (PIPE <ident>)*] RPAR
+             | LPAR <type_sig> RPAR
+
+<type_expr> ::= <type_sig>
+
+<dimport> ::= IMPORT STRING SEMICOLON
+
+<expr> ::= IDENT
+         | <value>
+         | <expr> ADD <expr>
+         | <expr> SUB <expr>
+         | <expr> DIV <expr>
+         | <expr> MUL <expr>
+         | <expr> MOD <expr>
+         | <expr> AND <expr>
+         | <expr> OR <expr>
+         | NOT <expr>
+         | <expr> LT <expr>
+         | <expr> LTE <expr>
+         | <expr> GT <expr>
+         | <expr> GTE <expr>
+         | <expr> EQEQ <expr>
+         | <expr> NEQ <expr>
+         | IF <expr> THEN <expr> ELSE <expr>
+         | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
+         | LPAR <expr> RPAR
+
+<left_hand> ::= IDENT
+              | THIS DOT IDENT
+              | TEZOS DOT IDENT
+
+<statement> ::= VAR IDENT COLON <type_expr> SEMICOLON
+              | VAR IDENT COLON <type_expr> EQ <expr> SEMICOLON
+              | VAR LPAR <parameter> (COMMA <parameter>)* RPAR EQ <expr>
+                SEMICOLON
+              | CONST IDENT COLON <type_expr> EQ <expr> SEMICOLON
+              | <left_hand> EQ <expr> SEMICOLON
+              | <left_hand> DOT <ident> EQ <expr> SEMICOLON
+              | IDENT LPAR [<expr> (COMMA <expr>)*] RPAR SEMICOLON
+              | <left_hand> DOT IDENT LPAR [<expr> (COMMA <expr>)*] RPAR
+                SEMICOLON
+              | RETURN <expr> SEMICOLON
+              | SKIP SEMICOLON
+
+<fun_body> ::= <statement>*
+
+<dfunction> ::= FUNCTION IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
+                COLON <type_sig> LBRACE <fun_body> RBRACE
+
+<dinterface> ::= INTERFACE IDENT LBRACE (<signature> SEMICOLON)* RBRACE
+               | INTERFACE IDENT EXTENDS IDENT LBRACE (<signature>
+                 SEMICOLON)* RBRACE
+
+<dcontract_field> ::= FIELD IDENT COLON <type_sig>
+
+<dcontract_entry> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*]
+                      RPAR LBRACE <fun_body> RBRACE
+
+<dcontract_constructor_assign> ::= THIS DOT IDENT EQ <tvalue> SEMICOLON
+
+<dcontract_constructor> ::= CONSTRUCTOR LPAR [<parameter> (COMMA
+                            <parameter>)*] RPAR LBRACE
+                            <dcontract_constructor_assign>* RBRACE
+
+<dcontract_body> ::= (<dcontract_field> SEMICOLON)* <dcontract_constructor>
+                     <dcontract_entry>*
+                   | (<dcontract_field> SEMICOLON)* <dcontract_entry>*
+
+<dcontract> ::= CONTRACT IDENT IMPLEMENTS IDENT LBRACE <dcontract_body>
+                RBRACE
+              | CONTRACT IDENT LBRACE <dcontract_body> RBRACE
+
+<dtype> ::= TYPE IDENT EQ <type_sig> SEMICOLON
+
+<dconst> ::= CONST IDENT COLON <type_expr> EQ <tvalue> SEMICOLON
+
+<declaration> ::= <dinterface>
+                | <dcontract>
+                | <dfunction>
+                | <dtype>
+                | <dconst>
+
+

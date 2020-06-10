@@ -12,22 +12,20 @@
     "type"; 
     "enum";
     "record";
-	"this";
-	"const";
-	"var";
-	"list";
-	"map";
-	"set";
-	"option";
-	"true";
-	"false";
-	"and";
-	"or";
-	"not";
-	"skip";
-	"size";
-	"assert";
-	"constructor";
+		"this";
+		"const";
+		"var";
+		"list";
+		"map";
+		"set";
+		"option";
+		"true";
+		"false";
+		"and";
+		"or";
+		"not";
+		"skip";
+		"constructor";
   ]
 }
 
@@ -86,7 +84,6 @@ rule token = parse
   | "get"				  { GET }
   | "has"				  { HAS }
   | "empty"				  { EMPTY }
-  | "assert"			  { ASSERT }
   | "Some"				  { SOME }
   | "None"				  { NONE }
   | "Tezos"				  { TEZOS }

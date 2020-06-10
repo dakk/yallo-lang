@@ -70,9 +70,9 @@ and pexpr =
 
 (* left operator could be an ident or a this.ident *)
 type left_op = 
-  | T             (* Tezos *)
   | I of iden     (* i *)
   | S of iden     (* this.i *)
+  | T of iden     (* Tezos.i *)
   [@@deriving show {with_path = false}]
 
 type statement =
@@ -83,7 +83,9 @@ type statement =
   | PSAssign of left_op * pexpr                      (* a = 12; *)
   | PSRecAssign of left_op * iden * pexpr            (* a.el = 12; | this.a.el = 12; *)
   | PSCall of left_op * iden * pexpr list            (* m.update(k, 12) *)
+  | PSCallBuiltin of iden * pexpr list               (* assert(15) *)
   | PSSkip
+  | PSReturn of pexpr
   [@@deriving show {with_path = false}]
 
 (* contract field: iden * type * initial value *)

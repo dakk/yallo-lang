@@ -1,0 +1,33 @@
+function testFunction (a: int): int {
+	var b: int = a * 12;
+	return b * 512;
+}
+
+contract Test {
+	entry testSkip () {
+		skip;
+	}
+	entry testConst () {
+		const b: int = 12;
+		const c: int = b * 11;
+	}
+	entry testVar () {
+		var b: int = 12;
+		var c: int;
+		var (c: int, b: int list) = (12, [12]);
+	}
+	entry testAssign () {
+		var bb: record { a: int };
+		var b: int;
+		b = 12;
+		this.c = 14;
+		bb.a = 199;
+	}
+	entry testCall () {
+		var b: (int, int) map;
+		b.update(235,"ciaomondo");
+		this.b.update(12, 15);
+		failwith("error");
+		assert(12 > 14);
+	}
+}
