@@ -8,10 +8,10 @@
 %token EOF
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, QUOTE, LSQUARE, RSQUARE, AT
 %token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD, VAR
-%token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT
+%token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT, LAMBDA
 %token ADD, SUB, DIV, MUL, MOD, TRUE, FALSE, IF, THEN, ELSE, SKIP
 %token LTE, LT, GT, GTE, EQEQ, SIZE, QUESTION, GET, HAS, EMPTY, NONE, SOME
-%token TEZOS, ASSERT, CONSTRUCTOR
+%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -27,9 +27,30 @@
 
   parameter: | i=IDENT COLON t=type_sig { (i, t) }
 
+
+  vmap_element:
+	| LPAR a=tvalue COLON b=tvalue RPAR { (a, b) }
+  vrec_element:
+	| i=IDENT EQ b=expr { (i, b) }
+
   value: 
-    | NONE  { Parse_tree.PVNone }
-    | EMPTY { Parse_tree.PVEmpty }
+    | NONE  					{ Parse_tree.PVNone }
+	| SOME LPAR x=value RPAR 	{ Parse_tree.PVSome (x) }
+    | EMPTY 					{ Parse_tree.PVEmpty }
+	| x=STRING 					{ Parse_tree.PVString (x) }
+	| x=MTZ 					{ Parse_tree.PVMutez (x) }
+	| x=NAT 					{ Parse_tree.PVNat (x) }
+	| x=INT 					{ Parse_tree.PVInt (x) }
+	| LBRACE tl=separated_nonempty_list(SEMICOLON, vrec_element) RBRACE
+								{ Parse_tree.PVRecord (tl) }
+	| LSQUARE tl=separated_nonempty_list(COMMA, value) RSQUARE
+								{ Parse_tree.PVList (tl) }
+	| LPAR tl=separated_nonempty_list(COMMA, value) RPAR
+								{ Parse_tree.PVTuple (tl) }
+	| LSQUARE tl=separated_nonempty_list(COMMA, vmap_element) RSQUARE
+								{ Parse_tree.PVMap (tl) }
+	| LPAR tl=separated_nonempty_list(SEMICOLON, parameter) RPAR LAMBDAB LPAR e=expr RPAR
+								{ Parse_tree.PVLambda (tl, e) }
   
   tvalue:
     | v=value { v }
@@ -43,17 +64,19 @@
 
   type_sig:
     | t=ident                                                       { Parse_tree.PTBase (t) }
-    | LPAR tl=separated_list(COMMA, type_sig) RPAR                  { Parse_tree.PTTuple (tl) }
+    | LPAR t1=type_sig COMMA tl=separated_nonempty_list(COMMA, type_sig) RPAR         { Parse_tree.PTTuple (t1::tl) }
+	| p=type_sig LAMBDA pr=type_sig									{ Parse_tree.PTLambda (p, pr) }
     | bt=type_expr c=CONT                                           { Parse_tree.PTCont (c, bt) }
-    | RECORD LBRACE tl=list(terminated(parameter, SEMICOLON)) RBRACE{ Parse_tree.PTRecord (tl)}
+    | RECORD LBRACE tl=separated_nonempty_list(SEMICOLON, parameter) RBRACE{ Parse_tree.PTRecord (tl)}
     | ENUM LPAR el=separated_list(PIPE, ident) RPAR                 { Parse_tree.PTEnum (el) }
+	| LPAR t=type_sig RPAR											{ t }
 
   type_expr: | te=type_sig {te}
 
   dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p)}
 
   expr:
-    | SEMICOLON { Parse_tree.PEVal (Parse_tree.None)}
+    | t=tvalue { Parse_tree.PELit (t)}
   
   statement:
     | SEMICOLON { Parse_tree.PSSkip }
@@ -76,8 +99,8 @@
       { (x, t) }
 
   dcontract_entry:
-    | ENTRY x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE RBRACE
-      { (x, tl, ()) }
+    | ENTRY x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE b=fun_body RBRACE
+      { (x, tl, b) }
 
   dcontract_constructor_assign:
     | THIS DOT x=IDENT EQ v=tvalue SEMICOLON

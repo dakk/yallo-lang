@@ -6,22 +6,32 @@ type ptype =
   | PTRecord of (string * ptype) list (* record is (iden * type) list *)
   | PTCont of string * ptype          (* container type * inner_type *)
   | PTEnum of string list
+  | PTLambda of ptype * ptype
   [@@deriving show {with_path = false}]
 
 (* identifier * (iden * type) list of parameters * modifier list *)
 type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_path = false}]
 
 (* a value, the type will be defined by declaration *)
-type pvalue = 
+type plit = 
   | PVEmpty
   | PVNone
-  | PVSome of pvalue
+  | PVNat of int 
+  | PVInt of int 
+  | PVMutez of int
+  | PVString of string
+  | PVSome of plit
   | PVEnum of iden * string
-  | PVTyped of pvalue * ptype
+  | PVTyped of plit * ptype
+  | PVList of plit list 
+  | PVMap of (plit * plit) list
+  | PVTuple of plit list
+  | PVLambda of (iden * ptype) list * pexpr
+  | PVRecord of (iden * pexpr) list
   [@@deriving show {with_path = false}]
 
-type pexpr =
-  | PEVal of pvalue
+and pexpr =
+  | PELit of plit
   | PERef of iden
   | PEStorageRef of iden
 
@@ -36,12 +46,39 @@ type pexpr =
   | PEAnd of pexpr * pexpr
   | PEOr of pexpr * pexpr
   | PENot of pexpr
+  | PELt of pexpr * pexpr
+  | PELte of pexpr * pexpr
+  | PEGt of pexpr * pexpr
+  | PEGte of pexpr * pexpr
+  | PEEq of pexpr * pexpr
+  | PENeq of pexpr * pexpr
+
+  (* ifthenelse expression *)
+  | PEIfThenElse of pexpr * pexpr * pexpr 
+
+  (* function apply *)
+  | PEApply of pexpr * pexpr list
 
   (* accessor (used for map, big map) *)
   | PEGet of pexpr * pexpr
 
+  (* of, used for getting an entrypoint of another contract *)
+  | PEOf of iden * pexpr
+  [@@deriving show {with_path = false}]
+
+(* left operator could be an ident or a this.ident *)
+type left_op = 
+  | I of iden
+  | S of iden
+  [@@deriving show {with_path = false}]
 
 type statement =
+  | PSConst of iden * ptype * pexpr
+  | PSVar of iden * ptype
+  | PSVarAssign of iden * ptype * pexpr
+  | PSAssign of left_op * pexpr
+  | PSRecAssign of left_op * iden * pexpr
+  | PSCall of left_op * iden * pexpr list
   | PSSkip
   [@@deriving show {with_path = false}]
 
@@ -49,9 +86,9 @@ type statement =
 type contract_field = iden * ptype [@@deriving show {with_path = false}]
 
 (* contract entry: iden * params * commands *)
-type contract_entry = iden * (iden * ptype) list * unit [@@deriving show {with_path = false}]
+type contract_entry = iden * (iden * ptype) list * statement list [@@deriving show {with_path = false}]
 
-type contract_constructor = (iden * ptype) list * (iden * pvalue) list [@@deriving show {with_path = false}]
+type contract_constructor = (iden * ptype) list * (iden * plit) list [@@deriving show {with_path = false}]
 
 (* a declaration could be a type alias, a modifier, an interface or a contract *)
 type declaration = 
@@ -69,7 +106,7 @@ type declaration =
   | DConst of { 
     id: iden; 
     t: ptype; 
-    v: pvalue; 
+    v: plit; 
   }
 
   (* type declaration *)

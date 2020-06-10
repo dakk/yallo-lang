@@ -93,6 +93,8 @@ rule token = parse
   | "Tezos"				  { TEZOS }
   | "constructor"		  { CONSTRUCTOR }
   
+  | "->"				  { LAMBDA }
+  | "=>"				  { LAMBDAB }
   | "{"                   { LBRACE }
   | "}"                   { RBRACE }
   | "["					  { LSQUARE }

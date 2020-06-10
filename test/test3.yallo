@@ -3,8 +3,6 @@ interface FA12 {
 	entry getBalance(of: address, cb: int callback);
 }
 
-const b: int option = (None: int option);
-const b: int option = None;
 
 type getBalanceCallback = nat callback;
 
@@ -12,6 +10,7 @@ function aFunction(c: int callback, z: nat option): nat {
 
 }
 
+// could be useful to add type parameters, maybe in the future
 contract tzToken implements FA12 {
 	field balances 	: (address, nat) map;
 	field supply 	: nat;
@@ -33,8 +32,8 @@ contract tzToken implements FA12 {
 		// var b: int = 12; 
 		//this.balances.get(Tezos.sender);
 		//var bto: int = if this.balances.has (to) then balances.get(to) else 0;
-		//this.balances.get(to) = bto + amount;
-		//this.balances.get(Tezos.sender) = b - amount;
+		//this.balances.update(to, bto + amount);
+		//this.balances.update(Tezos.sender, b - amount);
 	}
 
 	entry getBalance (adr: address, callBack: int callback) {
