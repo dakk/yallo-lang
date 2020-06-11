@@ -71,7 +71,10 @@
               | TEZOS DOT IDENT
               | CRYPTO DOT IDENT
 
-<statement> ::= VAR IDENT COLON <type_expr> SEMICOLON
+<statement> ::= IF LPAR <expr> RPAR LBRACE <statement>* RBRACE
+              | IF LPAR <expr> RPAR LBRACE <statement>* RBRACE ELSE LBRACE
+                <statement>* RBRACE
+              | VAR IDENT COLON <type_expr> SEMICOLON
               | VAR IDENT COLON <type_expr> EQ <expr> SEMICOLON
               | VAR LPAR <parameter> (COMMA <parameter>)* RPAR EQ <expr>
                 SEMICOLON

@@ -27,17 +27,41 @@ type ttype =
   | TContract of ttype 
   | TCallback of ttype
 
-let is_comparable (t: ttype) = match t with 
-| TAddress
-| TInt
-| TNat
-| TMutez
-| TTimestamp
-| TBool
-| TKeyHash
-| TString
-| TBytes -> true
-| _ -> false
+type tattr = {
+  push  : bool;
+  cmp   : bool;
+  pass  : bool;
+  store : bool;
+  pack  : bool;
+  bm_val: bool;
+} [@@deriving show {with_path = false}]
+
+let attributes (t: ttype) = match t with 
+  | TUnit ->          { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TAddress ->       { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TInt ->           { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TChainId ->       { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TNat ->           { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TMutez ->         { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TTimestamp ->     { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TBool ->          { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TSignature ->     { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TKeyHash ->       { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TKey ->           { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TString ->        { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TBytes ->         { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TLambda (_, _) -> { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TEnum (sl) ->     { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false } (* ? *)
+  | TList (l) ->      { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TSet (l) ->       { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TMap (k,v) ->     { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TBigMap (k,v) ->  { cmp=false; pass=true;  store=true;  push=false; pack=false; bm_val=false }
+  | TOption (v) ->    { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TRecord (kl) ->   { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false } (* ? *)
+  | TTuple (v) ->     { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
+  | TContract (v) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  }
+  | TCallback (v) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  } (* ? *)
+
 
 let rec show_ttype (t: ttype) = match t with 
 | TUnit -> "unit"
@@ -68,10 +92,6 @@ let rec show_ttype (t: ttype) = match t with
 let pp_ttype fmt (t: ttype) = Format.pp_print_string fmt (show_ttype t); ()
 
 type expr = 
-  | FailIf of expr
-  | FailIfMessage of expr * expr
-  | Assert of expr
-
   | TezosSender
   | TezosNow
   | TezosAmount
@@ -95,6 +115,7 @@ type expr =
   | StorageRef of iden
 
   | None
+  | Unit 
   | Bool of bool
   | Nat of int 
   | Int of int 
@@ -180,14 +201,25 @@ type expr =
 
   [@@deriving show {with_path = false}]
 
+type texpr = (ttype * expr) [@@deriving show {with_path = false}]
+
 type left_op = 
   | I of iden     (* i *)
   | S of iden     (* this.i *)
-  | T of iden     (* Tezos.i *)
-  | C of iden     (* Crypto.i *)
   [@@deriving show {with_path = false}]
 
 type statement = 
+  | FailIf of expr
+  | FailIfMessage of expr * expr
+  | Assert of expr           
+  | MapUpdate of left_op * expr * expr 
+  | BigMapUpdate of left_op * expr * expr 
+  | SetUpdate of left_op * expr * expr 
+  | MapRemove of left_op * expr 
+  | BigMapRemove of left_op * expr 
+
+  (* | CallBuiltin of iden * expr list   *)
+
   | ListIter of expr * expr
   | MapIter of expr * expr
   | DeclareVar of iden * ttype
@@ -195,11 +227,10 @@ type statement =
   | RecAssign of left_op * iden * expr
   | DeclareAssignVar of iden * ttype * expr
   | DeclareAssignVarTuple of (iden *  ttype) list * expr
-  | Call of left_op * iden * expr list           
-  | CallBuiltin of iden * expr list              
+  | Call of iden * expr list  
+  | If of expr * statement list * (statement list) option          
   | Skip
   | Return of expr
-  [@@deriving show {with_path = false}]
 
 
 type signature = iden * (iden * ttype) list * iden list [@@deriving show {with_path = false}]
@@ -208,7 +239,8 @@ type signature = iden * (iden * ttype) list * iden list [@@deriving show {with_p
 type contract_field = iden * ttype [@@deriving show {with_path = false}]
 
 (* contract entry: iden * params * commands *)
-type contract_entry = iden * (iden * ttype) list * statement list [@@deriving show {with_path = false}]
+type contract_entry = iden * (iden * ttype) list * statement list
+(* [@@deriving show {with_path = false}] *)
 
 type contract_constructor = (iden * ttype) list * (iden * expr) list [@@deriving show {with_path = false}]
 
@@ -223,7 +255,8 @@ type dfunction = {
   params: (iden * ttype) list;
   rettype: ttype;
   statements: statement list;
-} [@@deriving show {with_path = false}]
+} 
+(* [@@deriving show {with_path = false}] *)
 
 type dcontract = {
   id: iden;
@@ -255,10 +288,12 @@ type symbol_type = | Type | Interface | Const | Contract [@@deriving show {with_
 
 type env = {
   types: (iden * ttype) list;
+  consts: (iden * texpr) list;
   symbols: (iden * symbol_type) list
 } [@@deriving show {with_path = false}]
 
 let start_env = {
+  consts=[];
   types=[
     "unit", TUnit;
     "address", TAddress;
@@ -307,7 +342,7 @@ let rec transform_type (pt: Parse_tree.ptype) (e: env): ttype = match pt with
 | Parse_tree.PTTuple (tl) -> 
   TTuple (List.map (fun tt -> transform_type tt e) tl)
 | Parse_tree.PTCont (c, tt) -> (
-  let assert_cmp_key a = if not (is_comparable a) then 
+  let assert_cmp_key a = if not (attributes a).cmp then 
     failwith ("Type '" ^ show_ttype a ^ "' is not comparable and cannot be used as key of " ^ c)
     else () 
   in
@@ -330,6 +365,10 @@ let rec transform_type (pt: Parse_tree.ptype) (e: env): ttype = match pt with
 | Parse_tree.PTEnum (e) -> TEnum (e)
 | Parse_tree.PTLambda (p, r) -> TLambda (transform_type p e, transform_type r e)
 
+(* transform an pexpr to (ttype * expr) *)
+let transform_expr (pe: Parse_tree.pexpr) (e: env) : (ttype * expr) = (TUnit, Unit)
+
+
 let rec extract (p: Parse_tree.t) (e: env): (env) = 
   match p with 
   (* type definition *)
@@ -342,20 +381,35 @@ let rec extract (p: Parse_tree.t) (e: env): (env) =
     }
 
   (* global const *)
+  | Parse_tree.DConst (dc) :: p' -> 
+    assert_symbol_absence e dc.id;
+    let et = transform_type dc.t e in
+    let (t, exp) = transform_expr dc.v e in 
+
+    if t <> et then 
+      failwith ("Const '" ^ dc.id ^ "' expect to have type '" ^ show_ttype et ^ "', but type '" ^ show_ttype t ^ "' found");
+
+    extract p' { e with 
+      symbols=(dc.id, Const)::e.symbols;
+      consts=(dc.id, (t, exp))::e.consts;
+    }
+
+
 
   (* functions *)
 
   (* interface *)
 
   (* contracts *)
-  
+
   | _ :: p' -> extract p' e
   | [] -> e
 
 (* in teoria dobbiamo estrarre tutto in un passaggio, altrimenti non siamo a conoscenza di cosa e' gia' definito o meno *) 
 (* quando abbiamo un espressione, per esempio da assegnare ad una const, allora controlliamo se l'espressione
   ha lo stesso tipo della const *)
-
+(* of_parse_tree returns the contract, with the env around it, so it needs also the contract to extract *)
+(* creare un exception per ogni tipo di errore, catcharla nel compiler *)
 
 let of_parse_tree (p: Parse_tree.t) = 
   let e = extract p start_env in 

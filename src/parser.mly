@@ -132,6 +132,10 @@
     | CRYPTO DOT x=IDENT { Parse_tree.C x }
 
   statement:
+		| IF LPAR x=expr RPAR LBRACE sl=list (statement) RBRACE 
+			{ Parse_tree.PSIfThen (x, sl) }
+		| IF LPAR x=expr RPAR LBRACE sl=list(statement) RBRACE ELSE LBRACE sle=list(statement) RBRACE
+			{ Parse_tree.PSIfThenElse (x, sl, sle) }
     | VAR x=IDENT COLON t=type_expr SEMICOLON
       { Parse_tree.PSVar (x, t) }
     | VAR x=IDENT COLON t=type_expr EQ e=expr SEMICOLON

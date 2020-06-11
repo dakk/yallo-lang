@@ -81,6 +81,8 @@ type statement =
   | PSRecAssign of left_op * iden * pexpr            (* a.el = 12; | this.a.el = 12; *)
   | PSCall of left_op * iden * pexpr list            (* m.update(k, 12) *)
   | PSCallBuiltin of iden * pexpr list               (* assert(15) *)
+  | PSIfThenElse of pexpr * statement list * statement list
+  | PSIfThen of pexpr * statement list
   | PSSkip
   | PSReturn of pexpr
   [@@deriving show {with_path = false}]
