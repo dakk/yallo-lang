@@ -11,7 +11,7 @@
 %token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
 %token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, SKIP, WITH, MATCH
 %token LTE, LT, GT, GTE, EQEQ, SIZE, QUESTION, GET, HAS, NONE, SOME
-%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB, NEQ, HT, UNIT
+%token TEZOS, ASSERT, CONSTRUCTOR, ASTERISK, LAMBDAB, NEQ, HT, UNIT, CRYPTO
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -116,6 +116,7 @@
     | i=IDENT 						      { Parse_tree.PERef (i) }
     | TEZOS DOT i=IDENT         { Parse_tree.PETRef (i) }
     | THIS DOT i=IDENT          { Parse_tree.PESRef (i) }
+    | CRYPTO DOT i=IDENT 				{ Parse_tree.PECRef (i) }
     // todo: fix tezos.c() and this.c()
     // | THIS DOT ii=IDENT DOT i=IDENT LPAR p=separated_list(COMMA, expr) RPAR 			
     //   { PEApply2(Parse_tree.PESRef(ii), i, p) }
@@ -128,6 +129,7 @@
     | x=IDENT           { Parse_tree.I x }
     | THIS DOT x=IDENT  { Parse_tree.S x }
     | TEZOS DOT x=IDENT { Parse_tree.T x }
+    | CRYPTO DOT x=IDENT { Parse_tree.C x }
 
   statement:
     | VAR x=IDENT COLON t=type_expr SEMICOLON

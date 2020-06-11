@@ -63,11 +63,13 @@
          | IDENT
          | TEZOS DOT IDENT
          | THIS DOT IDENT
+         | CRYPTO DOT IDENT
          | <expr> DOT IDENT
 
 <left_hand> ::= IDENT
               | THIS DOT IDENT
               | TEZOS DOT IDENT
+              | CRYPTO DOT IDENT
 
 <statement> ::= VAR IDENT COLON <type_expr> SEMICOLON
               | VAR IDENT COLON <type_expr> EQ <expr> SEMICOLON

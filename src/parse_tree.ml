@@ -7,7 +7,6 @@ type ptype =
   | PTCont of string * ptype          (* container type * inner_type *)
   | PTEnum of string list
   | PTLambda of ptype * ptype
-  | PTContract of ptype
   [@@deriving show {with_path = false}]
 
 (* identifier * (iden * type) list of parameters * modifier list *)
@@ -18,6 +17,7 @@ and left_op =
   | I of iden     (* i *)
   | S of iden     (* this.i *)
   | T of iden     (* Tezos.i *)
+  | C of iden     (* Crypto.i *)
   [@@deriving show {with_path = false}]
 
 and pexpr =
@@ -40,6 +40,7 @@ and pexpr =
   | PERef of iden
   | PESRef of iden
   | PETRef of iden
+  | PECRef of iden
 
   (* aritmetic *)
   | PEAdd of pexpr * pexpr

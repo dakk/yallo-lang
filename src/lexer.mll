@@ -27,6 +27,17 @@
 		"skip";
 		"constructor";
   ]
+
+
+	exception SyntaxError of string
+
+	let next_line lexbuf =
+		let pos = lexbuf.lex_curr_p in
+		lexbuf.lex_curr_p <-
+			{ pos with pos_bol = lexbuf.lex_curr_pos;
+								pos_lnum = pos.pos_lnum + 1
+			}
+
 }
 
 let digit = ['0'-'9']
@@ -86,6 +97,7 @@ rule token = parse
 	| "match"					{ MATCH }
 	| "with"					{ WITH }
 	| "Unit"					{ UNIT }
+	| "Crypto"				{ CRYPTO }
   | "constructor"		{ CONSTRUCTOR }
   
 	| "#"							{ HT }
@@ -125,10 +137,10 @@ rule token = parse
 
   | string as s     { STRING (String.sub s 1 ((String.length s) - 2)) }
   | modifier as m   { MODIFIER m }
-  | ident as i      { if List.exists (fun r -> r = i) reserved then failwith "Using reserved word for identifier %s" i else IDENT i }
+  | ident as i      { if List.exists (fun r -> r = i) reserved then raise (SyntaxError ("Using reserved word for identifier")) else IDENT i }
 
   | eof             { EOF }
-  | _ as c          { failwith (Format.sprintf "invalid string starting with %C" c) }
+  | _ as c          { raise (SyntaxError (Format.sprintf "invalid string starting with %C" c)) }
 
 and comment_line = parse
   | "//"      			{ comment_line lexbuf }
