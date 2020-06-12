@@ -71,4 +71,4 @@ let compile (filename: string) opt =
     |> Ast.of_parse_tree
     |> app opt.print_ast (fun e -> e |> Ast_env.Env.show |> print_endline)
 
-    |> (fun x -> ())
+    |> (fun _ -> ())

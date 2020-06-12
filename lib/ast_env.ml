@@ -18,7 +18,7 @@ module Scope = struct
     stype= ss;
     consts= pl;
     vars= [];
-    symbols= List.map (fun (i,t) -> (i, Const)) pl
+    symbols= List.map (fun (i,_) -> (i, Const)) pl
   }
 
   let get_opt i s: (ttype option) = match List.assoc_opt i s.symbols with
@@ -87,7 +87,7 @@ module Env = struct
 
   let pop_scope (e: t) = match e.scope_stack with 
     | [] -> failwith "empty scope!"
-    | x::xl' -> { e with scope_stack=xl' }
+    | _::xl' -> { e with scope_stack=xl' }
 
   let get_type_opt tn (e: t) = List.assoc_opt tn e.types
 
@@ -99,5 +99,6 @@ module Env = struct
     | _ -> 
       match List.assoc_opt sn e.symbols with 
       | None -> failwith @@ "Unknown reference to symbol '" ^ sn ^ "'"
-      | Some (Const) -> let (tt, ee) = List.assoc sn e.consts in tt        
+      | Some (Const) -> let (tt, _) = List.assoc sn e.consts in tt       
+      | _ -> failwith "get_ref: not handled" 
 end

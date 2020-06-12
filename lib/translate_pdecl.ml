@@ -21,12 +21,15 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     let (t, exp) = transform_expr dc.v e in 
 
     let t = match (t, et) with
-      | TBigMap (TAny, TAny), TBigMap(a, b) -> et 
-      | TMap (TAny, TAny), TMap(a, b) -> et 
-      | TList (TAny), TList (a) -> et
-      | TSet (TAny), TSet (a) -> et
-      | TOption (TAny), TOption (a) -> et
+      | TBigMap (TAny, TAny), TBigMap(_, _) -> et 
+      | TMap (TAny, TAny), TMap(_, _) -> et 
+      | TList (TAny), TList (_) -> et
+      | TSet (TAny), TSet (_) -> et
+      | TOption (TAny), TOption (_) -> et
       | TString, TAddress -> TAddress
+      | TString, TBytes -> TBytes 
+      | TBytes, TString -> TString
+      | TAddress, TString -> TString
       | a, b when a = b -> t
       | _, _ -> failwith ("Const '" ^ dc.id ^ "' expect to have type '" ^ show_ttype et ^ "', but type '" ^ show_ttype t ^ "' found")
     in

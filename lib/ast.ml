@@ -1,10 +1,4 @@
-open Ast_ttype
-open Ast_expr
-open Ast_statement
 open Ast_env
-open Ast_decl
-open Translate_ptype
-open Translate_pexpr
 open Translate_pdecl
 
 

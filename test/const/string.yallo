@@ -1,0 +1,6 @@
+const a : string = ("ciao": string);
+const b : string = "ciao";
+const c : address = "ciao";
+const d : bytes = "ciao";
+const e : bytes = ("ciao" : bytes);
+const f : address = ("ciao" : address);

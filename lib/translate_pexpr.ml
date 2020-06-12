@@ -37,25 +37,25 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     let el' = List.map (fun a -> transform_expr a env') el in 
     (match te, i, el' with 
       (* List *)
-      | TList (l), "size", [] -> TNat, ListSize (ee)
+      | TList (_), "size", [] -> TNat, ListSize (ee)
       | TList (l), "head", [] -> l, ListHead (ee)
       | TList (l), "tail", [] -> TList (l), ListTail (ee)
       | TList (l), "prepend", [(ll, e)] when ll = l -> TList (l), ListPrepend (ee, e)
       | TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> TList (rt), ListMapWith (ee, lame)
 
       (* Map *)
-      | TMap (kt, kv), "size", [] -> TNat, MapSize (ee)
+      | TMap (_, _), "size", [] -> TNat, MapSize (ee)
       | TMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, MapGet(ee, e)
-      | TMap (kt, kv), "mem", [(kk, e)] when kk = kt -> TBool, MapMem(ee, e)
+      | TMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, MapMem(ee, e)
       | TMap (kt, kv), "mapWith", [(TLambda (TTuple([a;b]), rt), lame)] when (a=kt && b=kv) -> 
         TMap (kt, rt), MapMapWith (ee, lame)
 
       (* BigMap *)
       | TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, BigMapGet(ee, e)
-      | TBigMap (kt, kv), "mem", [(kk, e)] when kk = kt -> TBool, BigMapMem(ee, e)
+      | TBigMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, BigMapMem(ee, e)
 
       (* Set *)
-      | TSet (kt), "size", [] -> TNat, SetSize (ee)
+      | TSet (_), "size", [] -> TNat, SetSize (ee)
       | TSet (kt), "mem", [(ll, e)] when kt = ll -> TBool, SetMem (ee, e)
 
       (* String *)
@@ -63,10 +63,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
       | TString, "size", [] -> TNat, StringSize(ee)
 
       (* Tuple *)
-      | TTuple ([a; b]), "fst", [] -> a, TupleFst (ee)
-      | TTuple ([a; b]), "snd", [] -> b, TupleSnd (ee)
+      | TTuple ([a; _]), "fst", [] -> a, TupleFst (ee)
+      | TTuple ([_; b]), "snd", [] -> b, TupleSnd (ee)
 
-      | _, f, _-> 
+      | _, _, _-> 
         failwith @@ "Invalid apply of f over '" ^ show_ttype te ^ "'"
     )
 
@@ -75,7 +75,6 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     let (te, ee) = transform_expr e env' in
     (match te with 
     | TRecord(t) -> 
-      let f = List.assoc_opt i t in 
       (match List.assoc_opt i t with 
         | None -> failwith @@ "Unkown record field '" ^ i ^ "'"
         | Some(t) -> t, RecordAccess(ee, i))
@@ -121,7 +120,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     (match tt, tt', ee with 
     | TString, TAddress, String (a) -> TAddress, Address (a)
     | TString, TBytes, String (a) -> TBytes, Bytes (Bytes.of_string a)
+    | TBytes, TString, Bytes (a) -> TString, String (Bytes.to_string a)
     | TOption (TAny), TOption(t), None -> TOption(t), None
+    | a, b, _ when a=b -> a, ee
     | a, b, c -> failwith @@ "Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c)
 
 
@@ -131,14 +132,13 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     let arg = (match List.length rl with 
       | 0 -> TUnit
       | 1 -> snd @@ List.hd rl
-      | n -> TTuple (snd @@ List.split rl)
+      | _ -> TTuple (snd @@ List.split rl)
     ) in
     TLambda (arg, tt), Lambda(rl, ee)
 
   | PERecord (l) -> 
     let l' = List.map (fun (i,e) -> i, transform_expr e env') l in 
-    let idtt = List.map (fun (i, (tt, ee)) -> i, tt) l' in
-    let idee = List.map (fun (i, (tt, ee)) -> i, ee) l' in
+    let (idtt, idee) = List.map (fun (i, (tt, ee)) -> (i, tt), (i, ee)) l' |> List.split in
     TRecord (idtt), Record (idee)
 
 
@@ -155,7 +155,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
       | TInt, TTimestamp -> TTimestamp
       | TMutez, TMutez -> TMutez
       | TString, TString -> TString 
-      | a, b -> failwith @@ "Add between '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' is not allowed"
+      | _, _ -> failwith @@ "Add between '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' is not allowed"
     ) in
     if tt1 = TString then rt, StringConcat (ee1, ee2) else rt, Add (ee1, ee2)
 
@@ -169,7 +169,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
       | TInt, TInt -> TInt
       | TMutez, TNat -> TMutez
       | TNat, TMutez -> TMutez
-      | a, b -> failwith @@ "Mul between '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' is not allowed"
+      | _, _ -> failwith @@ "Mul between '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' is not allowed"
     ) in
     rt, Mul (ee1, ee2)
 
@@ -184,7 +184,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
       | TTimestamp, TInt -> TTimestamp
       | TTimestamp, TTimestamp -> TInt
       | TMutez, TMutez -> TMutez
-      | a, b -> failwith @@ "Sub between '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' is not allowed"
+      | _, _ -> failwith @@ "Sub between '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' is not allowed"
     ) in
     rt, Sub (ee1, ee2)
 
@@ -266,7 +266,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
       ) @@ List.combine argl el 
       in rettype, Apply(ee, Tuple(ap))
 
-    | TLambda (TTuple(argl), rettype) when (List.length argl) <> (List.length el) -> 
+    | TLambda (TTuple(argl), _) when (List.length argl) <> (List.length el) -> 
       failwith @@ "Invalid argument number for lambda apply"
 
     | TLambda (t, rettype) when (List.length el) = 1 -> 
@@ -276,7 +276,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
       else
         rettype, Apply(ee, pee)
 
-    | TLambda (t, rettype) when (List.length el) > 1 -> 
+    | TLambda (_, _) when (List.length el) > 1 -> 
       failwith "This lambda expect only one argument"
       
     | _ -> failwith "Applying on not a labmda")
@@ -289,7 +289,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     (match tc, te1, te2 with 
     | TBool, t, t' when t <> t' -> failwith @@ "If branches should have same type, got: '" ^ show_ttype t ^ "' and '" ^ show_ttype t' ^ "'"
     | TBool, t, t' when t = t' -> t, IfThenElse (ec, ee1, ee2)
-    | _, t, t' -> failwith @@ "If condition should be a boolean expression, got '" ^ show_ttype tc ^ "'")
+    | _, _, _ -> failwith @@ "If condition should be a boolean expression, got '" ^ show_ttype tc ^ "'")
 
   | PEMatchWith (e, bl) -> 
     let (te, ee) = transform_expr e env' in 
@@ -302,13 +302,13 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
         (ee, tcex, ecex) 
     ) bl in
     (* assert that every branch as the same type *)
-    let rett: ttype = List.fold_left (fun acc (ee, tcex, ecex) -> 
+    let rett: ttype = List.fold_left (fun acc (_, tcex, _) -> 
       if acc <> tcex then 
         failwith @@ "Match branches should have same type, got: '" ^ show_ttype tcex ^ "' expect '" ^ show_ttype acc ^ "'"
       else 
         tcex
-    ) (let (a,b,c) = List.hd bl' in b) bl' 
-    in rett, MatchWith (ee, List.map (fun (a,b,c) -> (a,c)) bl')
+    ) (let (_,b,_) = List.hd bl' in b) bl' 
+    in rett, MatchWith (ee, List.map (fun (a,_,c) -> (a,c)) bl')
 
   | ex -> failwith @@ "expression not handled yet: " ^ Parse_tree.show_pexpr ex
 

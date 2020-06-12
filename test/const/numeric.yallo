@@ -1,0 +1,5 @@
+const litEmpty : (int, int) map = Map.empty;
+const litString : string = "hola";
+const litNat : nat = 1n;
+const litInt : int = 12;
+const litMutez : mutez = 10mtz;

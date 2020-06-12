@@ -1,0 +1,7 @@
+type a = enum (Padre | Madre);
+type b = enum (Zio | Zia);
+const c: a = a#Padre;
+const d: a = a#Madre;
+const e: b = b#Zio;
+const f: b = b#Zia;
+const g: (b, a) = (b#Zia, a#Madre);

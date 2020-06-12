@@ -8,15 +8,6 @@ clean:
 run-test:
 	./_build/default/test/test.exe 
 
-run-test-old:
-	./_build/default/src/yallo.exe compile test/test_literal.yallo
-	./_build/default/src/yallo.exe compile test/test_types.yallo
-	./_build/default/src/yallo.exe compile test/test_expr.yallo
-	./_build/default/src/yallo.exe compile test/test_statements.yallo
-	./_build/default/src/yallo.exe compile test/test_declarations.yallo
-	./_build/default/src/yallo.exe compile test/test_record.yallo 
-	./_build/default/src/yallo.exe compile test/test_typemod.yallo -print-pt
-
 grammar:
 	@echo Pretty-printing grammar... docs/grammar.ebnf
 	@obelisk lib/parser.mly > docs/grammar.ebnf
