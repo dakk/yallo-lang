@@ -65,6 +65,7 @@
          | THIS DOT IDENT
          | CRYPTO DOT IDENT
          | <expr> DOT IDENT
+         | IDENT HT IDENT
 
 <left_hand> ::= IDENT
               | THIS DOT IDENT

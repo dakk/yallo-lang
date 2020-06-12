@@ -109,14 +109,14 @@ rule token = parse
   | "]"					  	{ RSQUARE }
   | "."					  	{ DOT }
   | "("             { LPAR }
-  | "@"					 		{ AT }
+  (* | "@"					 		{ AT } *)
   | ")"             { RPAR }
   | ","             { COMMA }
   | ":"             { COLON }
   | ";"             { SEMICOLON }
   | "|"             { PIPE }
-  | "\""				  	{ QUOTE }
-  | "?"					  	{ QUESTION }
+  (* | "\""				  	{ QUOTE } *)
+  (* | "?"					  	{ QUESTION } *)
 
   | "+"					  	{ ADD }
   | "-"					  	{ SUB }

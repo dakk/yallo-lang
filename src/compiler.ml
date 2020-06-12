@@ -68,6 +68,6 @@ let compile (filename: string) opt =
     |> parse_file                   (* parse the starting file *)
     |> inject_import                (* parse and inject imports *)
     |> app opt.print_pt print_pt    (* print pt *)
-    |> Typed.of_parse_tree
+    |> Ast.of_parse_tree
 
     |> (fun x -> ())

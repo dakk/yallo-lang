@@ -67,6 +67,7 @@ and pexpr =
 
   (* function apply *)
   | PEDot of pexpr * iden
+  | PEHt of iden * iden
   | PEApply of pexpr * pexpr list
 
   [@@deriving show {with_path = false}]
