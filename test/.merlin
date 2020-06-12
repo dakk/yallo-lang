@@ -1,4 +1,6 @@
 EXCLUDE_QUERY_DIR
+B /home/dakk/.opam/default/lib/alcotest
+B /home/dakk/.opam/default/lib/astring
 B /home/dakk/.opam/default/lib/base
 B /home/dakk/.opam/default/lib/base/base_internalhash_types
 B /home/dakk/.opam/default/lib/base/caml
@@ -8,6 +10,8 @@ B /home/dakk/.opam/default/lib/base_bigstring
 B /home/dakk/.opam/default/lib/base_quickcheck
 B /home/dakk/.opam/default/lib/bin_prot
 B /home/dakk/.opam/default/lib/bin_prot/shape
+B /home/dakk/.opam/default/lib/bytes
+B /home/dakk/.opam/default/lib/cmdliner
 B /home/dakk/.opam/default/lib/core
 B /home/dakk/.opam/default/lib/core/error_checking_mutex
 B /home/dakk/.opam/default/lib/core_kernel
@@ -16,6 +20,7 @@ B /home/dakk/.opam/default/lib/core_kernel/bounded_int_table
 B /home/dakk/.opam/default/lib/core_kernel/flags
 B /home/dakk/.opam/default/lib/core_kernel/version_util
 B /home/dakk/.opam/default/lib/fieldslib
+B /home/dakk/.opam/default/lib/fmt
 B /home/dakk/.opam/default/lib/jane-street-headers
 B /home/dakk/.opam/default/lib/menhirLib
 B /home/dakk/.opam/default/lib/parsexp
@@ -34,20 +39,26 @@ B /home/dakk/.opam/default/lib/ppx_inline_test/config
 B /home/dakk/.opam/default/lib/ppx_inline_test/runtime-lib
 B /home/dakk/.opam/default/lib/ppx_module_timer/runtime
 B /home/dakk/.opam/default/lib/ppx_sexp_conv/runtime-lib
+B /home/dakk/.opam/default/lib/re
 B /home/dakk/.opam/default/lib/result
+B /home/dakk/.opam/default/lib/seq
 B /home/dakk/.opam/default/lib/sexplib
 B /home/dakk/.opam/default/lib/sexplib/unix
 B /home/dakk/.opam/default/lib/sexplib0
 B /home/dakk/.opam/default/lib/spawn
 B /home/dakk/.opam/default/lib/splittable_random
 B /home/dakk/.opam/default/lib/stdio
+B /home/dakk/.opam/default/lib/stdlib-shims
 B /home/dakk/.opam/default/lib/time_now
 B /home/dakk/.opam/default/lib/typerep
+B /home/dakk/.opam/default/lib/uuidm
 B /home/dakk/.opam/default/lib/variantslib
 B /usr/lib/ocaml
 B /usr/lib/ocaml/threads
 B ../_build/default/lib/.yallo.objs/byte
-B ../_build/default/src/.yallo.eobjs/byte
+B ../_build/default/test/.test.eobjs/byte
+S /home/dakk/.opam/default/lib/alcotest
+S /home/dakk/.opam/default/lib/astring
 S /home/dakk/.opam/default/lib/base
 S /home/dakk/.opam/default/lib/base/base_internalhash_types
 S /home/dakk/.opam/default/lib/base/caml
@@ -57,6 +68,8 @@ S /home/dakk/.opam/default/lib/base_bigstring
 S /home/dakk/.opam/default/lib/base_quickcheck
 S /home/dakk/.opam/default/lib/bin_prot
 S /home/dakk/.opam/default/lib/bin_prot/shape
+S /home/dakk/.opam/default/lib/bytes
+S /home/dakk/.opam/default/lib/cmdliner
 S /home/dakk/.opam/default/lib/core
 S /home/dakk/.opam/default/lib/core/error_checking_mutex
 S /home/dakk/.opam/default/lib/core_kernel
@@ -65,6 +78,7 @@ S /home/dakk/.opam/default/lib/core_kernel/bounded_int_table
 S /home/dakk/.opam/default/lib/core_kernel/flags
 S /home/dakk/.opam/default/lib/core_kernel/version_util
 S /home/dakk/.opam/default/lib/fieldslib
+S /home/dakk/.opam/default/lib/fmt
 S /home/dakk/.opam/default/lib/jane-street-headers
 S /home/dakk/.opam/default/lib/menhirLib
 S /home/dakk/.opam/default/lib/parsexp
@@ -83,19 +97,22 @@ S /home/dakk/.opam/default/lib/ppx_inline_test/config
 S /home/dakk/.opam/default/lib/ppx_inline_test/runtime-lib
 S /home/dakk/.opam/default/lib/ppx_module_timer/runtime
 S /home/dakk/.opam/default/lib/ppx_sexp_conv/runtime-lib
+S /home/dakk/.opam/default/lib/re
 S /home/dakk/.opam/default/lib/result
+S /home/dakk/.opam/default/lib/seq
 S /home/dakk/.opam/default/lib/sexplib
 S /home/dakk/.opam/default/lib/sexplib/unix
 S /home/dakk/.opam/default/lib/sexplib0
 S /home/dakk/.opam/default/lib/spawn
 S /home/dakk/.opam/default/lib/splittable_random
 S /home/dakk/.opam/default/lib/stdio
+S /home/dakk/.opam/default/lib/stdlib-shims
 S /home/dakk/.opam/default/lib/time_now
 S /home/dakk/.opam/default/lib/typerep
+S /home/dakk/.opam/default/lib/uuidm
 S /home/dakk/.opam/default/lib/variantslib
 S /usr/lib/ocaml
 S /usr/lib/ocaml/threads
 S ../lib
 S .
-FLG -ppx '/home/dakk/Repositories/MyRepos/tezlang/_build/default/.ppx/4b82ef4a253ffa2f3871dcd81243673b/ppx.exe --as-ppx'
 FLG -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A

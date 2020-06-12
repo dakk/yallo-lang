@@ -7,12 +7,12 @@ type expr =
 | TezosBalance
 | TezosChainId
 | TezosSelf
-| TezosCreateContract
 | TezosSetDelegate of expr
 | TezosSource
-| TezosTransfer
 | TezosAddressOfContract of expr
 | TezosContractOfAddress of expr
+| TezosTransfer (* to def *)
+| TezosCreateContract (* to def *)
 
 | CryptoBlake2B of expr
 | CryptoCheckSignature

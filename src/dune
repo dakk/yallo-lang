@@ -1,21 +1,10 @@
-(rule
- (targets parser_messages.ml)
- (deps parser.messages parser.mly)
- (action  (with-stdout-to %{targets} (run menhir --compile-errors %{deps}))))
-
 (executable
  (public_name yallo)
  (name yallo)
  (preprocess (pps ppx_jane ppx_deriving.show))
- (libraries core ppx_deriving menhirLib)
- (modules yallo parse_tree ast_ttype ast_expr ast_statement ast parser lexer compiler))
+ (libraries yallo core ppx_deriving menhirLib)
+ (modules yallo))
 
-(ocamllex lexer)
-
-(menhir 
- (modules parser)
- (flags --explain --inspection --table --dump)
-)
 
 (env
   (dev

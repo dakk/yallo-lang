@@ -73,7 +73,7 @@ and pexpr =
   [@@deriving show {with_path = false}]
 
 
-type statement =
+type pstatement =
   | PSConst of iden * ptype * pexpr
   | PSVar of iden * ptype
   | PSVarAssignTuple of (iden * ptype) list * pexpr  (* var (a:int,b:int,c:int) = (1,2,3); *)
@@ -82,8 +82,8 @@ type statement =
   | PSRecAssign of left_op * iden * pexpr            (* a.el = 12; | this.a.el = 12; *)
   | PSCall of left_op * iden * pexpr list            (* m.update(k, 12) *)
   | PSCallBuiltin of iden * pexpr list               (* assert(15) *)
-  | PSIfThenElse of pexpr * statement list * statement list
-  | PSIfThen of pexpr * statement list
+  | PSIfThenElse of pexpr * pstatement list * pstatement list
+  | PSIfThen of pexpr * pstatement list
   | PSSkip
   | PSReturn of pexpr
   [@@deriving show {with_path = false}]
@@ -92,7 +92,7 @@ type statement =
 type contract_field = iden * ptype [@@deriving show {with_path = false}]
 
 (* contract entry: iden * params * commands *)
-type contract_entry = iden * (iden * ptype) list * statement list [@@deriving show {with_path = false}]
+type contract_entry = iden * (iden * ptype) list * pstatement list [@@deriving show {with_path = false}]
 
 type contract_constructor = (iden * ptype) list * (iden * pexpr) list [@@deriving show {with_path = false}]
 
@@ -142,7 +142,7 @@ type declaration =
     id: iden;
     params: (iden * ptype) list;
     rettype: ptype;
-    statements: statement list;
+    statements: pstatement list;
   }
 [@@deriving show {with_path = false}]
 

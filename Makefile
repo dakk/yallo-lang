@@ -6,6 +6,9 @@ clean:
 	rm -rf _build
 	
 run-test:
+	./_build/default/test/test.exe 
+
+run-test-old:
 	./_build/default/src/yallo.exe compile test/test_literal.yallo
 	./_build/default/src/yallo.exe compile test/test_types.yallo
 	./_build/default/src/yallo.exe compile test/test_expr.yallo
@@ -16,7 +19,7 @@ run-test:
 
 grammar:
 	@echo Pretty-printing grammar... docs/grammar.ebnf
-	@obelisk src/parser.mly > docs/grammar.ebnf
+	@obelisk lib/parser.mly > docs/grammar.ebnf
 
 #pin: 
 #	opam pin add nmea . -n --working-dir && opam remove nmea && opam install nmea --working-dir

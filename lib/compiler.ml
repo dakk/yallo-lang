@@ -27,10 +27,10 @@ let parse filename s =
   try Parser.program Lexer.token lexbuf with 
   | SyntaxError msg ->
     fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    exit (-1)
+    failwith "Syntax error"
   | Parser.Error ->
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
-    exit (-1)
+    failwith "Syntax error"
 
 let rec readfile ic = 
   try let line = input_line ic in (line ^ "\n")::(readfile ic) with _ -> close_in_noerr ic; []
@@ -69,5 +69,6 @@ let compile (filename: string) opt =
     |> inject_import                (* parse and inject imports *)
     |> app opt.print_pt print_pt    (* print pt *)
     |> Ast.of_parse_tree
+    |> app opt.print_ast (fun e -> e |> Ast_env.Env.show |> print_endline)
 
     |> (fun x -> ())
