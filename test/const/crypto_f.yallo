@@ -1,0 +1,11 @@
+const a1: signature = "";
+const a2: key = "";
+const a3: bytes = "";
+const a: bool = Crypto.checkSignature (a2, a1, a3);
+// const b: bool = Crypto.checkSignature ("a2", "a1", "a3");
+
+
+const c: bytes = Crypto.blake2b (("ciao": bytes));
+const d: bytes = Crypto.sha256 (("ciao": bytes));
+const e: bytes = Crypto.sha512 (("ciao": bytes));
+const f: key_hash = Crypto.hashKey (("ciao": key));

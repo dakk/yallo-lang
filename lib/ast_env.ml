@@ -100,5 +100,5 @@ module Env = struct
       match List.assoc_opt sn e.symbols with 
       | None -> failwith @@ "Unknown reference to symbol '" ^ sn ^ "'"
       | Some (Const) -> let (tt, _) = List.assoc sn e.consts in tt       
-      | _ -> failwith "get_ref: not handled" 
+      | _ -> failwith @@ "Symbol '" ^ sn ^ "' not found in the current env"
 end

@@ -38,5 +38,6 @@ let () =
       "lambda_fail", `Quick, compile false "test/const/lambda_fail.yallo" None;
       "expr", `Quick, compile true "test/const/expr.yallo" None;
       "enum", `Quick, compile true "test/const/enum.yallo" None;
+      "crypto_f", `Quick, compile true "test/const/crypto_f.yallo" None;
     ];
   ]

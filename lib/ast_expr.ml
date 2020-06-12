@@ -11,11 +11,11 @@ type expr =
 | TezosSource
 | TezosAddressOfContract of expr
 | TezosContractOfAddress of expr
-| TezosTransfer (* to def *)
-| TezosCreateContract (* to def *)
+| TezosTransfer of expr * expr * expr
+| TezosCreateContract of iden (* todef *)
 
 | CryptoBlake2B of expr
-| CryptoCheckSignature
+| CryptoCheckSignature of expr * expr * expr
 | CryptoHashKey of expr 
 | CryptoSha256 of expr
 | CryptoSha512 of expr
@@ -32,6 +32,9 @@ type expr =
 | Address of string
 | String of string
 | Bytes of bytes
+| KeyHash of string
+| Key of string 
+| Signature of string
 | Some of expr
 | Enum of ttype * string
 | Typed of expr * ttype

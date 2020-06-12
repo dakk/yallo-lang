@@ -27,6 +27,9 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | TSet (TAny), TSet (_) -> et
       | TOption (TAny), TOption (_) -> et
       | TString, TAddress -> TAddress
+      | TString, TKey -> TKey
+      | TString, TKeyHash -> TKeyHash
+      | TString, TSignature -> TSignature
       | TString, TBytes -> TBytes 
       | TBytes, TString -> TString
       | TAddress, TString -> TString

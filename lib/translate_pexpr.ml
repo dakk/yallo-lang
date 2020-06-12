@@ -31,6 +31,26 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
   | PEDot (PERef("Map"), "empty") -> TMap(TAny, TAny), MapEmpty
   | PEDot (PERef("BigMap"), "empty") -> TBigMap(TAny, TAny), BigMapEmpty
 
+  (* PEApply(PETRef) tezos apis *)
+  | PEApply (PETRef (i), el) ->
+    let el' = List.map (fun a -> transform_expr a env') el in 
+    (match i, el' with 
+      | _, _ -> failwith @@ "Unknown Tezos function: " ^ i
+    )
+
+  (* PEApply(PECRef) crypto apis *)
+  | PEApply (PECRef (i), el) -> 
+    let el' = List.map (fun a -> transform_expr a env') el in 
+    (match i, el' with 
+      | "blake2b", [(TBytes, e)] -> TBytes, CryptoBlake2B(e)
+      | "hashKey", [(TKey, e)] -> TKeyHash, CryptoHashKey(e)
+      | "sha256", [(TBytes, e)] -> TBytes, CryptoSha256(e)
+      | "sha512", [(TBytes, e)] -> TBytes, CryptoSha512(e)
+      | "checkSignature", [(TKey, ek); (TSignature, es); (TBytes, ed)] ->
+        TBool, CryptoCheckSignature (ek, es, ed)
+      | _, _ -> failwith @@ "Invalid call to Crypto." ^ i
+    )
+
   (* PEApply(PEDot) base type apis *)
   | PEApply (PEDot(e,i), el) -> 
     let (te, ee) = transform_expr e env' in
@@ -118,6 +138,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     let (tt, ee) = transform_expr e env' in 
     let tt' = transform_type et env' in
     (match tt, tt', ee with 
+    | TString, TKeyHash, String (a) -> TKeyHash, KeyHash (a)
+    | TString, TKey, String (a) -> TKey, Key (a)
+    | TString, TSignature, String (a) -> TSignature, Signature (a)
     | TString, TAddress, String (a) -> TAddress, Address (a)
     | TString, TBytes, String (a) -> TBytes, Bytes (Bytes.of_string a)
     | TBytes, TString, Bytes (a) -> TString, String (Bytes.to_string a)
