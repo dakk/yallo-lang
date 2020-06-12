@@ -30,7 +30,13 @@
          | NONE
          | TRUE
          | FALSE
+         | CHAIN_ID
          | STRING
+         | SIGNATURE
+         | BYTES
+         | KEY
+         | KEY_HASH
+         | ADDRESS
          | MTZ
          | NAT
          | INT

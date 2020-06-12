@@ -26,13 +26,13 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | TList (TAny), TList (_) -> et
       | TSet (TAny), TSet (_) -> et
       | TOption (TAny), TOption (_) -> et
-      | TString, TAddress -> TAddress
+      (* | TString, TAddress -> TAddress
       | TString, TKey -> TKey
       | TString, TKeyHash -> TKeyHash
       | TString, TSignature -> TSignature
       | TString, TBytes -> TBytes 
       | TBytes, TString -> TString
-      | TAddress, TString -> TString
+      | TAddress, TString -> TString *)
       | a, b when a = b -> t
       | _, _ -> failwith ("Const '" ^ dc.id ^ "' expect to have type '" ^ show_ttype et ^ "', but type '" ^ show_ttype t ^ "' found")
     in

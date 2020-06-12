@@ -40,7 +40,7 @@ contract tzToken implements FA12 {
 
 
 
-const tzTokenAddress: address = "ciaomondo";
+const tzTokenAddress: address = @tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx;
 
 contract usingTezToken {
 	field balance: nat;

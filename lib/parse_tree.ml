@@ -26,8 +26,14 @@ and pexpr =
   | PEBool of bool
   | PENat of int 
   | PEInt of int 
+  | PEChainId of int
   | PEMutez of int
   | PEString of string
+  | PEBytes of string
+  | PEAddress of string
+  | PESignature of string
+  | PEKeyHash of string
+  | PEKey of string
   | PESome of pexpr
   | PEEnum of iden * string
   | PETyped of pexpr * ptype

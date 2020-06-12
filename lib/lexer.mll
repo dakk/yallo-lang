@@ -51,10 +51,19 @@ let nat = digit digit* "n"
 let int = digit digit*
 let mtz = digit digit* "mtz"
 
+let hex_digit = ['a'-'f'] | ['A' - 'F'] | ['0' - '9']
+
 let blank = [' ' '\t' '\r']
 let newline = '\n'
 let quote = '"'
-let string = quote (letter | ' ' | '\'' | '_' | '.' | '/')* quote
+let string = quote (letter | digit | ' ' | '\'' | '_' | '.' | '/')* quote
+
+let address = '@' (letter | digit)*
+let key_hash = 'h' string 
+let key = 'k' string 
+let signature = 's' string 
+let bytes = 'b' string 
+let chain_id = '0' 'x' hex_digit hex_digit hex_digit hex_digit hex_digit hex_digit hex_digit hex_digit 
 
 rule token = parse 
   | newline         { Lexing.new_line lexbuf; token lexbuf }
@@ -135,7 +144,14 @@ rule token = parse
 
   | "//"            { comment_line lexbuf; token lexbuf }
 
+  | address as s    { ADDRESS (String.sub s 1 ((String.length s) - 1)) }
+	| chain_id as s		{ CHAIN_ID (int_of_string s) }
   | string as s     { STRING (String.sub s 1 ((String.length s) - 2)) }
+  | bytes as s     	{ BYTES (String.sub s 2 ((String.length s) - 3)) }
+  | key as s     		{ KEY (String.sub s 2 ((String.length s) - 3)) }
+  | key_hash as s   { KEY_HASH (String.sub s 2 ((String.length s) - 3)) }
+  | signature as s  { SIGNATURE (String.sub s 2 ((String.length s) - 3)) }
+
   | modifier as m   { MODIFIER m }
   | ident as i      { if List.exists (fun r -> r = i) reserved then raise (SyntaxError ("Using reserved word for identifier")) else IDENT i }
 

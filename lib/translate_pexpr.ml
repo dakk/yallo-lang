@@ -109,6 +109,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   (* Literals *)
   | PEString (s) -> TString, String (s)
+  | PEAddress (s) -> TAddress, Address (s)
+  | PEChainId (s) -> TChainId, ChainId (s)
+  | PEBytes (s) -> TBytes, Bytes (Bytes.of_string s)
+  | PEKey (s) -> TKey, Key (s)
+  | PEKeyHash (s) -> TKeyHash, KeyHash (s)
+  | PESignature (s) -> TSignature, Signature (s)
   | PENat (n) -> TNat, Nat (n)
   | PEInt (n) -> TInt, Int (n)
   | PEMutez (t) -> TMutez, Mutez (t)
@@ -138,12 +144,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     let (tt, ee) = transform_expr e env' in 
     let tt' = transform_type et env' in
     (match tt, tt', ee with 
-    | TString, TKeyHash, String (a) -> TKeyHash, KeyHash (a)
+    (* | TString, TKeyHash, String (a) -> TKeyHash, KeyHash (a)
     | TString, TKey, String (a) -> TKey, Key (a)
     | TString, TSignature, String (a) -> TSignature, Signature (a)
     | TString, TAddress, String (a) -> TAddress, Address (a)
     | TString, TBytes, String (a) -> TBytes, Bytes (Bytes.of_string a)
-    | TBytes, TString, Bytes (a) -> TString, String (Bytes.to_string a)
+    | TBytes, TString, Bytes (a) -> TString, String (Bytes.to_string a) *)
     | TOption (TAny), TOption(t), None -> TOption(t), None
     | a, b, _ when a=b -> a, ee
     | a, b, c -> failwith @@ "Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c)

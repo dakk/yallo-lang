@@ -16,6 +16,12 @@
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
+%token <string> ADDRESS
+%token <string> BYTES
+%token <int> CHAIN_ID
+%token <string> SIGNATURE
+%token <string> KEY
+%token <string> KEY_HASH
 %token <int> INT
 %token <int> NAT
 %token <int> MTZ
@@ -62,7 +68,13 @@
     | NONE  					{ Parse_tree.PENone }
     | TRUE            { Parse_tree.PEBool (true) }
     | FALSE           { Parse_tree.PEBool (false) }
+		| x=CHAIN_ID			{ Parse_tree.PEChainId (x) }
     | x=STRING 				{ Parse_tree.PEString (x) }
+    | x=SIGNATURE 		{ Parse_tree.PESignature (x) }
+    | x=BYTES			 		{ Parse_tree.PEBytes (x) }
+    | x=KEY				 		{ Parse_tree.PEKey (x) }
+    | x=KEY_HASH	 		{ Parse_tree.PEKeyHash (x) }
+    | x=ADDRESS		 		{ Parse_tree.PEAddress (x) }
     | x=MTZ 					{ Parse_tree.PEMutez (x) }
     | x=NAT 					{ Parse_tree.PENat (x) }
     | x=INT 					{ Parse_tree.PEInt (x) }

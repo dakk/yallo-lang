@@ -29,6 +29,7 @@ type expr =
 | Nat of int 
 | Int of int 
 | Mutez of int
+| ChainId of int
 | Address of string
 | String of string
 | Bytes of bytes

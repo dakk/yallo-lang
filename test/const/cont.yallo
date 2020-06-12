@@ -3,7 +3,7 @@ const litSome 	: int option 			= Some(12);
 const litTuple 	: (int, nat, string)	= (12, 32n, "ciao");
 const litList 	: int list 				= [13, 14, 15];
 const litMap	: (int, string) map	 	= [(1: "ciao"), (2: "hello")];
-const litTyped	: address 				= ("ciao": address);
+const litTyped	: address 				= @ciao;
 const litLambda	: int -> int			= (a: int) => (2);
 const litRec2	: record { a: string; b: int } = { a="ciao"; b=12 };
 const litMap2	: (int, record { a: string; b: int}) map = [(1: { a="ciao"; b=12 })];
