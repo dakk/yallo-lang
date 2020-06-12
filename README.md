@@ -40,11 +40,15 @@ contract Token implements IToken {
 	}
 
 	entry transfer(from: address, to: address, val: nat) {
-		...
+		const a: nat = this.balances.get(from);
+		const b: nat = this.balances.get(to);
+		assert (a > val);
+		this.balances.update(from, a - val);
+		this.balances.update(to, b + val); 
 	}
 
 	entry getBalance(ad: address, cb: nat callback) {
-		...
+		const balance: nat = this.balances.get(ad);
 		var op: operation = cb(balance);
 		return [op];
 	}
