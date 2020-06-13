@@ -12,13 +12,6 @@ type ptype =
 (* identifier * (iden * type) list of parameters * modifier list *)
 type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_path = false}]
 
-(* left operator could be an ident or a this.ident *)
-and left_op = 
-  | I of iden     (* i *)
-  | S of iden     (* this.i *)
-  | T of iden     (* Tezos.i *)
-  | C of iden     (* Crypto.i *)
-  [@@deriving show {with_path = false}]
 
 and pexpr =
   | PEUnit
@@ -68,37 +61,33 @@ and pexpr =
 
   (* ifthenelse expression *)
   | PEIfThenElse of pexpr * pexpr * pexpr 
-
   | PEMatchWith of pexpr * (pexpr * pexpr) list
 
   (* function apply *)
-  | PEDot of pexpr * iden
   | PEHt of iden * iden
+  | PEDot of pexpr * iden
   | PEApply of pexpr * pexpr list
 
+
+  | PELetIn of iden * ptype * pexpr * pexpr
+  | PELet of iden * ptype * pexpr 
+  | PELetTuple of (iden * ptype) list * pexpr 
+  | PESAssign of iden * pexpr
+  | PESRecAssign of iden * iden * pexpr 
+  | PECallBultin of iden * pexpr list
+  (* | PECall of left_op * iden * pexpr list  *)
+
+  | PESeq of pexpr * pexpr
+
   [@@deriving show {with_path = false}]
 
 
-type pstatement =
-  | PSConst of iden * ptype * pexpr
-  | PSVar of iden * ptype
-  | PSVarAssignTuple of (iden * ptype) list * pexpr  (* var (a:int,b:int,c:int) = (1,2,3); *)
-  | PSVarAssign of iden * ptype * pexpr              (* var a:int = 12; *)
-  | PSAssign of left_op * pexpr                      (* a = 12; *)
-  | PSRecAssign of left_op * iden * pexpr            (* a.el = 12; | this.a.el = 12; *)
-  | PSCall of left_op * iden * pexpr list            (* m.update(k, 12) *)
-  | PSCallBuiltin of iden * pexpr list               (* assert(15) *)
-  | PSIfThenElse of pexpr * pstatement list * pstatement list
-  | PSIfThen of pexpr * pstatement list
-  | PSSkip
-  | PSReturn of pexpr
-  [@@deriving show {with_path = false}]
 
 (* contract field: iden * type * initial value *)
 type contract_field = iden * ptype [@@deriving show {with_path = false}]
 
 (* contract entry: iden * params * commands *)
-type contract_entry = iden * (iden * ptype) list * pstatement list [@@deriving show {with_path = false}]
+type contract_entry = iden * (iden * ptype) list * pexpr [@@deriving show {with_path = false}]
 
 type contract_constructor = (iden * ptype) list * (iden * pexpr) list [@@deriving show {with_path = false}]
 
@@ -148,7 +137,7 @@ type declaration =
     id: iden;
     params: (iden * ptype) list;
     rettype: ptype;
-    statements: pstatement list;
+    exp: pexpr;
   }
 [@@deriving show {with_path = false}]
 

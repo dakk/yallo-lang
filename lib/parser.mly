@@ -8,10 +8,10 @@
 %token EOF
 // QUOTE SIZE HT ASTERISK AT GET HAS QUESTION ASSERT
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, LSQUARE, RSQUARE
-%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD, VAR
-%token ENUM, TYPE, RECORD, CONST, RETURN, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
-%token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, SKIP, WITH, MATCH
-%token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT
+%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD
+%token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
+%token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, WITH, MATCH
+%token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT, LET, IN
 %token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO
 %token <string> MODIFIER
 %token <string> IDENT
@@ -47,7 +47,7 @@
     | p=type_sig LAMBDA pr=type_sig									{ Parse_tree.PTLambda (p, pr) }
     | bt=type_expr c=CONT                           { Parse_tree.PTCont (c, bt) }
     | bt=type_expr CONTRACT                         { Parse_tree.PTCont ("contract", bt) }
-    | RECORD LBRACE tl=separated_nonempty_list(SEMICOLON, parameter) RBRACE
+    | RECORD LBRACE tl=separated_nonempty_list(COMMA, parameter) RBRACE
                                                     { Parse_tree.PTRecord (tl)}
     | ENUM LPAR el=separated_list(PIPE, ident) RPAR { Parse_tree.PTEnum (el) }
     | LPAR t=type_sig RPAR											    { t }
@@ -79,7 +79,7 @@
     | x=NAT 					{ Parse_tree.PENat (x) }
     | x=INT 					{ Parse_tree.PEInt (x) }
     | SOME LPAR x=expr RPAR 	  { Parse_tree.PESome (x) }
-    | LBRACE tl=separated_nonempty_list(SEMICOLON, erec_element) RBRACE
+    | LBRACE tl=separated_nonempty_list(COMMA, erec_element) RBRACE
                                 { Parse_tree.PERecord (tl) }
     | LSQUARE tl=separated_list(COMMA, expr) RSQUARE
                                 { Parse_tree.PEList (tl) }
@@ -89,6 +89,15 @@
                                 { Parse_tree.PEMap (tl) }
     | LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR LAMBDAB LPAR e=expr RPAR
                                 { Parse_tree.PELambda (tl, e) }
+
+		// bindings 
+		// | e1=expr COLON e2=expr { Parse_tree.PESeq (e1, e2) }
+		| LET i=IDENT COLON t=type_sig EQ e=expr IN ee=expr { Parse_tree.PELetIn (i, t, e, ee) }
+		| LET i=IDENT COLON t=type_sig EQ e=expr { Parse_tree.PELet (i, t, e) }
+
+		// ??
+		| THIS DOT i=IDENT EQ e=expr { Parse_tree.PESAssign (i, e) }
+		| THIS DOT i=IDENT DOT ii=IDENT EQ e=expr { Parse_tree.PESRecAssign (i, ii, e) }
 
     // arithm
     | e1=expr ADD e2=expr 			{ Parse_tree.PEAdd (e1,e2) }
@@ -133,50 +142,16 @@
     // todo: fix tezos.c() and this.c()
     // | THIS DOT ii=IDENT DOT i=IDENT LPAR p=separated_list(COMMA, expr) RPAR 			
     //   { PEApply2(Parse_tree.PESRef(ii), i, p) }
-    | e=expr DOT i=IDENT { PEDot (e, i) }
-    | ii=IDENT HT i=IDENT { PEHt (ii, i) }
-
-
-
-
-  left_hand:
-    | x=IDENT           { Parse_tree.I x }
-    | THIS DOT x=IDENT  { Parse_tree.S x }
-    | TEZOS DOT x=IDENT { Parse_tree.T x }
-    | CRYPTO DOT x=IDENT { Parse_tree.C x }
-
-  statement:
-		| IF LPAR x=expr RPAR LBRACE sl=list (statement) RBRACE 
-			{ Parse_tree.PSIfThen (x, sl) }
-		| IF LPAR x=expr RPAR LBRACE sl=list(statement) RBRACE ELSE LBRACE sle=list(statement) RBRACE
-			{ Parse_tree.PSIfThenElse (x, sl, sle) }
-    | VAR x=IDENT COLON t=type_expr SEMICOLON
-      { Parse_tree.PSVar (x, t) }
-    | VAR x=IDENT COLON t=type_expr EQ e=expr SEMICOLON
-      { Parse_tree.PSVarAssign (x, t, e) }
-    | VAR LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR EQ e=expr SEMICOLON
-      { Parse_tree.PSVarAssignTuple (tl, e) }
-    | CONST x=IDENT COLON t=type_expr EQ e=expr SEMICOLON 
-      { Parse_tree.PSConst (x, t, e) }
-    | x=left_hand EQ e=expr SEMICOLON
-      { Parse_tree.PSAssign (x, e) }
-    | x=left_hand DOT i=ident EQ e=expr SEMICOLON
-      { Parse_tree.PSRecAssign (x, i, e) }
-    | i=IDENT LPAR p=separated_list(COMMA, expr) RPAR SEMICOLON
-      { Parse_tree.PSCallBuiltin (i, p) }
-    | x=left_hand DOT i=IDENT LPAR p=separated_list(COMMA, expr) RPAR SEMICOLON
-      { Parse_tree.PSCall (x, i, p) }
-    | RETURN x=expr SEMICOLON
-      { Parse_tree.PSReturn x }
-    | SKIP SEMICOLON 
-      { Parse_tree.PSSkip }
+    | e=expr DOT i=IDENT 	{ Parse_tree.PEDot (e, i) }
+    | ii=IDENT HT i=IDENT { Parse_tree.PEHt (ii, i) }
 
   fun_body:
-    | sl=list(statement) { sl }
+		| e1=expr SEMICOLON f=fun_body { Parse_tree.PESeq (e1, f) }
+		| e1=expr { e1 }
 
   dfunction:
     | FUNCTION n=IDENT LPAR pl=separated_list(COMMA, parameter) RPAR COLON tt=type_sig LBRACE b=fun_body RBRACE
-      { Parse_tree.DFunction ({id=n; params=pl; rettype=tt; statements=b }) }
+      { Parse_tree.DFunction ({id=n; params=pl; rettype=tt; exp=b }) }
 
   dinterface: 
     | INTERFACE x=IDENT LBRACE sl=list(terminated(signature, SEMICOLON)) RBRACE   

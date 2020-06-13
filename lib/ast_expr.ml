@@ -109,6 +109,27 @@ type expr =
 | MatchWith of expr * (expr * expr) list
 | Apply of expr * expr
 
+| FailIf of expr
+| FailIfMessage of expr * expr
+| Assert of expr    
+
+| MapUpdate of iden * expr * expr 
+| BigMapUpdate of iden * expr * expr 
+| SetUpdate of iden * expr * expr 
+| MapRemove of iden * expr 
+| BigMapRemove of iden * expr 
+| ListIter of expr * expr
+| MapIter of expr * expr
+     
+| LetIn of iden * ttype * expr * expr
+| Let of iden * ttype * expr 
+| LetTuple of (iden * ttype) list * expr 
+| SAssign of iden * expr
+| SRecAssign of iden * iden * expr 
+(* | PECall of left_op * iden * pexpr list  *)
+
+| Seq of expr * expr
+
 [@@deriving show {with_path = false}]
 
 type texpr = (ttype * expr) [@@deriving show {with_path = false}]

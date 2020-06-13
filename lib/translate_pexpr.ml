@@ -4,7 +4,7 @@ open Ast_expr
 open Translate_ptype
 
 (* transform an pexpr to (ttype * expr) *)
-let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) = 
+let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) list) : (ttype * expr) = 
   let fold_container_type debs l =
     List.fold_left (fun acc xt -> if acc <> xt then 
       failwith @@ debs ^ " must have the same type: " ^ show_ttype acc ^ " <> " ^ show_ttype xt
@@ -33,14 +33,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   (* PEApply(PETRef) tezos apis *)
   | PEApply (PETRef (i), el) ->
-    let el' = List.map (fun a -> transform_expr a env') el in 
+    let el' = List.map (fun a -> transform_expr a env' ic) el in 
     (match i, el' with 
       | _, _ -> failwith @@ "Unknown Tezos function: " ^ i
     )
 
   (* PEApply(PECRef) crypto apis *)
   | PEApply (PECRef (i), el) -> 
-    let el' = List.map (fun a -> transform_expr a env') el in 
+    let el' = List.map (fun a -> transform_expr a env' ic) el in 
     (match i, el' with 
       | "blake2b", [(TBytes, e)] -> TBytes, CryptoBlake2B(e)
       | "hashKey", [(TKey, e)] -> TKeyHash, CryptoHashKey(e)
@@ -53,8 +53,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   (* PEApply(PEDot) base type apis *)
   | PEApply (PEDot(e,i), el) -> 
-    let (te, ee) = transform_expr e env' in
-    let el' = List.map (fun a -> transform_expr a env') el in 
+    let (te, ee) = transform_expr e env' ic in
+    let el' = List.map (fun a -> transform_expr a env' ic) el in 
     (match te, i, el' with 
       (* List *)
       | TList (_), "size", [] -> TNat, ListSize (ee)
@@ -92,7 +92,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   (* PEDot record access *)
   | PEDot (e, i) -> 
-    let (te, ee) = transform_expr e env' in
+    let (te, ee) = transform_expr e env' ic in
     (match te with 
     | TRecord(t) -> 
       (match List.assoc_opt i t with 
@@ -104,7 +104,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
   (* Option *)
   | PENone -> TOption (TAny), None
   | PESome (e) -> 
-    let (tt, te) = transform_expr e env' in
+    let (tt, te) = transform_expr e env' ic in
     TOption (tt), Some (te)
 
   (* Literals *)
@@ -122,16 +122,16 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   (*  *)
   | PETuple (el) -> 
-    let (ttl, tel) = List.map (fun x -> transform_expr x env') el |> List.split in
+    let (ttl, tel) = List.map (fun x -> transform_expr x env' ic) el |> List.split in
     TTuple(ttl), Tuple(tel)
 
   | PEList (el) -> 
-    let (ttl, tel) = List.map (fun x -> transform_expr x env') el |> List.split in
+    let (ttl, tel) = List.map (fun x -> transform_expr x env' ic) el |> List.split in
     let lt = fold_container_type "List elements" ttl in 
     TList(lt), List(tel)
 
   | PEMap (el) -> 
-    let l = List.map (fun (a, b) -> transform_expr a env', transform_expr b env') el in
+    let l = List.map (fun (a, b) -> transform_expr a env' ic, transform_expr b env' ic) el in
     let keys, values = List.split l in
 
     (* get keys and values type *)
@@ -141,7 +141,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     TMap(keyt, valuet), Map (List.combine (snd @@ List.split keys) (snd @@ List.split values))
 
   | PETyped (e, et) -> 
-    let (tt, ee) = transform_expr e env' in 
+    let (tt, ee) = transform_expr e env' ic in 
     let tt' = transform_type et env' in
     (match tt, tt', ee with 
     (* | TString, TKeyHash, String (a) -> TKeyHash, KeyHash (a)
@@ -157,7 +157,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   | PELambda (argl, e) -> 
     let rl = List.map (fun (i,t) -> i, transform_type t env') argl in
-    let (tt, ee) = transform_expr e @@ Env.push_scope env' (Scope.of_params Lambda rl) in 
+    let (tt, ee) = transform_expr e (Env.push_scope env' (Scope.of_params Lambda rl)) ic in 
     let arg = (match List.length rl with 
       | 0 -> TUnit
       | 1 -> snd @@ List.hd rl
@@ -166,15 +166,15 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     TLambda (arg, tt), Lambda(rl, ee)
 
   | PERecord (l) -> 
-    let l' = List.map (fun (i,e) -> i, transform_expr e env') l in 
+    let l' = List.map (fun (i,e) -> i, transform_expr e env' ic) l in 
     let (idtt, idee) = List.map (fun (i, (tt, ee)) -> (i, tt), (i, ee)) l' |> List.split in
     TRecord (idtt), Record (idee)
 
 
   (* Arithmetic *)
   | PEAdd (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     let rt = (match tt1, tt2 with 
       | TNat, TNat -> TNat
       | TNat, TInt -> TInt 
@@ -189,8 +189,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     if tt1 = TString then rt, StringConcat (ee1, ee2) else rt, Add (ee1, ee2)
 
   | PEMul (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     let rt = (match tt1, tt2 with 
       | TNat, TNat -> TNat
       | TNat, TInt -> TInt 
@@ -203,8 +203,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
     rt, Mul (ee1, ee2)
 
   | PESub (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     let rt = (match tt1, tt2 with 
       | TNat, TNat -> TNat
       | TNat, TInt -> TInt 
@@ -219,76 +219,80 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   (* Boolean *)
   | PENot (e1) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
     if tt1 = TBool then TBool, Not (ee1) 
     else failwith @@ "Not needs a boolean expression, got: '" ^ show_ttype tt1 ^ "'"
 
   | PEOr (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     (match tt1, tt2 with 
     | TBool, TBool -> TBool, Or (ee1, ee2)
     | _, _ -> failwith @@ "Or branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'")
 
   | PEAnd (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     (match tt1, tt2 with 
     | TBool, TBool -> TBool, And (ee1, ee2)
     | _, _ -> failwith @@ "And branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'")
   
   (* Compare *)
   | PEGt (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Gt(ee1, ee2)
     | _, _ -> failwith @@ "Types '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' are not comparable")
 
   | PEGte (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Gte(ee1, ee2)
     | _, _ -> failwith @@ "Types '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' are not comparable")
     
   | PELt (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Lt(ee1, ee2)
     | _, _ -> failwith @@ "Types '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' are not comparable")
 
   | PELte (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Lte(ee1, ee2)
     | _, _ -> failwith @@ "Types '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' are not comparable")
 
     | PEEq (e1, e2) -> 
-      let (tt1, ee1) = transform_expr e1 env' in 
-      let (tt2, ee2) = transform_expr e2 env' in 
+      let (tt1, ee1) = transform_expr e1 env' ic in 
+      let (tt2, ee2) = transform_expr e2 env' ic in 
       (match (attributes tt1).cmp, (attributes tt2).cmp with 
       | true, true -> TBool, Eq(ee1, ee2)
       | _, _ -> failwith @@ "Types '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' are not comparable")
 
   | PENeq (e1, e2) -> 
-    let (tt1, ee1) = transform_expr e1 env' in 
-    let (tt2, ee2) = transform_expr e2 env' in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Neq(ee1, ee2)
     | _, _ -> failwith @@ "Types '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' are not comparable")
       
 
-  | PERef (i) -> Env.get_ref i env', LocalRef (i)
+  | PERef (i) -> 
+    (match List.assoc_opt i ic with 
+    | None -> Env.get_ref i env', LocalRef (i)
+    | Some (t) -> t, LocalRef (i)
+    )
 
   | PEApply (e, el) -> 
-    let (tt,ee) = transform_expr e env' in 
+    let (tt,ee) = transform_expr e env' ic in 
     (match tt with 
     | TLambda (TTuple(argl), rettype) when (List.length argl) = (List.length el) -> 
       let ap = List.map (fun (arg, ex) -> 
-        let (ptt, pee) = transform_expr ex env' in 
+        let (ptt, pee) = transform_expr ex env' ic in 
         if ptt <> arg then 
           failwith @@ "Invalid argument on apply: got '" ^ show_ttype ptt ^ "' expected '" ^ show_ttype arg ^ "'" 
         else pee
@@ -299,7 +303,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
       failwith @@ "Invalid argument number for lambda apply"
 
     | TLambda (t, rettype) when (List.length el) = 1 -> 
-      let (ptt, pee) = transform_expr (List.hd el) env' in 
+      let (ptt, pee) = transform_expr (List.hd el) env' ic in 
       if ptt <> t then 
         failwith @@ "Invalid argument for apply, got '" ^ show_ttype ptt ^ "' expected '" ^ show_ttype t ^ "'"
       else
@@ -312,19 +316,19 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
   
 
   | PEIfThenElse (c, e1, e2) -> 
-    let (tc, ec) = transform_expr c env' in 
-    let (te1, ee1) = transform_expr e1 env' in 
-    let (te2, ee2) = transform_expr e2 env' in 
+    let (tc, ec) = transform_expr c env' ic in 
+    let (te1, ee1) = transform_expr e1 env' ic in 
+    let (te2, ee2) = transform_expr e2 env' ic in 
     (match tc, te1, te2 with 
     | TBool, t, t' when t <> t' -> failwith @@ "If branches should have same type, got: '" ^ show_ttype t ^ "' and '" ^ show_ttype t' ^ "'"
     | TBool, t, t' when t = t' -> t, IfThenElse (ec, ee1, ee2)
     | _, _, _ -> failwith @@ "If condition should be a boolean expression, got '" ^ show_ttype tc ^ "'")
 
   | PEMatchWith (e, bl) -> 
-    let (te, ee) = transform_expr e env' in 
+    let (te, ee) = transform_expr e env' ic in 
     let bl' = List.map (fun (cv, cex)  -> 
-      let (tt, ee) = transform_expr cv env' in
-      let (tcex, ecex) = transform_expr cex env' in
+      let (tt, ee) = transform_expr cv env' ic in
+      let (tcex, ecex) = transform_expr cex env' ic in
       if (tt <> te) then
         failwith @@ "Match case has an invalid value type, got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype te ^ "'"
       else 
@@ -338,6 +342,27 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
         tcex
     ) (let (_,b,_) = List.hd bl' in b) bl' 
     in rett, MatchWith (ee, List.map (fun (a,_,c) -> (a,c)) bl')
+
+
+  | PELetIn(i, t, e, e1) -> 
+    let t' = transform_type t env' in
+    let (tt, ee) = transform_expr e env' ic in 
+    if tt <> t' then failwith @@ "LetIn type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
+    let (tt1, ee1) = transform_expr e1 env' @@ (i,t')::ic in 
+    tt, LetIn (i, t', ee, ee1)
+
+  | PESeq(PELet(i, t, e), en) -> 
+    let t' = transform_type t env' in
+    let (tt, ee) = transform_expr e env' ic in 
+    if tt <> t' then failwith @@ "Let type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
+    let (tnt, ene) = transform_expr en env' @@ (i, t')::ic in
+    tnt, Seq(Let(i, t', ee), ene)
+
+  | PESeq (e1, e2) -> 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e1 env' ic in 
+    if tt1 <> TUnit then failwith @@ "Cannot ignore non unit expression in sequence";
+    (tt2, Seq(ee1, ee2))
 
   | ex -> failwith @@ "expression not handled yet: " ^ Parse_tree.show_pexpr ex
 
@@ -355,3 +380,31 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) : (ttype * expr) =
 
   | PEMatchWith of pexpr * (pexpr * pexpr) list
 *)
+
+
+(* | PELetIn of iden * ptype * pexpr * pexpr
+| PELet of iden * ptype * pexpr 
+| PELetTuple of (iden * ptype) list * pexpr 
+| PESAssign of iden * pexpr
+| PESRecAssign of iden * iden * pexpr 
+| PECallBultin of iden * pexpr list *)
+(* | PECall of left_op * iden * pexpr list  *)
+
+(* 
+| Parse_tree.PSCallBuiltin (i, el)::pl' ->
+  let el' = List.map (fun x -> transform_expr x env') el in 
+  
+  (* check if we are calling a standard function *)
+  let cmd = (match i with 
+    | "assert" -> (match el' with 
+      | [(TBool, e1)] -> Some (Assert(e1))
+      | _ -> failwith "Invalid arguments for assert"
+    )
+    | "failif" -> (match el' with 
+      | [(TBool, e1)] -> Some (FailIf(e1))
+      | [(TBool, e1); (TString, e2)] -> Some (FailIfMessage(e1, e2))
+      | _ -> failwith "Invalid arguments for failif"
+    )
+    | _ -> None
+  ) in if cmd <> None then (Option.get cmd)::transform_statements pl' env' else 
+    failwith @@ "Unknown builting function " ^ i     *)

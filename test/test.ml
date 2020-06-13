@@ -22,11 +22,11 @@ let compile success path cname _ =
 let () =
   Alcotest.run "yallo" [
     "misc", [
-      "declarations", `Quick, compile true "test/misc/declarations.yallo" None;
+      (* "declarations", `Quick, compile true "test/misc/declarations.yallo" None; *)
       "expr", `Quick, compile true "test/misc/expr.yallo" None;
       "literal", `Quick, compile true "test/misc/literal.yallo" None;
       "record", `Quick, compile true "test/misc/record.yallo" None;
-      "statements", `Quick, compile true "test/misc/statements.yallo" None;
+      (* "statements", `Quick, compile true "test/misc/statements.yallo" None; *)
       "typemod", `Quick, compile true "test/misc/typemod.yallo" None;
       "types", `Quick, compile true "test/misc/types.yallo" None;
     ];
@@ -37,10 +37,12 @@ let () =
       "lambda", `Quick, compile true "test/const/lambda.yallo" None;
       "lambda_fail", `Quick, compile false "test/const/lambda_fail.yallo" None;
       "expr", `Quick, compile true "test/const/expr.yallo" None;
+      "let_expr", `Quick, compile true "test/const/let_expr.yallo" None;
       "enum", `Quick, compile true "test/const/enum.yallo" None;
       "crypto_f", `Quick, compile true "test/const/crypto_f.yallo" None;
     ];
     "decl.function", [
       "wrong_return_type", `Quick, compile false "test/decl/function/wrong_return_type.yallo" None;
+      "base_fun", `Quick, compile true "test/decl/function/base_fun.yallo" None;
     ]
   ]

@@ -2,7 +2,6 @@ open Ast_env
 open Ast_ttype
 open Translate_pexpr
 open Translate_ptype
-open Translate_pstatement
 
 let rec transform (p: Parse_tree.t) (e: Env.t): Env.t = 
   match p with 
@@ -19,7 +18,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
   | Parse_tree.DConst (dc) :: p' -> 
     Env.assert_symbol_absence e dc.id;
     let et = transform_type dc.t e in
-    let (t, exp) = transform_expr dc.v e in 
+    let (t, exp) = transform_expr dc.v e [] in 
 
     let t = match (t, et) with
       | TBigMap (TAny, TAny), TBigMap(_, _) -> et 
@@ -39,11 +38,16 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
   (* functions *)
   | Parse_tree.DFunction (df) :: p' ->
     Env.assert_symbol_absence e df.id;
+    let rettype = transform_type df.rettype e in 
     let pars = List.map (fun (i, t) -> (i, transform_type t e)) df.params in 
     let nscope = Scope.add_consts pars @@ Scope.empty Function in     
     let nscope = { nscope with rettype = transform_type df.rettype e } in
-    let st = transform_statements df.statements @@ Env.push_scope e nscope in 
-    transform p' e
+    let (st, se) = transform_expr df.exp (Env.push_scope e nscope) [] in 
+    if st <> rettype then failwith @@ "Function return type mismatch, got: '" ^ show_ttype st ^ "', expect: '" ^ show_ttype rettype ^ "'";
+
+    print_endline @@ Ast_expr.show_expr se;
+    transform p' e 
+    (* { e with functions=(df.id, ) *)
 
   (* interface *)
 

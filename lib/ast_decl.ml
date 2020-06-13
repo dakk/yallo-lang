@@ -1,6 +1,5 @@
 open Ast_ttype
 open Ast_expr
-open Ast_statement
 
 type signature = iden * (iden * ttype) list * iden list [@@deriving show {with_path = false}]
 
@@ -8,7 +7,7 @@ type signature = iden * (iden * ttype) list * iden list [@@deriving show {with_p
 type contract_field = iden * ttype [@@deriving show {with_path = false}]
 
 (* contract entry: iden * params * commands *)
-type contract_entry = iden * (iden * ttype) list * statement list
+type contract_entry = iden * (iden * ttype) list * expr list
 (* [@@deriving show {with_path = false}] *)
 
 type contract_constructor = (iden * ttype) list * (iden * expr) list [@@deriving show {with_path = false}]
@@ -23,7 +22,7 @@ type dfunction = {
   id: iden;
   params: (iden * ttype) list;
   rettype: ttype;
-  statements: statement list;
+  exp: expr list;
 } 
 (* [@@deriving show {with_path = false}] *)
 

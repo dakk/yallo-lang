@@ -12,7 +12,7 @@
              | <type_sig> LAMBDA <type_sig>
              | <type_expr> CONT
              | <type_expr> CONTRACT
-             | RECORD LBRACE <parameter> (SEMICOLON <parameter>)* RBRACE
+             | RECORD LBRACE <parameter> (COMMA <parameter>)* RBRACE
              | ENUM LPAR [<ident> (PIPE <ident>)*] RPAR
              | LPAR <type_sig> RPAR
 
@@ -41,12 +41,16 @@
          | NAT
          | INT
          | SOME LPAR <expr> RPAR
-         | LBRACE <erec_element> (SEMICOLON <erec_element>)* RBRACE
+         | LBRACE <erec_element> (COMMA <erec_element>)* RBRACE
          | LSQUARE [<expr> (COMMA <expr>)*] RSQUARE
          | LPAR <expr> COMMA <expr> (COMMA <expr>)* RPAR
          | LSQUARE <emap_element> (COMMA <emap_element>)* RSQUARE
          | LPAR <parameter> (COMMA <parameter>)* RPAR LAMBDAB LPAR <expr>
            RPAR
+         | LET IDENT COLON <type_sig> EQ <expr> IN <expr>
+         | LET IDENT COLON <type_sig> EQ <expr>
+         | THIS DOT IDENT EQ <expr>
+         | THIS DOT IDENT DOT IDENT EQ <expr>
          | <expr> ADD <expr>
          | <expr> SUB <expr>
          | <expr> DIV <expr>
@@ -73,28 +77,7 @@
          | <expr> DOT IDENT
          | IDENT HT IDENT
 
-<left_hand> ::= IDENT
-              | THIS DOT IDENT
-              | TEZOS DOT IDENT
-              | CRYPTO DOT IDENT
-
-<statement> ::= IF LPAR <expr> RPAR LBRACE <statement>* RBRACE
-              | IF LPAR <expr> RPAR LBRACE <statement>* RBRACE ELSE LBRACE
-                <statement>* RBRACE
-              | VAR IDENT COLON <type_expr> SEMICOLON
-              | VAR IDENT COLON <type_expr> EQ <expr> SEMICOLON
-              | VAR LPAR <parameter> (COMMA <parameter>)* RPAR EQ <expr>
-                SEMICOLON
-              | CONST IDENT COLON <type_expr> EQ <expr> SEMICOLON
-              | <left_hand> EQ <expr> SEMICOLON
-              | <left_hand> DOT <ident> EQ <expr> SEMICOLON
-              | IDENT LPAR [<expr> (COMMA <expr>)*] RPAR SEMICOLON
-              | <left_hand> DOT IDENT LPAR [<expr> (COMMA <expr>)*] RPAR
-                SEMICOLON
-              | RETURN <expr> SEMICOLON
-              | SKIP SEMICOLON
-
-<fun_body> ::= <statement>*
+<fun_body> ::= <expr> (SEMICOLON <expr>)*
 
 <dfunction> ::= FUNCTION IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
                 COLON <type_sig> LBRACE <fun_body> RBRACE

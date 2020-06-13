@@ -7,7 +7,7 @@ interface FA12 {
 type getBalanceCallback = nat callback;
 
 function aFunction(c: int callback, z: nat option): nat {
-
+	123
 }
 
 // could be useful to add type parameters, maybe in the future
@@ -21,20 +21,21 @@ contract tzToken implements FA12 {
 	constructor(sup: nat) {
 		this.supply = None;
 		this.balances = Map.empty;
-		this.symbol = None;
+		this.symbol = None
 	}
 
 	entry transfer (to: address, amount: int) {
 		failif(not (this.balances.has(Tezos.sender)), "ciao ");
-		const b: nat = this.balances.get(Tezos.sender);
-		var bto: int = if this.balances.has (to) then balances.get(to) else 0;
+		let b: nat = this.balances.get(Tezos.sender);
+		let bto: int = if this.balances.has (to) then balances.get(to) else 0;
 		this.balances.update(to, bto + amount);
 		this.balances.update(Tezos.sender, b - amount);
+		[]
 	}
 
 	entry getBalance (adr: address, callBack: int callback) {
-		var op: operation = if this.balances.has(a) then callBack(this.balances.get(a)) else callBack(0);
-		return [op];
+		let op: operation = if this.balances.has(a) then callBack(this.balances.get(a)) else callBack(0);
+		[op]
 	}
 }
 
@@ -47,11 +48,13 @@ contract usingTezToken {
 
 	entry getb() {
 		// get an instance of contract, call getbalance passing address and the handleBalance entry
-		var op: operation = tzToken.of(tzTokenAddress).getBalance(address, this.handleBalance);
+		let op: operation = tzToken.of(tzTokenAddress).getBalance(address, this.handleBalance);
+		[op]
 	}
 
 	entry handleBalance(bal: nat) {
 		this.balance = bal;
+		[]
 	}
 }
 
@@ -60,8 +63,7 @@ contract creatingContract {
 	entry test () {
 		// create a new instance of tzToken (storage is inferred by field declaration) 
 		// transferring 100tz, without a delegate
-		var (addr: address, op: oepration) = Tezos.createContract (tzToken(12), 100mtz, None);
-
-		return op;
+		let (addr: address, op: oepration) = Tezos.createContract (tzToken(12), 100mtz, None);
+		[op]
 	}
 }
