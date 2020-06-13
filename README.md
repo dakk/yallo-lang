@@ -81,11 +81,12 @@ Or, if we want to deploy a token contract from another contract:
 ```java
 #import "Token.yallo";
 
-contract usingAToken {
-	...
+contract deployAToken {
+	field tokenAddress: address;
 
 	entry deployToken() {
 		let (a: address, op: operation) = Tezos.createContract (Token(100, "ourToken"), None, 0);
+		this.tokenAddress = a;
 		[op]
 	}
 }
