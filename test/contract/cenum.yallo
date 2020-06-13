@@ -1,0 +1,10 @@
+type status = enum (Pending | Terminated);
+
+contract Test {
+	field a: status;
+
+	entry tentry () {
+		this.a = status#Pending;
+		[]
+	}
+}

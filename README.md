@@ -23,11 +23,11 @@ IToken with a getTotalSupply.
 ```java
 interface IToken {
 	entry transfer(from: address, to: address, val: nat);
-	entry getBalance(ad: address, cb: nat callback);
+	entry getBalance(ad: address, cb: nat contract);
 }
 
 interface ITokenWithGetTotalSupply extends IToken {
-	entry getTotalSupply (cb: nat callback);
+	entry getTotalSupply (cb: nat contract);
 }
 ```
 
@@ -55,7 +55,7 @@ contract Token implements IToken {
 		[]
 	}
 
-	entry getBalance(ad: address, cb: nat callback) {
+	entry getBalance(ad: address, cb: nat contract) {
 		let balance: nat = this.balances.get(ad);
 		let op: operation = cb(balance);
 		[op];

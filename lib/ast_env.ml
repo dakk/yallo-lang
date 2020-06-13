@@ -35,8 +35,10 @@ module Env = struct
       "key", TKey;
       "string", TString;
       "bytes", TBytes;
+      "operation", TOperation
     ];
     symbols=[
+      "operation", Type;
       "unit", Type;
       "address", Type;
       "int", Type;

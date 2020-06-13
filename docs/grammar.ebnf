@@ -25,6 +25,12 @@
 
 <match_case> ::= PIPE <expr> LAMBDA <expr>
 
+<left> ::= <left> DOT IDENT
+         | IDENT
+         | TEZOS DOT IDENT
+         | THIS DOT IDENT
+         | CRYPTO DOT IDENT
+
 <expr> ::= UNIT
          | NONE
          | TRUE
@@ -50,8 +56,7 @@
          | LET IDENT COLON <type_sig> EQ <expr>
          | LET IDENT EQ <expr> IN <expr>
          | LET IDENT EQ <expr>
-         | THIS DOT IDENT EQ <expr>
-         | THIS DOT IDENT DOT IDENT EQ <expr>
+         | <left> EQ <expr>
          | <expr> ADD <expr>
          | <expr> SUB <expr>
          | <expr> DIV <expr>
@@ -69,11 +74,9 @@
          | IF <expr> THEN <expr> ELSE <expr>
          | MATCH <expr> WITH <match_case>+
          | IDENT
-         | TEZOS DOT IDENT
-         | THIS DOT IDENT
-         | CRYPTO DOT IDENT
-         | <expr> DOT IDENT
+         | <left> DOT IDENT
          | IDENT HT IDENT
+         | <left> LPAR [<expr> (COMMA <expr>)*] RPAR
          | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
          | LPAR <expr> RPAR
          | LPAR <expr> COLON <type_sig> RPAR

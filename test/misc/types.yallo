@@ -1,6 +1,6 @@
 type a = nat list;
 type b = nat contract;
-type getBalance = (address, nat callback) contract;
+type getBalance = (address, nat contract) contract;
 
 type tt = (nat, (nat, nat)) big_map;
 

@@ -112,7 +112,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     (* entry list *)
     let el = List.map (fun (i, p, ex) -> 
       let p' = List.map (fun (ii, pp) -> ii, transform_type pp e) p in 
-      let tt, ee = transform_expr ex e p' in 
+      let tt, ee = transform_expr ex e (p'@flds) in 
       if tt<>TList(TOperation) && tt<>TList(TAny) then failwith @@ "Entry " ^ i ^ " of contract " ^ dc.id ^ " does not evalute to an operation list";
       (i, (p', ee))
     ) dc.entries in

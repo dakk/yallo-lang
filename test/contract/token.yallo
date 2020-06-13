@@ -2,11 +2,11 @@
 
 interface IToken {
 	entry transfer(from: address, to: address, val: nat);
-	entry getBalance(ad: address, cb: nat callback);
+	entry getBalance(ad: address, cb: nat contract);
 }
 
 interface ITokenWithGetTotalSupply extends IToken {
-	entry getTotalSupply (cb: nat callback);
+	entry getTotalSupply (cb: nat contract);
 }
 
 contract Token implements IToken {
@@ -15,25 +15,24 @@ contract Token implements IToken {
 	field symbol: string;
 
 	constructor (supply: nat, symbol: string) {
-		this.balances = BigMap.empty;
+		this.balances = BigMap.empty();
 		this.totalSupply = supply;
 		this.symbol = symbol;
 	}
 
 	entry transfer(from: address, to: address, val: nat) {
 		assert (val > 0);
-		let a = this.balances.get(from);
-		//let b: nat = this.balances.get(to);
-		// assert(a > val);
-		//this.balances.update(from, a - val);
-		//this.balances.update(to, b + val); 
+		let a = this.balances.get(from, 0n);
+		let b: nat = this.balances.get(to, 0n);
+		assert(a > val);
+		this.balances.update(from, a - val);
+		this.balances.update(to, b + val); 
 		[]
 	}
 
-	entry getBalance(ad: address, cb: nat callback) {
-		// let balance: nat = this.balances.get(ad);
-		// let op: operation = cb(balance);
-		// [op]
-		[]
+	entry getBalance(ad: address, cb: nat contract) {
+		let balance: nat = this.balances.get(ad, 0n);
+		let op: operation = cb(balance);
+		[op]
 	}
 }

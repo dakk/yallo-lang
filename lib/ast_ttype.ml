@@ -27,7 +27,6 @@ type ttype =
   | TRecord of (iden * ttype) list
   | TTuple of ttype list 
   | TContract of ttype 
-  | TCallback of ttype (* this is an alias, I think is useless *)
   | TContractCode (* this is the reference to a contract code, used only on create_contract *)
 
 type tattr = {
@@ -64,17 +63,17 @@ let attributes (t: ttype) = match t with
   | TRecord (_) ->    { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false } (* ? *)
   | TTuple (_) ->     { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TContract (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  }
-  | TCallback (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  } (* ? *)
   | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TOperation ->     { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
 
 
-let rec show_ttype (t: ttype) = match t with 
+let rec show_ttype (at: ttype) = match at with 
 | TAny -> "'a"
 | TUnit -> "unit"
 | TAddress -> "address"
 | TInt -> "int"
 | TChainId -> "chain_id"
+| TOperation -> "operation"
 | TNat -> "nat"
 | TMutez -> "mutez"
 | TTimestamp -> "timestamp"
@@ -94,7 +93,7 @@ let rec show_ttype (t: ttype) = match t with
 | TRecord (l) -> "record { " ^ List.fold_left (fun acc (x, xt) -> acc ^ (if acc = "" then "" else ", ") ^ x ^ ": " ^ show_ttype xt) "" l ^ " }"
 | TTuple (tl) -> "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ show_ttype x) "" tl ^ ")"
 | TContract (t) -> show_ttype t ^ " contract"
-| TCallback (t) -> show_ttype t ^ " callback"
 | TContractCode -> "contract_code"
+| _ -> failwith ("Unhandled type")
 
 let pp_ttype fmt (t: ttype) = Format.pp_print_string fmt (show_ttype t); ()

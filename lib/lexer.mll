@@ -88,7 +88,7 @@ rule token = parse
   | "big_map"       { CONT "big_map" }
   | "option"        { CONT "option" }
   | "set"           { CONT "set" }
-  | "callback"      { CONT "callback" }
+  (* | "callback"      { CONT "callback" } *)
   | "const"				  { CONST }
   | "record"        { RECORD }
   | "this"				  { THIS }

@@ -60,5 +60,7 @@ let () =
     ];
     "contract", [
       "token", `Quick, compile true "test/contract/token.yallo" None;
+      "crec", `Quick, compile true "test/contract/crec.yallo" None;
+      "cenum", `Quick, compile true "test/contract/cenum.yallo" None;
     ]
   ]

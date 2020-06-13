@@ -26,10 +26,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     | _ -> failwith "Accessor # is only usable on enum type")
 
   (* PEDot on base *)
-  | PEDot (PERef("Set"), "empty") -> TSet(TAny), SetEmpty
-  | PEDot (PERef("List"), "empty") -> TList(TAny), ListEmpty
-  | PEDot (PERef("Map"), "empty") -> TMap(TAny, TAny), MapEmpty
-  | PEDot (PERef("BigMap"), "empty") -> TBigMap(TAny, TAny), BigMapEmpty
+  | PEApply (PEDot (PERef("Set"), "empty"), []) -> TSet(TAny), SetEmpty
+  | PEApply (PEDot (PERef("List"), "empty"), []) -> TList(TAny), ListEmpty
+  | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
+  | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
 
   (* PEApply(PETRef) tezos apis *)
   | PEApply (PETRef (i), el) ->
@@ -311,6 +311,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     | _, _ -> failwith @@ "Types '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "' are not comparable")
       
 
+  | PESRef (i) ->
+    (match List.assoc_opt i ic with 
+      | None -> Env.get_ref i env', LocalRef (i)
+      | Some (t) -> t, LocalRef (i)
+      )
+  
   | PERef (i) -> 
     (match List.assoc_opt i ic with 
     | None -> Env.get_ref i env', LocalRef (i)
@@ -347,8 +353,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
 
     | TLambda (_, _) when (List.length el) > 1 -> 
       failwith "This lambda expect only one argument"
+
+    | TContract (ttl) ->
+      let (ptt, pee) = transform_expr (List.hd el) env' ic in 
+      if ptt <> ttl then failwith "Invalid arguments for callback";
+      TOperation, Apply(ee, pee)
       
-    | _ -> failwith "Applying on not a labmda")
+    | _ -> failwith @@ "Applying on not a labmda: " ^ (Parse_tree.show_pexpr (PEApply(e, el)))
+  )
   
 
   | PEIfThenElse (c, e1, e2) -> 
@@ -410,10 +422,23 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     if tt1 <> TUnit then failwith @@ "Cannot ignore non unit expression in sequence";
     (tt2, Seq(ee1, ee2))
 
+  | PEAssign (PESRef (x), e) -> 
+    let (tte, eee) = transform_expr e env' ic in 
+    if tte <> List.assoc x ic then failwith @@ "Invalid assignment";
+    TUnit, SAssign(x, eee)
+
+  | PEAssign (PEDot(PESRef (x), i), e) -> 
+    let (tte, eee) = transform_expr e env' ic in 
+    (match List.assoc x ic with 
+    | TRecord (tl) ->
+      let recel = List.assoc i tl in 
+      if tte <> recel then failwith @@ "Invalid assignment";
+      TUnit, SRecAssign(x, i, eee)
+    | _ -> failwith "Invalid assignment")
+
   | ex -> failwith @@ "expression not handled yet: " ^ Parse_tree.show_pexpr ex
 
   (*
-  | PESRef of iden
   | PETRef of iden
   | PECRef of iden
 

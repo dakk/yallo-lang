@@ -1,12 +1,12 @@
 interface FA12 {
 	entry transfer(to: address, value: int);
-	entry getBalance(of: address, cb: int callback);
+	entry getBalance(of: address, cb: int contract);
 }
 
 
-type getBalanceCallback = nat callback;
+type getBalanceCallback = nat contract;
 
-function aFunction(c: int callback, z: nat option): nat {
+function aFunction(c: int contract, z: nat option): nat {
 	123
 }
 
@@ -33,7 +33,7 @@ contract tzToken implements FA12 {
 		[]
 	}
 
-	entry getBalance (adr: address, callBack: int callback) {
+	entry getBalance (adr: address, callBack: int contract) {
 		let op: operation = if this.balances.has(a) then callBack(this.balances.get(a)) else callBack(0);
 		[op]
 	}

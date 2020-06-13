@@ -72,7 +72,7 @@ and pexpr =
   | PELetIn of iden * ptype option * pexpr * pexpr
   | PELet of iden * ptype option * pexpr 
   | PELetTuple of (iden * ptype) list * pexpr 
-  | PESAssign of iden * pexpr
+  | PEAssign of pexpr * pexpr
   | PESRecAssign of iden * iden * pexpr 
   | PECallBultin of iden * pexpr list
   (* | PECall of left_op * iden * pexpr list  *)
