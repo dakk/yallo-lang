@@ -52,20 +52,28 @@ type expr =
 
 (* map *)
 | MapEmpty
-| MapGet of expr * expr
+| MapGetOpt of expr * expr
+| MapGet of expr * expr * expr
 | MapMem of expr * expr
 | MapSize of expr
 | MapMapWith of expr * expr
+| MapFold of expr * expr * expr
+| MapUpdate of expr * expr * expr 
+| MapRemove of expr * expr 
 
 (* bigmap *)
 | BigMapEmpty
-| BigMapGet of expr * expr
+| BigMapGetOpt of expr * expr
+| BigMapGet of expr * expr * expr
 | BigMapMem of expr * expr
+| BigMapUpdate of expr * expr * expr 
+| BigMapRemove of expr * expr 
 
 (* set *)
 | SetEmpty
 | SetMem of expr * expr
 | SetSize of expr
+| SetUpdate of expr * expr * expr 
 
 (* list *)
 | ListEmpty
@@ -74,6 +82,7 @@ type expr =
 | ListMapWith of expr * expr
 | ListHead of expr
 | ListTail of expr
+| ListFold of expr * expr * expr
 
 (* string *)
 | StringConcat of expr * expr 
@@ -113,14 +122,6 @@ type expr =
 | FailIf of expr
 | FailIfMessage of expr * expr
 | Assert of expr    
-
-| MapUpdate of iden * expr * expr 
-| BigMapUpdate of iden * expr * expr 
-| SetUpdate of iden * expr * expr 
-| MapRemove of iden * expr 
-| BigMapRemove of iden * expr 
-| ListIter of expr * expr
-| MapIter of expr * expr
      
 | LetIn of iden * ttype * expr * expr
 | Let of iden * ttype * expr 

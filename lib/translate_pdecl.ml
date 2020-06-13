@@ -61,8 +61,6 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       consts=(df.id, (TLambda(TTuple(snd @@ List.split pars), rettype), Lambda(pars, se)))::e.consts;
     }
 
-    (* { e with functions=(df.id, ) *)
-
   (* interface *)
 
   (* contracts *)

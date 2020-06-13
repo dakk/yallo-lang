@@ -76,21 +76,35 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
       | TList (l), "tail", [] -> TList (l), ListTail (ee)
       | TList (l), "prepend", [(ll, e)] when ll = l -> TList (l), ListPrepend (ee, e)
       | TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> TList (rt), ListMapWith (ee, lame)
+      | TList (l), "fold", [(TLambda (TTuple([ll; rt']), rt), lame); (ft, ff)] when l=ll && rt=rt' && rt=ft -> 
+        ft, ListFold(ee, lame, ff)
 
       (* Map *)
       | TMap (_, _), "size", [] -> TNat, MapSize (ee)
-      | TMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, MapGet(ee, e)
+      | TMap (kt, kv), "get", [(kk, e)] when kk = kt -> TOption (kv), MapGetOpt(ee, e)
+      | TMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = kt -> kv, MapGet(ee, e, kvd)
       | TMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, MapMem(ee, e)
+      | TMap (kt, _), "remove", [(kk, e)] when kk = kt -> TUnit, MapRemove(ee, e)
       | TMap (kt, kv), "mapWith", [(TLambda (TTuple([a;b]), rt), lame)] when (a=kt && b=kv) -> 
         TMap (kt, rt), MapMapWith (ee, lame)
+      | TMap (kt, kv), "fold", [(TLambda (TTuple([llkt; llkv; rt']), rt), lame); (ft, ff)] when kt=llkt && kv=llkv && rt=rt' && rt=ft -> 
+        ft, MapFold(ee, lame, ff)
+      | TMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
+        TUnit, MapUpdate(ee, ek, ev)
 
       (* BigMap *)
-      | TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, BigMapGet(ee, e)
+      | TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> TOption(kv), BigMapGetOpt(ee, e)
+      | TBigMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kv=kvv && kk = kt -> kv, BigMapGet(ee, e, kvd)
       | TBigMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, BigMapMem(ee, e)
+      | TBigMap (kt, _), "remove", [(kk, e)] when kk = kt -> TUnit, BigMapRemove(ee, e)
+      | TBigMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
+        TUnit, BigMapUpdate(ee, ek, ev)
 
       (* Set *)
       | TSet (_), "size", [] -> TNat, SetSize (ee)
       | TSet (kt), "mem", [(ll, e)] when kt = ll -> TBool, SetMem (ee, e)
+      | TSet (kt), "update", [(kkt, ek); (TBool, ev)] when kkt=kt ->
+        TUnit, SetUpdate(ee, ek, ev)
 
       (* String *)
       | TString, "slice", [(TInt, i1); (TInt, i2)] -> TString, StringSlice (ee, i1, i2)
