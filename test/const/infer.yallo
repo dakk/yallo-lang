@@ -1,0 +1,19 @@
+const a = (a: int) => (0 + 1);
+const b = (a: int) => (0 > 1);
+const c = (a: int) => (a > 1);
+const d = (a: int, b: int) => ((a * 8) > (b - 12));
+const e = (a: int, b: int) => ((a * (b - 8)) > (b - 12));
+const f = (a: int) => (d (12, 13));
+
+const g = (a: int) => (((b: int) => (b))(12));
+const h = (a: int) => (g (12) * g (13));
+
+const i = (a: int) => (if a > 12 then 12 else 14 + 15);
+const l= true or false;
+const m = (a: int) => (match a with | 1 -> Some(12) | 2 -> (None: int option));
+const u = Unit;
+
+const litString = "hola";
+const litNat = 1n;
+const litInt = 12;
+const litMutez = 10mtz;

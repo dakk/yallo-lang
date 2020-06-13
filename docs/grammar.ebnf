@@ -49,6 +49,8 @@
            RPAR
          | LET IDENT COLON <type_sig> EQ <expr> IN <expr>
          | LET IDENT COLON <type_sig> EQ <expr>
+         | LET IDENT EQ <expr> IN <expr>
+         | LET IDENT EQ <expr>
          | THIS DOT IDENT EQ <expr>
          | THIS DOT IDENT DOT IDENT EQ <expr>
          | <expr> ADD <expr>
@@ -108,6 +110,7 @@
 <dtype> ::= TYPE IDENT EQ <type_sig> SEMICOLON
 
 <dconst> ::= CONST IDENT COLON <type_expr> EQ <expr> SEMICOLON
+           | CONST IDENT EQ <expr> SEMICOLON
 
 <declaration> ::= <dinterface>
                 | <dcontract>

@@ -7,29 +7,29 @@ function test1_nopar (): int {
 }
 
 function test2_nopar (): int {
-	let c: int = 12;
+	let c = 12;
 	12 + c
 }
 
 function test3_nopar (): int {
-	let c: int = 12;
-	let d: int = 12;
+	let c = 12;
+	let d = 12;
 	12 + c + d
 }
 
 function test21_nopar (): int {
-	let c: int = 12;
+	let c = 12;
 	12 + c
 }
 
 function test31_nopar (): int {
-	let c: int = 12;
-	let d: int = 12;
+	let c = 12;
+	let d = 12;
 	12 + c + d
 }
 
 function test_redeclare_let (): int {
-	let c: string = "ciao";
-	let c: int = 12;
+	let c = "ciao";
+	let c = 12;
 	12 + c
 }

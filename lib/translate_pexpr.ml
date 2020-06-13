@@ -35,7 +35,21 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
   | PEApply (PETRef (i), el) ->
     let el' = List.map (fun a -> transform_expr a env' ic) el in 
     (match i, el' with 
-      | _, _ -> failwith @@ "Unknown Tezos function: " ^ i
+      | "sender", [] -> TAddress, TezosSender 
+      | "source", [] -> TAddress, TezosSource
+      | "chainId", [] -> TChainId, TezosChainId
+      | "amount", [] -> TMutez, TezosAmount
+      | "balance", [] -> TMutez, TezosBalance
+      | "now", [] -> TTimestamp, TezosNow
+      | "setDelegate", [(TKeyHash, kh)] -> TOperation, TezosSetDelegate (kh)
+
+(* | TezosSelf
+| TezosImplicitAccount of iden (* todef *)
+| TezosAddressOfContract of expr
+| TezosContractOfAddress of expr
+| TezosTransfer of expr * expr * expr
+| TezosCreateContract of iden todef *)
+      | _, _ -> failwith @@ "Invalid call to Tezos." ^ i
     )
 
   (* PEApply(PECRef) crypto apis *)
@@ -344,19 +358,29 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     in rett, MatchWith (ee, List.map (fun (a,_,c) -> (a,c)) bl')
 
 
-  | PELetIn(i, t, e, e1) -> 
+  | PELetIn(i, Some(t), e, e1) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
     if tt <> t' then failwith @@ "LetIn type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
     let (tt1, ee1) = transform_expr e1 env' @@ (i,t')::ic in 
     tt, LetIn (i, t', ee, ee1)
 
-  | PESeq(PELet(i, t, e), en) -> 
+  | PESeq(PELet(i, Some(t), e), en) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
     if tt <> t' then failwith @@ "Let type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
     let (tnt, ene) = transform_expr en env' @@ (i, t')::ic in
     tnt, Seq(Let(i, t', ee), ene)
+
+  | PELetIn(i, None, e, e1) -> 
+    let (tt, ee) = transform_expr e env' ic in 
+    let (tt1, ee1) = transform_expr e1 env' @@ (i,tt)::ic in 
+    tt, LetIn (i, tt, ee, ee1)
+
+  | PESeq(PELet(i, None, e), en) -> 
+    let (tt, ee) = transform_expr e env' ic in 
+    let (tnt, ene) = transform_expr en env' @@ (i, tt)::ic in
+    tnt, Seq(Let(i, tt, ee), ene)
 
   | PESeq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 

@@ -50,13 +50,12 @@ module Scope = struct
 end
 
 module Env = struct 
-  type st = | Type | Interface | Const | Contract | Function [@@deriving show {with_path = false}]
+  type st = | Type | Interface | Const | Contract [@@deriving show {with_path = false}]
 
   type t = {
     scope_stack: Scope.t list;
     types:       (iden * ttype) list;
     consts:      (iden * texpr) list;
-    (* functions:   (iden * ) *)
     symbols:     (iden * st) list
   } [@@deriving show {with_path = false}]
 

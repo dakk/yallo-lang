@@ -16,6 +16,7 @@ type ttype =
   | TKey
   | TString
   | TBytes
+  | TOperation
   | TLambda of ttype * ttype
   | TEnum of string list
   | TList of ttype
@@ -65,6 +66,7 @@ let attributes (t: ttype) = match t with
   | TContract (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  }
   | TCallback (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  } (* ? *)
   | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TOperation ->     { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
 
 
 let rec show_ttype (t: ttype) = match t with 

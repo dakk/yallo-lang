@@ -92,8 +92,10 @@
 
 		// bindings 
 		// | e1=expr COLON e2=expr { Parse_tree.PESeq (e1, e2) }
-		| LET i=IDENT COLON t=type_sig EQ e=expr IN ee=expr { Parse_tree.PELetIn (i, t, e, ee) }
-		| LET i=IDENT COLON t=type_sig EQ e=expr { Parse_tree.PELet (i, t, e) }
+		| LET i=IDENT COLON t=type_sig EQ e=expr IN ee=expr { Parse_tree.PELetIn (i, Some(t), e, ee) }
+		| LET i=IDENT COLON t=type_sig EQ e=expr { Parse_tree.PELet (i, Some(t), e) }
+		| LET i=IDENT EQ e=expr IN ee=expr { Parse_tree.PELetIn (i, None, e, ee) }
+		| LET i=IDENT EQ e=expr { Parse_tree.PELet (i, None, e) }
 
 		// ??
 		| THIS DOT i=IDENT EQ e=expr { Parse_tree.PESAssign (i, e) }
@@ -193,7 +195,9 @@
 
   dconst:
     | CONST x=IDENT COLON t=type_expr EQ v=expr SEMICOLON
-      { Parse_tree.DConst ({ id=x; t=t; v=v }) }
+      { Parse_tree.DConst ({ id=x; t=Some(t); v=v }) }
+    | CONST x=IDENT EQ v=expr SEMICOLON
+      { Parse_tree.DConst ({ id=x; t=None; v=v }) }
 
   declaration:
     | i=dinterface { i }

@@ -2,6 +2,8 @@
 Yallo is a yet another high level experimental language for Tezos, with the purpose of 
 providing a better abstraction for integrating different contracts.
 
+Internally, the language is a functional language with side effects (storage assignments).
+
 This is only a research project, it is not (yet) intendeed for real usage.
 
 

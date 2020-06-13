@@ -1,7 +1,6 @@
 open Ast_ttype
 
 type expr = 
-| TezosSender
 | TezosNow
 | TezosAmount
 | TezosBalance
@@ -9,10 +8,12 @@ type expr =
 | TezosSelf
 | TezosSetDelegate of expr
 | TezosSource
+| TezosSender
 | TezosAddressOfContract of expr
 | TezosContractOfAddress of expr
 | TezosTransfer of expr * expr * expr
 | TezosCreateContract of iden (* todef *)
+| TezosImplicitAccount of iden (* todef *)
 
 | CryptoBlake2B of expr
 | CryptoCheckSignature of expr * expr * expr

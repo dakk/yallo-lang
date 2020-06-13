@@ -40,6 +40,8 @@ let () =
       "let_expr", `Quick, compile true "test/const/let_expr.yallo" None;
       "enum", `Quick, compile true "test/const/enum.yallo" None;
       "crypto_f", `Quick, compile true "test/const/crypto_f.yallo" None;
+      "infer", `Quick, compile true "test/const/infer.yallo" None;
+      "let_infer", `Quick, compile true "test/const/let_infer.yallo" None;
     ];
     "decl.function", [
       "wrong_return_type", `Quick, compile false "test/decl/function/wrong_return_type.yallo" None;

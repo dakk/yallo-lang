@@ -69,8 +69,8 @@ and pexpr =
   | PEApply of pexpr * pexpr list
 
 
-  | PELetIn of iden * ptype * pexpr * pexpr
-  | PELet of iden * ptype * pexpr 
+  | PELetIn of iden * ptype option * pexpr * pexpr
+  | PELet of iden * ptype option * pexpr 
   | PELetTuple of (iden * ptype) list * pexpr 
   | PESAssign of iden * pexpr
   | PESRecAssign of iden * iden * pexpr 
@@ -106,7 +106,7 @@ type declaration =
   (* constant value *)
   | DConst of { 
     id: iden; 
-    t: ptype; 
+    t: ptype option; 
     v: pexpr; 
   }
 
