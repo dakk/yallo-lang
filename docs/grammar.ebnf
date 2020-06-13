@@ -68,15 +68,15 @@
          | <expr> NEQ <expr>
          | IF <expr> THEN <expr> ELSE <expr>
          | MATCH <expr> WITH <match_case>+
-         | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
-         | LPAR <expr> RPAR
-         | LPAR <expr> COLON <type_sig> RPAR
          | IDENT
          | TEZOS DOT IDENT
          | THIS DOT IDENT
          | CRYPTO DOT IDENT
          | <expr> DOT IDENT
          | IDENT HT IDENT
+         | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
+         | LPAR <expr> RPAR
+         | LPAR <expr> COLON <type_sig> RPAR
 
 <fun_body> ::= <expr> (SEMICOLON <expr>)*
 

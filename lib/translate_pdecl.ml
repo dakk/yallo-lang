@@ -51,9 +51,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     Env.assert_symbol_absence e df.id;
     let rettype = transform_type df.rettype e in 
     let pars = List.map (fun (i, t) -> (i, transform_type t e)) df.params in 
-    let nscope = Scope.add_consts pars @@ Scope.empty Function in     
-    let nscope = { nscope with rettype = transform_type df.rettype e } in
-    let (st, se) = transform_expr df.exp (Env.push_scope e nscope) [] in 
+    let (st, se) = transform_expr df.exp e pars in 
     if st <> rettype then failwith @@ "Function return type mismatch, got: '" ^ show_ttype st ^ "', expect: '" ^ show_ttype rettype ^ "'";
 
     transform p' { e with 
@@ -93,7 +91,53 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
   (* contracts *)
   | Parse_tree.DContract (dc) :: p' -> 
-    transform p' e
+    Env.assert_symbol_absence e dc.id;
+    let flds = List.map (fun (i,t) -> i, transform_type t e) dc.fields in
+
+    (* if implements, get the list of entries *)
+    let to_implement = (match dc.implements with | None -> [] 
+      | Some (i) -> (match List.assoc_opt i e.ifaces with 
+        | None -> failwith @@ "Contract " ^ dc.id ^ " extends an unknown interface " ^ i 
+        | Some(el) -> el)
+    ) in 
+
+    (* handle constructor *)
+    let ctor = (match dc.constructor with | None -> [], []
+      | Some (par, ass) -> 
+        let par' = List.map (fun (i, a) -> i, transform_type a e) par in
+        par',
+        List.map (fun (i, a) -> i, snd @@ transform_expr a e par') ass
+    ) in
+    
+    (* entry list *)
+    let el = List.map (fun (i, p, ex) -> 
+      let p' = List.map (fun (ii, pp) -> ii, transform_type pp e) p in 
+      let tt, ee = transform_expr ex e p' in 
+      if tt<>TList(TOperation) && tt<>TList(TAny) then failwith @@ "Entry " ^ i ^ " of contract " ^ dc.id ^ " does not evalute to an operation list";
+      (i, (p', ee))
+    ) dc.entries in
+
+    (* assert no duplicated entry *)
+    let rec dup_fail lst b = match lst with
+      | [] -> ()
+      | (hdi, hdl)::tl -> 
+        if (List.exists (fun (x,l) -> x = hdi) b)
+        then failwith @@ "Duplicate entry " ^ hdi ^ " in contract " ^ dc.id
+        else dup_fail tl ((hdi, hdl)::b) 
+    in dup_fail el [];
+
+    (* assert all to_implement are implemented *)
+    List.iter (fun (i, _) ->
+      if List.assoc_opt i @@ el = None then failwith @@ "Contract " ^ dc.id ^ " does not implement " ^ i;
+      ()
+    ) to_implement;
+
+    let el = List.map (fun (x, (a,b)) -> x,a,b) el in
+
+    transform p' { e with 
+      symbols=(dc.id, Contract)::e.symbols;
+      contracts=(dc.id, (ctor, el))::e.contracts;
+    }
 
   | _ :: p' -> transform p' e
   | [] -> e

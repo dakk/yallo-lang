@@ -127,12 +127,6 @@
 		// match with
 		| MATCH c=expr WITH cl=nonempty_list(match_case) 
 																{ Parse_tree.PEMatchWith (c, cl) }
-    // apply a function
-    | i=expr LPAR p=separated_list(COMMA, expr) RPAR 						      { PEApply(i, p) }
-    // | f=expr LPAR p=separated_list(COMMA, expr) RPAR 
-    //                             { Parse_tree.PEApply (f, p) }
-    | LPAR e=expr RPAR 				  { e }
-    | LPAR v=expr COLON t=type_sig RPAR { Parse_tree.PETyped (v, t) }
 
 
     // | i=IDENT LPAR p=separated_list(COMMA, expr) RPAR 						      { PEApply(Parse_tree.PERef (i), p) }
@@ -147,6 +141,13 @@
     //   { PEApply2(Parse_tree.PESRef(ii), i, p) }
     | e=expr DOT i=IDENT 	{ Parse_tree.PEDot (e, i) }
     | ii=IDENT HT i=IDENT { Parse_tree.PEHt (ii, i) }
+
+    // apply a function
+    | i=expr LPAR p=separated_list(COMMA, expr) RPAR 						      { PEApply(i, p) }
+    // | f=expr LPAR p=separated_list(COMMA, expr) RPAR 
+    //                             { Parse_tree.PEApply (f, p) }
+    | LPAR e=expr RPAR 				  { e }
+    | LPAR v=expr COLON t=type_sig RPAR { Parse_tree.PETyped (v, t) }
 
   fun_body:
 		| e1=expr SEMICOLON f=fun_body { Parse_tree.PESeq (e1, f) }

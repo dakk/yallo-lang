@@ -96,13 +96,6 @@ type declaration =
   (* path import *)
   | DImport of string
 
-  (* a modifier, a pure function that assert a proprierty *)
-  (* | DModifier of {
-    id: iden;
-    params: (iden * ptype) list;
-    expression: unit;
-  } *)
-
   (* constant value *)
   | DConst of { 
     id: iden; 

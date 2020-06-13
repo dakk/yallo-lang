@@ -155,8 +155,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
 
   | PEList (el) -> 
     let (ttl, tel) = List.map (fun x -> transform_expr x env' ic) el |> List.split in
-    let lt = fold_container_type "List elements" ttl in 
-    TList(lt), List(tel)
+    if List.length ttl > 0 then 
+      let lt = fold_container_type "List elements" ttl in TList(lt), List(tel)
+    else 
+      TList(TAny), List([])
 
   | PEMap (el) -> 
     let l = List.map (fun (a, b) -> transform_expr a env' ic, transform_expr b env' ic) el in
@@ -185,7 +187,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
 
   | PELambda (argl, e) -> 
     let rl = List.map (fun (i,t) -> i, transform_type t env') argl in
-    let (tt, ee) = transform_expr e (Env.push_scope env' (Scope.of_params Lambda rl)) ic in 
+    let (tt, ee) = transform_expr e env' (ic @ rl) in 
     let arg = (match List.length rl with 
       | 0 -> TUnit
       | 1 -> snd @@ List.hd rl
@@ -314,6 +316,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     | None -> Env.get_ref i env', LocalRef (i)
     | Some (t) -> t, LocalRef (i)
     )
+
+  | PEApply (PERef("assert"), c) ->
+    if List.length c <> 1 then failwith @@ "Assert need only one argument";
+    let tt, ee = transform_expr (List.hd c) env' ic in
+    if tt <> TBool then failwith @@ "Assert need a bool expression, got: " ^ show_ttype tt;
+    TUnit, Assert(ee)
 
   | PEApply (e, el) -> 
     let (tt,ee) = transform_expr e env' ic in 

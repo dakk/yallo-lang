@@ -57,5 +57,8 @@ let () =
     "function", [
       "wrong_return_type", `Quick, compile false "test/function/wrong_return_type.yallo" None;
       "base_fun", `Quick, compile true "test/function/base_fun.yallo" None;
+    ];
+    "contract", [
+      "token", `Quick, compile true "test/contract/token.yallo" None;
     ]
   ]
