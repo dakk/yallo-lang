@@ -51,7 +51,7 @@ contract Token implements IToken {
 	entry getBalance(ad: address, cb: nat callback) {
 		let balance: nat = this.balances.get(ad);
 		let op: operation = cb(balance);
-		return [op];
+		[op];
 	}
 }
 ```
