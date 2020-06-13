@@ -1,6 +1,8 @@
 function testFunction (a: int): int {
-	var b: int = a * 12;
-	return b * 512;
+	var b: int;
+	const c: int = 12;
+	failif(a>12);
+	return a * 512 + c;
 }
 
 contract Test {

@@ -7,16 +7,18 @@ module Scope = struct
 
   type t = {
     stype: sc;
+    rettype: ttype;
     consts: (iden * ttype) list;
     vars: (iden * ttype) list;
     symbols: (iden * st) list
   } [@@deriving show {with_path = false}]
 
-  let empty s = { stype=s; consts=[]; vars=[]; symbols=[] }
+  let empty s = { rettype=TUnit; stype=s; consts=[]; vars=[]; symbols=[] }
 
   let of_params (ss: sc) (pl: (iden * ttype) list) = {
     stype= ss;
     consts= pl;
+    rettype= TUnit;
     vars= [];
     symbols= List.map (fun (i,_) -> (i, Const)) pl
   }
@@ -29,10 +31,26 @@ module Scope = struct
   let get i s: ttype = match get_opt i s with 
   | None -> raise Not_found
   | Some(v) -> v
+
+  let add_const i tt s = 
+    { s with 
+     consts= (i, tt)::s.consts;
+     symbols= (i, Const)::s.symbols;
+    }
+
+  let rec add_consts cl s = match cl with
+  | [] -> s 
+  | (i, tt)::xl -> add_consts xl (add_const i tt s)
+
+  let add_var i tt s = 
+    { s with 
+      vars= (i, tt)::s.vars;
+      symbols= (i, Var)::s.symbols;
+    }
 end
 
 module Env = struct 
-  type st = | Type | Interface | Const | Contract [@@deriving show {with_path = false}]
+  type st = | Type | Interface | Const | Contract | Function [@@deriving show {with_path = false}]
 
   type t = {
     scope_stack: Scope.t list;
@@ -78,6 +96,12 @@ module Env = struct
 
   (* Fail if the symbol is already defined *)
   let assert_symbol_absence (e: t) s = 
+    let rec assert_scope sl = (match sl with 
+    | [] -> () 
+    | sc::sl' -> 
+      if Scope.get_opt s sc = None then assert_scope sl' else 
+        failwith ("Symbol '" ^ s ^ "' is already defined")
+    ) in assert_scope e.scope_stack;
     match List.assoc_opt s e.symbols with 
     | None -> ()
     | Some (st) -> failwith ("Symbol '" ^ s ^ "' is already defined as " ^ show_st st)

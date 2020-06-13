@@ -40,4 +40,7 @@ let () =
       "enum", `Quick, compile true "test/const/enum.yallo" None;
       "crypto_f", `Quick, compile true "test/const/crypto_f.yallo" None;
     ];
+    "decl.function", [
+      "wrong_return_type", `Quick, compile false "test/decl/function/wrong_return_type.yallo" None;
+    ]
   ]

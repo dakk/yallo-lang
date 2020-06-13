@@ -1,0 +1,3 @@
+function testFunction (a: int): bool {
+	return a * 512 + c;
+}

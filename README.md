@@ -60,7 +60,7 @@ From another contract, if we want to use the token getBalance entry we'll do as 
 ```java
 #import "IToken.yallo";
 
-const tokenContractAddress: address = "...";
+const tokenContractAddress: address = @KT1ThEdxfUcWUwqsdergy3QnbCWGHSUHeHJq;
 
 contract usingAToken {
 	...

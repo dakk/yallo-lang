@@ -2,6 +2,7 @@ open Ast_env
 open Ast_ttype
 open Translate_pexpr
 open Translate_ptype
+open Translate_pstatement
 
 let rec transform (p: Parse_tree.t) (e: Env.t): Env.t = 
   match p with 
@@ -26,13 +27,6 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | TList (TAny), TList (_) -> et
       | TSet (TAny), TSet (_) -> et
       | TOption (TAny), TOption (_) -> et
-      (* | TString, TAddress -> TAddress
-      | TString, TKey -> TKey
-      | TString, TKeyHash -> TKeyHash
-      | TString, TSignature -> TSignature
-      | TString, TBytes -> TBytes 
-      | TBytes, TString -> TString
-      | TAddress, TString -> TString *)
       | a, b when a = b -> t
       | _, _ -> failwith ("Const '" ^ dc.id ^ "' expect to have type '" ^ show_ttype et ^ "', but type '" ^ show_ttype t ^ "' found")
     in
@@ -45,8 +39,10 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
   (* functions *)
   | Parse_tree.DFunction (df) :: p' ->
     Env.assert_symbol_absence e df.id;
-
-
+    let pars = List.map (fun (i, t) -> (i, transform_type t e)) df.params in 
+    let nscope = Scope.add_consts pars @@ Scope.empty Function in     
+    let nscope = { nscope with rettype = transform_type df.rettype e } in
+    let st = transform_statements df.statements @@ Env.push_scope e nscope in 
     transform p' e
 
   (* interface *)
