@@ -5,6 +5,14 @@ open Translate_ptype
 
 (* transform an pexpr to (ttype * expr) *)
 let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) list) : (ttype * expr) = 
+  let compare_type_lazy t t' = (match t', t with 
+    | TList(a), TList(TAny) -> true 
+    | TSet(a), TSet(TAny) -> true 
+    | TMap(a,b), TMap(TAny,TAny) -> true 
+    | TBigMap(a,b), TBigMap(TAny,TAny) -> true 
+    | a, b when a=b -> true
+    | _, _ -> false
+  ) in
   let fold_container_type debs l =
     List.fold_left (fun acc xt -> if acc <> xt then 
       failwith @@ debs ^ " must have the same type: " ^ show_ttype acc ^ " <> " ^ show_ttype xt
@@ -114,8 +122,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
       | TTuple ([a; _]), "fst", [] -> a, TupleFst (ee)
       | TTuple ([_; b]), "snd", [] -> b, TupleSnd (ee)
 
-      | _, _, _-> 
-        failwith @@ "Invalid apply of f over '" ^ show_ttype te ^ "'"
+      | _, i, _-> 
+        failwith @@ "Invalid apply of " ^ i ^ " over '" ^ show_ttype te ^ "'"
     )
 
   (* PEDot record access *)
@@ -329,6 +337,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     if tt <> TBool then failwith @@ "Assert need a bool expression, got: " ^ show_ttype tt;
     TUnit, Assert(ee)
 
+  | PEApply (PERef("fail"), c) ->
+    if List.length c <> 1 then failwith @@ "Fail need only one argument";
+    let tt, ee = transform_expr (List.hd c) env' ic in
+    if tt <> TString then failwith @@ "Fail need a string expression, got: " ^ show_ttype tt;
+    TUnit, Fail(ee)
+
   | PEApply (e, el) -> 
     let (tt,ee) = transform_expr e env' ic in 
     (match tt with 
@@ -395,14 +409,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
   | PELetIn(i, Some(t), e, e1) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
-    if tt <> t' then failwith @@ "LetIn type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
+    if not @@ compare_type_lazy tt t' then failwith @@ "LetIn type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
     let (tt1, ee1) = transform_expr e1 env' @@ (i,t')::ic in 
     tt, LetIn (i, t', ee, ee1)
 
   | PESeq(PELet(i, Some(t), e), en) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
-    if tt <> t' then failwith @@ "Let type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
+    if not @@ compare_type_lazy tt t' then failwith @@ "Let type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
     let (tnt, ene) = transform_expr en env' @@ (i, t')::ic in
     tnt, Seq(Let(i, t', ee), ene)
 
@@ -410,6 +424,23 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     let (tt, ee) = transform_expr e env' ic in 
     let (tt1, ee1) = transform_expr e1 env' @@ (i,tt)::ic in 
     tt, LetIn (i, tt, ee, ee1)
+
+  | PELetTuple(tl, e) -> 
+    let (tt, ee) = transform_expr e env' ic in 
+    let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
+    tt, LetTuple(tl', ee)
+
+  | PELetTupleIn(tl, e, e1) -> 
+    let (tt, ee) = transform_expr e env' ic in 
+    let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
+    let (tt1, ee1) = transform_expr e1 env' @@ tl'@ic in 
+    tt1, LetTupleIn(tl', ee, ee1)
+
+  | PESeq(PELetTuple(tl, e), en) -> 
+    let (tt, ee) = transform_expr e env' ic in 
+    let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
+    let (tnt, ene) = transform_expr en env' @@ tl'@ic in
+    tnt, Seq(LetTuple(tl', ee), ene)
 
   | PESeq(PELet(i, None, e), en) -> 
     let (tt, ee) = transform_expr e env' ic in 

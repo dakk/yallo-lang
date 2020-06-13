@@ -1,11 +1,13 @@
 function testFunction (a: int): int {
 	let b: int = 12;
 	let c: int = 12;
-	failif(a>12);
+	assert(a>12);
 	a * 512 + c
 }
 
 contract Test {
+	field b: (int, int) map;
+
 	entry testConst () {
 		let b: int = 12;
 		let c: int = b * 11;
@@ -18,16 +20,13 @@ contract Test {
 		[]
 	}
 	entry testAssign () {
-		let bb: record { a: int };
-		let b: int;
-		bb.a = 199;
+		let bb: record { a: int } = { a=12 };
 		[]
 	}
+
 	entry testCall () {
-		let b: (int, int) map;
-		b.update(235,"ciaomondo");
 		this.b.update(12, 15);
-		failwith("error");
+		fail("error");
 		assert(12 > 14);
 		[]
 	}

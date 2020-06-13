@@ -1,0 +1,13 @@
+import "test/contract/token.yallo";
+
+const tokenContractAddress: address = @KT1ThEdxfUcWUwqsdergy3QnbCWGHSUHeHJq;
+
+contract usingAToken {
+	entry checkBalance(a: address) {
+		[IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback)]
+	}
+
+	entry checkBalanceCallback(b: nat) {
+
+	}
+}

@@ -100,13 +100,17 @@
                                 { Parse_tree.PELambda (tl, e) }
 
 		// bindings 
-		// | e1=expr COLON e2=expr { Parse_tree.PESeq (e1, e2) }
 		| LET i=IDENT COLON t=type_sig EQ e=expr IN ee=expr { Parse_tree.PELetIn (i, Some(t), e, ee) }
 		| LET i=IDENT COLON t=type_sig EQ e=expr { Parse_tree.PELet (i, Some(t), e) }
 		| LET i=IDENT EQ e=expr IN ee=expr { Parse_tree.PELetIn (i, None, e, ee) }
 		| LET i=IDENT EQ e=expr { Parse_tree.PELet (i, None, e) }
 
-		// ??
+		| LET LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR EQ e=expr IN ee=expr 
+			{ Parse_tree.PELetTupleIn (tl, e, ee) }
+		| LET LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR EQ e=expr 
+			{ Parse_tree.PELetTuple (tl, e) }
+
+		// storage assignment
 		| i=left EQ e=expr { Parse_tree.PEAssign (i, e) }
 
     // arithm
@@ -135,12 +139,7 @@
 		| MATCH c=expr WITH cl=nonempty_list(match_case) 
 																{ Parse_tree.PEMatchWith (c, cl) }
 
-
     | i=IDENT 						      { Parse_tree.PERef (i) }
-    // | TEZOS DOT i=IDENT         { Parse_tree.PETRef (i) }
-    // | THIS DOT i=IDENT          { Parse_tree.PESRef (i) }
-    // | CRYPTO DOT i=IDENT 				{ Parse_tree.PECRef (i) }
-
     | e=left DOT i=IDENT 	{ Parse_tree.PEDot (e, i) }
     | ii=IDENT HT i=IDENT { Parse_tree.PEHt (ii, i) }
 

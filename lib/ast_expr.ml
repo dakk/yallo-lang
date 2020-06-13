@@ -119,6 +119,7 @@ type expr =
 | MatchWith of expr * (expr * expr) list
 | Apply of expr * expr
 
+| Fail of expr
 | FailIf of expr
 | FailIfMessage of expr * expr
 | Assert of expr    
@@ -126,6 +127,7 @@ type expr =
 | LetIn of iden * ttype * expr * expr
 | Let of iden * ttype * expr 
 | LetTuple of (iden * ttype) list * expr 
+| LetTupleIn of (iden * ttype) list * expr * expr
 | SAssign of iden * expr
 | SRecAssign of iden * iden * expr 
 (* | PECall of left_op * iden * pexpr list  *)

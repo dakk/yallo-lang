@@ -22,11 +22,10 @@ let compile success path cname _ =
 let () =
   Alcotest.run "yallo" [
     "misc", [
-      (* "declarations", `Quick, compile true "test/misc/declarations.yallo" None; *)
       "expr", `Quick, compile true "test/misc/expr.yallo" None;
       "literal", `Quick, compile true "test/misc/literal.yallo" None;
       "record", `Quick, compile true "test/misc/record.yallo" None;
-      (* "statements", `Quick, compile true "test/misc/statements.yallo" None; *)
+      "statements", `Quick, compile true "test/misc/statements.yallo" None;
       "typemod", `Quick, compile true "test/misc/typemod.yallo" None;
       "types", `Quick, compile true "test/misc/types.yallo" None;
     ];
@@ -59,7 +58,10 @@ let () =
       "base_fun", `Quick, compile true "test/function/base_fun.yallo" None;
     ];
     "contract", [
+      "itoken", `Quick, compile true "test/contract/itoken.yallo" None;
       "token", `Quick, compile true "test/contract/token.yallo" None;
+      "token_create", `Quick, compile true "test/contract/token_create.yallo" None;
+      "token_using", `Quick, compile true "test/contract/token_using.yallo" None;
       "crec", `Quick, compile true "test/contract/crec.yallo" None;
       "cenum", `Quick, compile true "test/contract/cenum.yallo" None;
     ]

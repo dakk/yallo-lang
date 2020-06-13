@@ -1,13 +1,4 @@
-
-
-interface IToken {
-	entry transfer(from: address, to: address, val: nat);
-	entry getBalance(ad: address, cb: nat contract);
-}
-
-interface ITokenWithGetTotalSupply extends IToken {
-	entry getTotalSupply (cb: nat contract);
-}
+import "test/contract/itoken.yallo";
 
 contract Token implements IToken {
 	field balances: (address, nat) big_map;

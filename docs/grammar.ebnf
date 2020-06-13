@@ -56,6 +56,8 @@
          | LET IDENT COLON <type_sig> EQ <expr>
          | LET IDENT EQ <expr> IN <expr>
          | LET IDENT EQ <expr>
+         | LET LPAR <parameter> (COMMA <parameter>)* RPAR EQ <expr> IN <expr>
+         | LET LPAR <parameter> (COMMA <parameter>)* RPAR EQ <expr>
          | <left> EQ <expr>
          | <expr> ADD <expr>
          | <expr> SUB <expr>
