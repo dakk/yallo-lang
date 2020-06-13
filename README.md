@@ -17,12 +17,17 @@ This is only a research project, it is not (yet) intendeed for real usage.
 
 ## OOlike abstraction example
 
-We first define an interface describing the signature of a token contract
+We first define an interface describing the signature of a token contract, and another interface extending
+IToken with a getTotalSupply.
 
 ```java
 interface IToken {
 	entry transfer(from: address, to: address, val: nat);
 	entry getBalance(ad: address, cb: nat callback);
+}
+
+interface ITokenWithGetTotalSupply extends IToken {
+	entry getTotalSupply (cb: nat callback);
 }
 ```
 
