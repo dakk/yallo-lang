@@ -1,0 +1,4 @@
+import "test/import/a.yallo";
+
+const a: t = (12, "ciao");
+
