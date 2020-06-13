@@ -1,39 +1,38 @@
 function testFunction (a: int): int {
-	var b: int;
-	const c: int = 12;
+	let b: int = 12;
+	let c: int = 12;
 	failif(a>12);
-	return a * 512 + c;
+	a * 512 + c
 }
 
 contract Test {
-	entry testSkip () {
-		skip;
-	}
 	entry testConst () {
-		const b: int = 12;
-		const c: int = b * 11;
+		let b: int = 12;
+		let c: int = b * 11;
+		[]
 	}
 	entry testVar () {
-		var b: int = 12;
-		var c: int;
-		var (c: int, b: int list) = (12, [12]);
+		let b: int = 12;
+		let c: int = 13;
+		let (c: int, b: int list) = (12, [12]);
+		[]
 	}
 	entry testAssign () {
-		var bb: record { a: int };
-		var b: int;
-		b = 12;
-		this.c = 14;
+		let bb: record { a: int };
+		let b: int;
 		bb.a = 199;
+		[]
 	}
 	entry testCall () {
-		var b: (int, int) map;
+		let b: (int, int) map;
 		b.update(235,"ciaomondo");
 		this.b.update(12, 15);
 		failwith("error");
 		assert(12 > 14);
+		[]
 	}
 	
 	entry testReturn () {
-		return [(12: operation)];
+		[]
 	}
 }

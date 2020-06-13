@@ -56,6 +56,7 @@ module Env = struct
     scope_stack: Scope.t list;
     types:       (iden * ttype) list;
     consts:      (iden * texpr) list;
+    (* functions:   (iden * ) *)
     symbols:     (iden * st) list
   } [@@deriving show {with_path = false}]
 

@@ -40,16 +40,17 @@ contract Token implements IToken {
 	}
 
 	entry transfer(from: address, to: address, val: nat) {
-		const a: nat = this.balances.get(from);
-		const b: nat = this.balances.get(to);
+		let a: nat = this.balances.get(from);
+		let b: nat = this.balances.get(to);
 		assert (a > val);
 		this.balances.update(from, a - val);
 		this.balances.update(to, b + val); 
+		[]
 	}
 
 	entry getBalance(ad: address, cb: nat callback) {
-		const balance: nat = this.balances.get(ad);
-		var op: operation = cb(balance);
+		let balance: nat = this.balances.get(ad);
+		let op: operation = cb(balance);
 		return [op];
 	}
 }
@@ -66,7 +67,7 @@ contract usingAToken {
 	...
 
 	entry checkBalance(a: address) {
-		return [IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback)];
+		[IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback)]
 	}
 
 	entry checkBalanceCallback(b: nat) {
@@ -84,8 +85,8 @@ contract usingAToken {
 	...
 
 	entry deployToken() {
-		var (a: address, op: operation) = Tezos.createContract (Token(100, "ourToken"), None, 0);
-		return [op];
+		let (a: address, op: operation) = Tezos.createContract (Token(100, "ourToken"), None, 0);
+		[op]
 	}
 }
 ```

@@ -1,0 +1,35 @@
+function test1 (a: int): int {
+	12 + a
+}
+
+function test1_nopar (): int {
+	12
+}
+
+function test2_nopar (): int {
+	let c: int = 12;
+	12 + c
+}
+
+function test3_nopar (): int {
+	let c: int = 12;
+	let d: int = 12;
+	12 + c + d
+}
+
+function test21_nopar (): int {
+	let c: int = 12;
+	12 + c
+}
+
+function test31_nopar (): int {
+	let c: int = 12;
+	let d: int = 12;
+	12 + c + d
+}
+
+function test_redeclare_let (): int {
+	let c: string = "ciao";
+	let c: int = 12;
+	12 + c
+}

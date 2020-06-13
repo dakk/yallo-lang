@@ -19,12 +19,13 @@
 		"map";
 		"set";
 		"option";
+		"let";
+		"in";
 		"true";
 		"false";
 		"and";
 		"or";
 		"not";
-		"skip";
 		"constructor";
   ]
 
@@ -90,8 +91,6 @@ rule token = parse
   | "callback"      { CONT "callback" }
   | "const"				  { CONST }
   | "record"        { RECORD }
-  | "var"				  	{ VAR }
-  | "return"			  { RETURN }
   | "this"				  { THIS }
   | "if"				  	{ IF }
   | "then"				  { THEN }
@@ -99,7 +98,6 @@ rule token = parse
   | "and"				  	{ AND }
   | "or"				  	{ OR }
   | "not"				  	{ NOT }
-  | "skip"				  { SKIP }
   | "Some"				  { SOME }
   | "None"				  { NONE }
   | "Tezos"				  { TEZOS }
@@ -108,6 +106,8 @@ rule token = parse
 	| "Unit"					{ UNIT }
 	| "Crypto"				{ CRYPTO }
   | "constructor"		{ CONSTRUCTOR }
+	| "let"						{ LET }
+	| "in"						{ IN }
   
 	| "#"							{ HT }
   | "->"				 	 	{ LAMBDA }
