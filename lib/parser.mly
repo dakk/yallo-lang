@@ -37,8 +37,9 @@
   ident: | i=IDENT { i }
 
   signature: 
-    | ENTRY n=IDENT LPAR pl=separated_list(COMMA, parameter) RPAR ml=list(MODIFIER)
-      { (n, pl, []) }
+		// ml=list(MODIFIER)
+    | ENTRY n=IDENT LPAR pl=separated_list(COMMA, parameter) RPAR 
+      { (n, pl) }
 
   type_sig:
     | t=ident                                       { Parse_tree.PTBuiltin (t) }

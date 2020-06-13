@@ -398,7 +398,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
 
   | PESeq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
-    let (tt2, ee2) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
     if tt1 <> TUnit then failwith @@ "Cannot ignore non unit expression in sequence";
     (tt2, Seq(ee1, ee2))
 

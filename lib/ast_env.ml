@@ -51,15 +51,18 @@ end
 
 module Env = struct 
   type st = | Type | Interface | Const | Contract [@@deriving show {with_path = false}]
+  type entry_sig = (iden * (iden * ttype) list)  [@@deriving show {with_path = false}]
 
   type t = {
     scope_stack: Scope.t list;
     types:       (iden * ttype) list;
     consts:      (iden * texpr) list;
+    ifaces:      (iden * entry_sig list) list;
     symbols:     (iden * st) list
   } [@@deriving show {with_path = false}]
 
   let start_env = {
+    ifaces=[];
     scope_stack=[];
     consts=[];
     types=[

@@ -1,0 +1,3 @@
+interface I1 {
+	entry testEntry (a: int, b: nat);
+}

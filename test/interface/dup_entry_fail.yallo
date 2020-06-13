@@ -1,0 +1,7 @@
+interface Test {
+	entry transfer ();
+}
+
+interface TestB extends Test {
+	entry transfer ();
+}

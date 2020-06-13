@@ -5,7 +5,7 @@
  (name yallo)
  (preprocess (pps ppx_jane ppx_deriving.show))
  (libraries core ppx_deriving menhirLib)
- (modules parse_tree ast_ttype ast_expr ast_env 
+ (modules parse_tree ast_ttype ast_expr ast_env errors
   ast_decl translate_pdecl translate_ptype translate_pexpr ast parser lexer compiler))
 
 (ocamllex lexer)

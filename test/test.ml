@@ -43,8 +43,15 @@ let () =
       "infer", `Quick, compile true "test/const/infer.yallo" None;
       "let_infer", `Quick, compile true "test/const/let_infer.yallo" None;
     ];
-    "decl.function", [
-      "wrong_return_type", `Quick, compile false "test/decl/function/wrong_return_type.yallo" None;
-      "base_fun", `Quick, compile true "test/decl/function/base_fun.yallo" None;
+    "interface", [
+      "i1", `Quick, compile true "test/interface/i1.yallo" None;
+      "extend", `Quick, compile true "test/interface/extend.yallo" None;
+      "empty", `Quick, compile true "test/interface/empty.yallo" None;
+      "duplicate_fail", `Quick, compile false "test/interface/duplicate_fail.yallo" None;
+      "dup_entry_fail", `Quick, compile false "test/interface/dup_entry_fail.yallo" None;
+    ];
+    "function", [
+      "wrong_return_type", `Quick, compile false "test/function/wrong_return_type.yallo" None;
+      "base_fun", `Quick, compile true "test/function/base_fun.yallo" None;
     ]
   ]

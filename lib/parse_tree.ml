@@ -9,8 +9,8 @@ type ptype =
   | PTLambda of ptype * ptype
   [@@deriving show {with_path = false}]
 
-(* identifier * (iden * type) list of parameters * modifier list *)
-type signature = iden * (iden * ptype) list * iden list [@@deriving show {with_path = false}]
+(* identifier * (iden * type) list of parameters *)
+type signature = iden * (iden * ptype) list [@@deriving show {with_path = false}]
 
 
 and pexpr =

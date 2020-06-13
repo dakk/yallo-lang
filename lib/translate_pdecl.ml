@@ -62,8 +62,38 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     }
 
   (* interface *)
+  | Parse_tree.DInterface (di) :: p' -> 
+    Env.assert_symbol_absence e di.id;
+
+    (* if extends, get the list of entries *)
+    let ex = (match di.extends with | None -> [] 
+    | Some (i) -> (match List.assoc_opt i e.ifaces with 
+      | None -> failwith @@ "Interface " ^ di.id ^ " extends an unknown interface " ^ i 
+      | Some(el) -> el)
+    ) in 
+
+    (* extract signatures *)
+    let el = List.map (fun (x, xl) -> 
+      x, List.map (fun (xi, xx) -> xi, transform_type xx e) xl
+    ) di.signatures in
+
+    (* check for duplicates *)
+    let rec dup_fail lst b = match lst with
+      | [] -> ()
+      | (hdi, hdl)::tl -> 
+        if (List.exists (fun (x,l) -> x = hdi) b)
+        then failwith @@ "Duplicate identifier " ^ hdi ^ " in interface " ^ di.id
+        else dup_fail tl ((hdi, hdl)::b) 
+    in dup_fail (el @ ex) [];
+
+    transform p' { e with 
+      symbols=(di.id, Interface)::e.symbols;
+      ifaces=(di.id, el)::e.ifaces; 
+    }
 
   (* contracts *)
+  | Parse_tree.DContract (dc) :: p' -> 
+    transform p' e
 
   | _ :: p' -> transform p' e
   | [] -> e

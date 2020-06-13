@@ -5,7 +5,6 @@
 <ident> ::= IDENT
 
 <signature> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
-                MODIFIER*
 
 <type_sig> ::= <ident>
              | LPAR <type_sig> COMMA <type_sig> (COMMA <type_sig>)* RPAR
