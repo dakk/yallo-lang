@@ -29,6 +29,8 @@ type ttype =
   | TContract of ttype 
   | TContractCode
   | TContractStorage
+  | TInterface of (iden * ttype list) list
+  | TContractInstance of ttype (* TInterface *)
 
 type tattr = {
   push  : bool;
@@ -65,8 +67,15 @@ let attributes (t: ttype) = match t with
   | TTuple (_) ->     { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TContract (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  }
   | TOperation ->     { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+
+  (* custom abstract types *)
   | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
-  | TContractStorage ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TContractStorage ->  
+                      { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TInterface (_) ->     
+                      { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TContractInstance (_) -> 
+                      { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
 
 
 let rec show_ttype (at: ttype) = match at with 
@@ -95,7 +104,11 @@ let rec show_ttype (at: ttype) = match at with
 | TRecord (l) -> "record { " ^ List.fold_left (fun acc (x, xt) -> acc ^ (if acc = "" then "" else ", ") ^ x ^ ": " ^ show_ttype xt) "" l ^ " }"
 | TTuple (tl) -> "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ show_ttype x) "" tl ^ ")"
 | TContract (t) -> show_ttype t ^ " contract"
-| TContractCode -> "contract_code"
+
+| TContractCode -> "code"
+| TContractStorage -> "storage"
+| TInterface (_) -> "interface"
+| TContractInstance (_) -> "instance"
 | _ -> failwith ("Unhandled type")
 
 let pp_ttype fmt (t: ttype) = Format.pp_print_string fmt (show_ttype t); ()

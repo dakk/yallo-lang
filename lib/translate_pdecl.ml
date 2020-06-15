@@ -110,13 +110,19 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     ) in
     if (snd ctor) <> [] && List.length (flds) <> List.length (snd ctor) then
       failwith "Constructor left some fields uninitialized";
+
+    (* entry list signature *)
+    let elsig = List.map (fun (i, p, ex) -> 
+      let p' = List.map (fun (ii, pp) -> transform_type pp e) p in i, p') dc.entries
+    in
     
     (* entry list *)
     let el = List.map (fun (i, p, ex) -> 
       let p' = List.map (fun (ii, pp) -> ii, transform_type pp e) p in 
       let flds_bind = List.map (fun (i,t) -> i, Storage(t)) flds in
       let p_bind = List.map (fun (i,t) -> i, Local(t)) p' in
-      let tt, ee = transform_expr ex e (p_bind @ flds_bind) in 
+      let entry_bind = List.map (fun (i,t) -> i, StorageEntry(t)) elsig in
+      let tt, ee = transform_expr ex e (p_bind @ flds_bind @ entry_bind) in 
       if tt<>TList(TOperation) && tt<>TList(TAny) then failwith @@ "Entry " ^ i ^ " of contract " ^ dc.id ^ " does not evalute to an operation list";
       (i, (p', ee))
     ) dc.entries in

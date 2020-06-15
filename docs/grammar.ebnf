@@ -77,6 +77,8 @@
          | MATCH <expr> WITH <match_case>+
          | IDENT
          | <left> DOT IDENT
+         | <expr> DOT IDENT
+         | THIS DOT IDENT
          | IDENT HT IDENT
          | <left> LPAR [<expr> (COMMA <expr>)*] RPAR
          | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR

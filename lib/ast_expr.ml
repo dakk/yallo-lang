@@ -1,6 +1,10 @@
 open Ast_ttype
 
 type expr = 
+| ContractInstance of expr 
+| StorageEntry of iden
+| BuildContractCodeAndStorage of iden * expr list
+
 | TezosNow
 | TezosAmount
 | TezosBalance
@@ -12,7 +16,7 @@ type expr =
 | TezosAddressOfContract of expr
 (* | TezosContractOfAddress of expr we have to define contract signature to extract *)
 | TezosTransfer of expr * expr * expr
-(* | TezosCreateContract of (expr option) * expr * unit * (iden * expr) list  *)
+| TezosCreateContract of expr * expr * expr
 | TezosImplicitAccount of expr
 
 | CryptoBlake2B of expr

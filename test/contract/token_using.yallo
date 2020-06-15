@@ -4,10 +4,11 @@ const tokenContractAddress: address = @KT1ThEdxfUcWUwqsdergy3QnbCWGHSUHeHJq;
 
 contract usingAToken {
 	entry checkBalance(a: address) {
-		[IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback)]
+		let op = IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback); 
+		[op]
 	}
 
 	entry checkBalanceCallback(b: nat) {
-
+		[]
 	}
 }

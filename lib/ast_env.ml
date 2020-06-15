@@ -69,5 +69,9 @@ module Env = struct
     | None -> failwith @@ "Unknown reference to symbol '" ^ sn ^ "'"
     | Some (Const) -> let (tt, _) = List.assoc sn e.consts in tt     
     | Some (Contract) -> TContractCode  
+    | Some (Interface) -> 
+      let esl = List.assoc sn e.ifaces in 
+      let esl' = List.map (fun (i, pl) -> i, List.map (fun (i, pt) -> pt) pl) esl in 
+      TInterface (esl')
     | _ -> failwith @@ "Symbol '" ^ sn ^ "' not found in env"
 end

@@ -140,8 +140,10 @@
 																{ Parse_tree.PEMatchWith (c, cl) }
 
     | i=IDENT 						      { Parse_tree.PERef (i) }
-    | e=left DOT i=IDENT 	{ Parse_tree.PEDot (e, i) }
-    | ii=IDENT HT i=IDENT { Parse_tree.PEHt (ii, i) }
+    | e=left DOT i=IDENT 				{ Parse_tree.PEDot (e, i) }
+    | e=expr DOT i=IDENT 				{ Parse_tree.PEDot (e, i) }
+		| THIS DOT i=IDENT					{ Parse_tree.PESRef (i) }
+    | ii=IDENT HT i=IDENT 			{ Parse_tree.PEHt (ii, i) }
 
     // apply a function
     | i=left LPAR p=separated_list(COMMA, expr) RPAR 						      { PEApply(i, p) }

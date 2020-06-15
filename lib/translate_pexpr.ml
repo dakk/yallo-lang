@@ -3,8 +3,11 @@ open Ast_env
 open Ast_expr
 open Translate_ptype
 
+let show_ttype_got_expect t1 t2 = "got: '" ^ show_ttype t1 ^ "' expect '" ^ show_ttype t2 ^ "'"
+
 type iref = 
 | Storage of ttype
+| StorageEntry of ttype list
 | Local of ttype
 
 (* transform an pexpr to (ttype * expr) *)
@@ -57,16 +60,21 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       | "now", [] -> TTimestamp, TezosNow
       | "address", [(TContract(ct), ad)] -> TAddress, TezosAddressOfContract (ad)
       (* | "contract", [(TAddress, ad)] -> TContract(TUnit), TezosContractOfAddress (ad) *)
-      | "setDelegate", [(TKeyHash, kh)] -> TOperation, TezosSetDelegate (kh)
+      | "setDelegate", [(TOption (TKeyHash), kho)] -> TOperation, TezosSetDelegate (kho)
+      | "setDelegate", [(TOption (TAny), None)] -> TOperation, TezosSetDelegate (None)
       | "implicitAccount", [(TKeyHash, kh)] -> TContract (TUnit), TezosImplicitAccount(kh)
       | "transfer", [(TContract(ct), c); (ct', cv); (TMutez, am)] when ct'=ct -> 
         TOperation, TezosTransfer (c, cv, am)
-      (* | "createContract", [] -> TTuple([TOperation; TAddress]), TezosCreateContract *)
+      | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TKeyHash), kho); (TMutez, v)] -> 
+        TTuple([TOperation; TAddress]), TezosCreateContract(BuildContractCodeAndStorage(a, b), kho, v)
+      | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TAny), None); (TMutez, v)] -> 
+        TTuple([TOperation; TAddress]), TezosCreateContract(BuildContractCodeAndStorage(a, b), None, v)
 
 (* | TezosSelf
-| TezosImplicitAccount of iden (* todef *)
-| TezosCreateContract of iden todef *)
-      | _, _ -> failwith @@ "Invalid call to Tezos." ^ i
+| TezosImplicitAccount of iden*)
+      | _, _ -> 
+        List.iter (fun (t,e) -> (show_expr e ^ " : " ^ show_ttype t) |> print_endline) el';
+        failwith @@ "Invalid call to Tezos." ^ i
     )
 
   (* PEApply(PECRef) crypto apis *)
@@ -130,6 +138,22 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       (* Tuple *)
       | TTuple ([a; _]), "fst", [] -> a, TupleFst (ee)
       | TTuple ([_; b]), "snd", [] -> b, TupleSnd (ee)
+
+      (* Interface to contract instance *)
+      | TInterface(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(ta)
+
+      (* contract instance call *)
+      | TContractInstance(TInterface(sl)), i, tl -> 
+        (match List.assoc_opt i sl with 
+        | None -> failwith @@ "Unknown entrypoint " ^ i ^ " on contract instance"
+        | Some(es) when es=(fst @@ List.split tl) -> TOperation, (
+          match List.length tl with 
+          | 0 -> Apply(ee, Unit)
+          | 1 -> Apply(ee, List.hd @@ snd @@ List.split tl)
+          | _ -> Apply(ee, Tuple(snd @@ List.split tl))
+        )
+        | _ -> failwith @@ "Invalid types on contract instance apply"
+      )
 
       | _, i, _-> 
         failwith @@ "Invalid apply of " ^ i ^ " over '" ^ show_ttype te ^ "'"
@@ -332,6 +356,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     (match List.assoc_opt i ic with 
       | None -> failwith @@ "Unknow storage field " ^ i
       | Some (Storage(t)) -> t, StorageRef (i)
+      | Some (StorageEntry(tl)) when List.length tl = 0 -> TContract(TUnit), StorageEntry (i)
+      | Some (StorageEntry(tl)) when List.length tl = 1 -> TContract(List.hd tl), StorageEntry (i)
+      | Some (StorageEntry(tl)) when List.length tl > 1 -> TContract(TTuple(tl)), StorageEntry (i)
       | _ -> failwith @@ "Symbol " ^ i ^ " is not a storage field"
       )
   
@@ -385,7 +412,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       TOperation, Apply(ee, pee)
 
     | TContractCode -> 
-      TTuple([TContractCode; TContractStorage]), Unit
+      (* TODO: check constructor parameters *)
+      let cc = (match ee with | GlobalRef (c) -> c) in
+      TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage (cc, List.map (fun e -> snd @@ transform_expr e env' ic) el)
       
     | _ -> failwith @@ "Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el)))
   )
@@ -406,14 +435,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       let (tt, ee) = transform_expr cv env' ic in
       let (tcex, ecex) = transform_expr cex env' ic in
       if (tt <> te) then
-        failwith @@ "Match case has an invalid value type, got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype te ^ "'"
+        failwith @@ "Match case has an invalid value type; " ^ show_ttype_got_expect tt te
       else 
         (ee, tcex, ecex) 
     ) bl in
     (* assert that every branch as the same type *)
     let rett: ttype = List.fold_left (fun acc (_, tcex, _) -> 
       if acc <> tcex then 
-        failwith @@ "Match branches should have same type, got: '" ^ show_ttype tcex ^ "' expect '" ^ show_ttype acc ^ "'"
+        failwith @@ "Match branches should have same type; " ^ show_ttype_got_expect tcex acc
       else 
         tcex
     ) (let (_,b,_) = List.hd bl' in b) bl' 
@@ -423,14 +452,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
   | PELetIn(i, Some(t), e, e1) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
-    if not @@ compare_type_lazy tt t' then failwith @@ "LetIn type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
+    if not @@ compare_type_lazy tt t' then failwith @@ "LetIn type mismatch; " ^ show_ttype_got_expect tt t';
     let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
     tt, LetIn (i, t', ee, ee1)
 
   | PESeq(PELet(i, Some(t), e), en) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
-    if not @@ compare_type_lazy tt t' then failwith @@ "Let type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
+    if not @@ compare_type_lazy tt t' then failwith @@ "Let type mismatch; " ^ show_ttype_got_expect tt t'; 
     let (tnt, ene) = transform_expr en env' @@ push_ic i (Local(t')) ic in
     tnt, Seq(Let(i, t', ee), ene)
 
