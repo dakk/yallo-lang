@@ -147,7 +147,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
     transform p' { e with 
       symbols=(dc.id, Contract)::e.symbols;
-      contracts=(dc.id, (ctor, el))::e.contracts;
+      contracts=(dc.id, (flds, ctor, el))::e.contracts;
     }
 
   | _ :: p' -> transform p' e

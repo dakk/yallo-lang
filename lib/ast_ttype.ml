@@ -27,10 +27,12 @@ type ttype =
   | TRecord of (iden * ttype) list
   | TTuple of ttype list 
   | TContract of ttype 
+
+  (* custom abstract types *)
   | TContractCode
   | TContractStorage
   | TInterface of (iden * ttype list) list
-  | TContractInstance of ttype (* TInterface *)
+  | TContractInstance of ttype
 
 type tattr = {
   push  : bool;
@@ -68,7 +70,6 @@ let attributes (t: ttype) = match t with
   | TContract (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  }
   | TOperation ->     { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
 
-  (* custom abstract types *)
   | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TContractStorage ->  
                       { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }

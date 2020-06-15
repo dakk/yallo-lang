@@ -3,6 +3,7 @@ open Errors
 
 let opt = Compiler.{
   contract = None;
+  out_lang = None;
   print_pt = false;
   print_ast = false;
   verbose = false;

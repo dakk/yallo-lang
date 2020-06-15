@@ -15,7 +15,7 @@ type expr =
 | TezosSource
 | TezosSender
 | TezosAddressOfContract of expr
-(* | TezosContractOfAddress of expr we have to define contract signature to extract *)
+| TezosContractOfAddress of expr
 | TezosTransfer of expr * expr * expr
 | TezosCreateContract of expr * expr * expr
 | TezosImplicitAccount of expr

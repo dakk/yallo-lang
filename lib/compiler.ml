@@ -5,6 +5,7 @@ open Errors
 
 type options = {
   contract: string option;
+  out_lang: string option;
   print_pt: bool;
   print_ast: bool;
   verbose: bool;
@@ -12,6 +13,7 @@ type options = {
 
 let default_options = {
   contract = None;
+  out_lang = None;
   print_pt = true;
   print_ast = true;
   verbose = true;
@@ -72,5 +74,10 @@ let compile (filename: string) opt =
     |> app opt.print_pt print_pt    (* print pt *)
     |> Ast.of_parse_tree            (* transform pt to ast *)
     |> app opt.print_ast print_ast  (* print ast *)
-
+    |> fun ast -> match opt.out_lang, opt.contract with 
+      | None, _ -> ()
+      | Some (_), None -> failwith "No contract specified"
+      | Some ("ligo"), Some(ctr) -> 
+        print_endline @@ Generate_ligo.generate_ligo ast ctr;
+        ()
     |> (fun _ -> ())

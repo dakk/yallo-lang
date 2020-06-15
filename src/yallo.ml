@@ -5,8 +5,7 @@ let run action filename opt =
   (match action with 
   | "compile" -> Compiler.compile filename opt
   | _ -> failwith @@ "Invalid compiler action: " ^ action
-  );
-  Printf.printf "done!\n%!"
+  )
 
 let command =
   Command.basic
@@ -21,8 +20,10 @@ let command =
         and past      = flag "-print-ast" no_arg ~doc:" print ast"
         and ppt       = flag "-print-pt" no_arg ~doc:" print parse-tree"
         and verbose   = flag "-verbose" no_arg ~doc:" enable verbosity"
+        and out_lang  = flag "-out-lang" (optional string) ~doc:" output language"
       in fun () -> 
         let opt = Compiler.{
+          out_lang = out_lang;
           contract = contract;
           print_pt = ppt;
           print_ast = past;

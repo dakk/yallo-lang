@@ -134,7 +134,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       | "balance", [] -> TMutez, TezosBalance
       | "now", [] -> TTimestamp, TezosNow
       | "address", [(TContract(_), ad)] -> TAddress, TezosAddressOfContract (ad)
-      (* | "contract", [(TAddress, ad)] -> TContract(TUnit), TezosContractOfAddress (ad) *)
+      | "contract", [(TAddress, ad)] -> TContract(TAny), TezosContractOfAddress (ad)
       | "setDelegate", [(TOption (TKeyHash), kho)] -> TOperation, TezosSetDelegate (kho)
       | "setDelegate", [(TOption (TAny), None)] -> TOperation, TezosSetDelegate (None)
       | "implicitAccount", [(TKeyHash, kh)] -> TContract (TUnit), TezosImplicitAccount(kh)
@@ -144,7 +144,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
         TTuple([TOperation; TAddress]), TezosCreateContract(BuildContractCodeAndStorage(a, b), kho, v)
       | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TAny), None); (TMutez, v)] -> 
         TTuple([TOperation; TAddress]), TezosCreateContract(BuildContractCodeAndStorage(a, b), None, v)
-      (* | TezosSelf | TezosImplicitAccount of iden*)
+      (* | TezosSelf *)
       | _, _ -> 
         List.iter (fun (t,e) -> (show_expr e ^ " : " ^ show_ttype t) |> print_endline) el';
         raise @@ APIError("Invalid call to Tezos." ^ i)
