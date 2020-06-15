@@ -108,6 +108,8 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
         par',
         List.map (fun (i, a) -> i, snd @@ transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
     ) in
+    if (snd ctor) <> [] && List.length (flds) <> List.length (snd ctor) then
+      failwith "Constructor left some fields uninitialized";
     
     (* entry list *)
     let el = List.map (fun (i, p, ex) -> 

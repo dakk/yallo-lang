@@ -64,5 +64,6 @@ let () =
       "token_using", `Quick, compile true "test/contract/token_using.yallo" None;
       "crec", `Quick, compile true "test/contract/crec.yallo" None;
       "cenum", `Quick, compile true "test/contract/cenum.yallo" None;
+      "ctor_fail", `Quick, compile false "test/contract/ctor_fail.yallo" None;
     ]
   ]
