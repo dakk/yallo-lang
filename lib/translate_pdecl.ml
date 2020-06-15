@@ -51,7 +51,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     Env.assert_symbol_absence e df.id;
     let rettype = transform_type df.rettype e in 
     let pars = List.map (fun (i, t) -> (i, transform_type t e)) df.params in 
-    let (st, se) = transform_expr df.exp e pars in 
+    let (st, se) = transform_expr df.exp e @@ List.map (fun (i,t) -> i, Local(t)) pars in 
     if st <> rettype then failwith @@ "Function return type mismatch, got: '" ^ show_ttype st ^ "', expect: '" ^ show_ttype rettype ^ "'";
 
     transform p' { e with 
@@ -106,13 +106,15 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | Some (par, ass) -> 
         let par' = List.map (fun (i, a) -> i, transform_type a e) par in
         par',
-        List.map (fun (i, a) -> i, snd @@ transform_expr a e par') ass
+        List.map (fun (i, a) -> i, snd @@ transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
     ) in
     
     (* entry list *)
     let el = List.map (fun (i, p, ex) -> 
       let p' = List.map (fun (ii, pp) -> ii, transform_type pp e) p in 
-      let tt, ee = transform_expr ex e (p'@flds) in 
+      let flds_bind = List.map (fun (i,t) -> i, Storage(t)) flds in
+      let p_bind = List.map (fun (i,t) -> i, Local(t)) p' in
+      let tt, ee = transform_expr ex e (p_bind @ flds_bind) in 
       if tt<>TList(TOperation) && tt<>TList(TAny) then failwith @@ "Entry " ^ i ^ " of contract " ^ dc.id ^ " does not evalute to an operation list";
       (i, (p', ee))
     ) dc.entries in

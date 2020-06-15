@@ -27,7 +27,8 @@ type ttype =
   | TRecord of (iden * ttype) list
   | TTuple of ttype list 
   | TContract of ttype 
-  | TContractCode (* this is the reference to a contract code, used only on create_contract *)
+  | TContractCode
+  | TContractStorage
 
 type tattr = {
   push  : bool;
@@ -63,8 +64,9 @@ let attributes (t: ttype) = match t with
   | TRecord (_) ->    { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false } (* ? *)
   | TTuple (_) ->     { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TContract (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  }
-  | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TOperation ->     { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TContractStorage ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
 
 
 let rec show_ttype (at: ttype) = match at with 

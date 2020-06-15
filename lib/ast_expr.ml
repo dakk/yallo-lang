@@ -10,10 +10,10 @@ type expr =
 | TezosSource
 | TezosSender
 | TezosAddressOfContract of expr
-| TezosContractOfAddress of expr
+(* | TezosContractOfAddress of expr we have to define contract signature to extract *)
 | TezosTransfer of expr * expr * expr
-| TezosCreateContract of iden (* todef *)
-| TezosImplicitAccount of iden (* todef *)
+(* | TezosCreateContract of (expr option) * expr * unit * (iden * expr) list  *)
+| TezosImplicitAccount of expr
 
 | CryptoBlake2B of expr
 | CryptoCheckSignature of expr * expr * expr
@@ -23,6 +23,7 @@ type expr =
 
 | LocalRef of iden 
 | StorageRef of iden
+| GlobalRef of iden
 
 | None
 | Unit 

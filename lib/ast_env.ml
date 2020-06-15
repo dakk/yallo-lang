@@ -67,6 +67,7 @@ module Env = struct
   let get_ref sn (e: t) = 
     match List.assoc_opt sn e.symbols with 
     | None -> failwith @@ "Unknown reference to symbol '" ^ sn ^ "'"
-    | Some (Const) -> let (tt, _) = List.assoc sn e.consts in tt       
-    | _ -> failwith @@ "Symbol '" ^ sn ^ "' not found in the current env"
+    | Some (Const) -> let (tt, _) = List.assoc sn e.consts in tt     
+    | Some (Contract) -> TContractCode  
+    | _ -> failwith @@ "Symbol '" ^ sn ^ "' not found in env"
 end

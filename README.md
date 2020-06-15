@@ -58,7 +58,7 @@ contract Token implements IToken {
 	entry getBalance(ad: address, cb: nat contract) {
 		let balance: nat = this.balances.get(ad);
 		let op: operation = cb(balance);
-		[op];
+		[op]
 	}
 }
 ```
@@ -78,7 +78,7 @@ contract usingAToken {
 	}
 
 	entry checkBalanceCallback(b: nat) {
-
+		[]
 	}
 }
 ```
@@ -86,7 +86,7 @@ contract usingAToken {
 Or, if we want to deploy a token contract from another contract:
 
 ```java
-#import "Token.yallo";
+import "Token.yallo";
 
 contract deployAToken {
 	field tokenAddress: address;

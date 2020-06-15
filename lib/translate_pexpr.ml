@@ -3,13 +3,19 @@ open Ast_env
 open Ast_expr
 open Translate_ptype
 
+type iref = 
+| Storage of ttype
+| Local of ttype
+
 (* transform an pexpr to (ttype * expr) *)
-let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) list) : (ttype * expr) = 
+let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) list) : (ttype * expr) = 
+  let push_ic i ii ic = (i, ii)::ic in
+  let push_local_many rl ic = (List.map (fun (i,x) -> i, Local(x)) rl) @ ic in
   let compare_type_lazy t t' = (match t', t with 
-    | TList(a), TList(TAny) -> true 
-    | TSet(a), TSet(TAny) -> true 
-    | TMap(a,b), TMap(TAny,TAny) -> true 
-    | TBigMap(a,b), TBigMap(TAny,TAny) -> true 
+    | TList(_), TList(TAny) -> true 
+    | TSet(_), TSet(TAny) -> true 
+    | TMap(_,_), TMap(TAny,TAny) -> true 
+    | TBigMap(_,_), TBigMap(TAny,TAny) -> true 
     | a, b when a=b -> true
     | _, _ -> false
   ) in
@@ -49,13 +55,16 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
       | "amount", [] -> TMutez, TezosAmount
       | "balance", [] -> TMutez, TezosBalance
       | "now", [] -> TTimestamp, TezosNow
+      | "address", [(TContract(ct), ad)] -> TAddress, TezosAddressOfContract (ad)
+      (* | "contract", [(TAddress, ad)] -> TContract(TUnit), TezosContractOfAddress (ad) *)
       | "setDelegate", [(TKeyHash, kh)] -> TOperation, TezosSetDelegate (kh)
+      | "implicitAccount", [(TKeyHash, kh)] -> TContract (TUnit), TezosImplicitAccount(kh)
+      | "transfer", [(TContract(ct), c); (ct', cv); (TMutez, am)] when ct'=ct -> 
+        TOperation, TezosTransfer (c, cv, am)
+      (* | "createContract", [] -> TTuple([TOperation; TAddress]), TezosCreateContract *)
 
 (* | TezosSelf
 | TezosImplicitAccount of iden (* todef *)
-| TezosAddressOfContract of expr
-| TezosContractOfAddress of expr
-| TezosTransfer of expr * expr * expr
 | TezosCreateContract of iden todef *)
       | _, _ -> failwith @@ "Invalid call to Tezos." ^ i
     )
@@ -195,7 +204,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
 
   | PELambda (argl, e) -> 
     let rl = List.map (fun (i,t) -> i, transform_type t env') argl in
-    let (tt, ee) = transform_expr e env' (ic @ rl) in 
+    let (tt, ee) = transform_expr e env' (push_local_many rl ic) in 
     let arg = (match List.length rl with 
       | 0 -> TUnit
       | 1 -> snd @@ List.hd rl
@@ -321,14 +330,16 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
 
   | PESRef (i) ->
     (match List.assoc_opt i ic with 
-      | None -> Env.get_ref i env', LocalRef (i)
-      | Some (t) -> t, LocalRef (i)
+      | None -> failwith @@ "Unknow storage field " ^ i
+      | Some (Storage(t)) -> t, StorageRef (i)
+      | _ -> failwith @@ "Symbol " ^ i ^ " is not a storage field"
       )
   
   | PERef (i) -> 
     (match List.assoc_opt i ic with 
-    | None -> Env.get_ref i env', LocalRef (i)
-    | Some (t) -> t, LocalRef (i)
+    | None -> Env.get_ref i env', GlobalRef (i)
+    | Some (Local(t)) -> t, LocalRef (i)
+    | _ -> failwith @@ "Symbol " ^ i ^ " is not a valid ref"
     )
 
   | PEApply (PERef("assert"), c) ->
@@ -372,8 +383,11 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
       let (ptt, pee) = transform_expr (List.hd el) env' ic in 
       if ptt <> ttl then failwith "Invalid arguments for callback";
       TOperation, Apply(ee, pee)
+
+    | TContractCode -> 
+      TTuple([TContractCode; TContractStorage]), Unit
       
-    | _ -> failwith @@ "Applying on not a labmda: " ^ (Parse_tree.show_pexpr (PEApply(e, el)))
+    | _ -> failwith @@ "Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el)))
   )
   
 
@@ -410,19 +424,19 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
     if not @@ compare_type_lazy tt t' then failwith @@ "LetIn type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
-    let (tt1, ee1) = transform_expr e1 env' @@ (i,t')::ic in 
+    let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
     tt, LetIn (i, t', ee, ee1)
 
   | PESeq(PELet(i, Some(t), e), en) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
     if not @@ compare_type_lazy tt t' then failwith @@ "Let type mismatch; got: '" ^ show_ttype tt ^ "' expect '" ^ show_ttype t' ^ "'";
-    let (tnt, ene) = transform_expr en env' @@ (i, t')::ic in
+    let (tnt, ene) = transform_expr en env' @@ push_ic i (Local(t')) ic in
     tnt, Seq(Let(i, t', ee), ene)
 
   | PELetIn(i, None, e, e1) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let (tt1, ee1) = transform_expr e1 env' @@ (i,tt)::ic in 
+    let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(tt)) ic in 
     tt, LetIn (i, tt, ee, ee1)
 
   | PELetTuple(tl, e) -> 
@@ -433,18 +447,18 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
   | PELetTupleIn(tl, e, e1) -> 
     let (tt, ee) = transform_expr e env' ic in 
     let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
-    let (tt1, ee1) = transform_expr e1 env' @@ tl'@ic in 
+    let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
     tt1, LetTupleIn(tl', ee, ee1)
 
   | PESeq(PELetTuple(tl, e), en) -> 
     let (tt, ee) = transform_expr e env' ic in 
     let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
-    let (tnt, ene) = transform_expr en env' @@ tl'@ic in
+    let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
     tnt, Seq(LetTuple(tl', ee), ene)
 
   | PESeq(PELet(i, None, e), en) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let (tnt, ene) = transform_expr en env' @@ (i, tt)::ic in
+    let (tnt, ene) = transform_expr en env' @@ push_ic i (Local(tt)) ic in
     tnt, Seq(Let(i, tt, ee), ene)
 
   | PESeq (e1, e2) -> 
@@ -455,13 +469,13 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * ttype) 
 
   | PEAssign (PESRef (x), e) -> 
     let (tte, eee) = transform_expr e env' ic in 
-    if tte <> List.assoc x ic then failwith @@ "Invalid assignment";
+    if Storage(tte) <> List.assoc x ic then failwith @@ "Invalid assignment";
     TUnit, SAssign(x, eee)
 
   | PEAssign (PEDot(PESRef (x), i), e) -> 
     let (tte, eee) = transform_expr e env' ic in 
     (match List.assoc x ic with 
-    | TRecord (tl) ->
+    | Storage(TRecord (tl)) ->
       let recel = List.assoc i tl in 
       if tte <> recel then failwith @@ "Invalid assignment";
       TUnit, SRecAssign(x, i, eee)
