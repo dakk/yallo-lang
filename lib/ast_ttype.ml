@@ -96,7 +96,7 @@ let rec show_ttype (at: ttype) = match at with
 | TString -> "string"
 | TBytes -> "bytes"
 | TLambda (p, r) -> "(" ^ show_ttype p ^ " -> " ^ show_ttype r ^ ")"
-| TEnum (el) -> "enum (" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else ", ") ^ x) "" el ^ ")"
+| TEnum (el) -> List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " | ") ^ x) "" el
 | TList (t) -> show_ttype t ^ " list"
 | TSet (t) -> show_ttype t ^ " set"
 | TMap (t, t') -> "(" ^ show_ttype t ^ ", " ^ show_ttype t' ^ ") map"

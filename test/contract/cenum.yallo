@@ -1,5 +1,10 @@
 type status = enum (Pending | Terminated);
 
+function testFunction (c: int): int {
+	let z = c * 2;
+	z
+}
+
 contract Test {
 	field a: status;
 

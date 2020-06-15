@@ -437,7 +437,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     | TContract (ttl) ->
       let (ptt, pee) = transform_expr (List.hd el) env' ic in 
       if ptt <> ttl then raise @@ InvalidExpression ("Invalid arguments for callback");
-      TOperation, Apply(ee, pee)
+      TOperation, TezosTransfer(ee, pee, Mutez (0))
 
     | TContractCode -> 
       (* TODO: check constructor parameters *)
