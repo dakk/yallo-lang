@@ -1,6 +1,7 @@
 open Lexing
 open Lexer
 open Printf
+open Errors
 
 type options = {
   contract: string option;
@@ -27,10 +28,10 @@ let parse filename s =
   try Parser.program Lexer.token lexbuf with 
   | SyntaxError msg ->
     fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    failwith "Syntax error"
+    raise @@ SyntaxError("Syntax error")
   | Parser.Error ->
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
-    failwith "Syntax error"
+    raise @@ SyntaxError("Syntax error")
 
 let rec readfile ic = 
   try let line = input_line ic in (line ^ "\n")::(readfile ic) with _ -> close_in_noerr ic; []

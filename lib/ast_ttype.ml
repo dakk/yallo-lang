@@ -42,7 +42,7 @@ type tattr = {
 } [@@deriving show {with_path = false}]
 
 let attributes (t: ttype) = match t with 
-  | TAny ->           failwith "TAny does not have attribute"
+  | TAny ->           { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TUnit ->          { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TAddress ->       { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TInt ->           { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
@@ -109,6 +109,5 @@ let rec show_ttype (at: ttype) = match at with
 | TContractStorage -> "storage"
 | TInterface (_) -> "interface"
 | TContractInstance (_) -> "instance"
-| _ -> failwith ("Unhandled type")
 
 let pp_ttype fmt (t: ttype) = Format.pp_print_string fmt (show_ttype t); ()

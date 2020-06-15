@@ -2,6 +2,7 @@ open Ast_env
 open Ast_ttype
 open Translate_pexpr
 open Translate_ptype
+open Errors
 
 let rec transform (p: Parse_tree.t) (e: Env.t): Env.t = 
   match p with 
@@ -26,7 +27,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
         | TMap (TAny, TAny)
         | TList (TAny)
         | TSet (TAny)
-        | TOption (TAny) -> failwith @@ "Unable to infer type of const '" ^ dc.id ^ "'"
+        | TOption (TAny) -> raise @@ TypeError("Unable to infer type of const '" ^ dc.id ^ "'")
         | _ -> (t, exp))
     | Some(ptt) ->
       let et = transform_type ptt e in
@@ -39,7 +40,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
         | TSet (TAny), TSet (_) -> et
         | TOption (TAny), TOption (_) -> et
         | a, b when a = b -> t
-        | _, _ -> failwith ("Const '" ^ dc.id ^ "' expect to have type '" ^ show_ttype et ^ "', but type '" ^ show_ttype t ^ "' found")
+        | _, _ -> raise @@ TypeError ("Const '" ^ dc.id ^ "' expect to have type '" ^ show_ttype et ^ "', but type '" ^ show_ttype t ^ "' found")
       in t, exp)
     in transform p' { e with 
       symbols=(dc.id, Const)::e.symbols;
@@ -52,7 +53,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     let rettype = transform_type df.rettype e in 
     let pars = List.map (fun (i, t) -> (i, transform_type t e)) df.params in 
     let (st, se) = transform_expr df.exp e @@ List.map (fun (i,t) -> i, Local(t)) pars in 
-    if st <> rettype then failwith @@ "Function return type mismatch, got: '" ^ show_ttype st ^ "', expect: '" ^ show_ttype rettype ^ "'";
+    if st <> rettype then raise @@ TypeError("Function return type mismatch, got: '" ^ show_ttype st ^ "', expect: '" ^ show_ttype rettype ^ "'");
 
     transform p' { e with 
       symbols=(df.id, Const)::e.symbols;
@@ -66,7 +67,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     (* if extends, get the list of entries *)
     let ex = (match di.extends with | None -> [] 
     | Some (i) -> (match List.assoc_opt i e.ifaces with 
-      | None -> failwith @@ "Interface " ^ di.id ^ " extends an unknown interface " ^ i 
+      | None -> raise @@ DeclarationError("Interface '" ^ di.id ^ "' extends an unknown interface '" ^ i ^ "'")
       | Some(el) -> el)
     ) in 
 
@@ -80,7 +81,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | [] -> ()
       | (hdi, hdl)::tl -> 
         if (List.exists (fun (x,_) -> x = hdi) b)
-        then failwith @@ "Duplicate identifier " ^ hdi ^ " in interface " ^ di.id
+        then raise @@ DeclarationError("Duplicate identifier '" ^ hdi ^ "' in interface '" ^ di.id ^ "'")
         else dup_fail tl ((hdi, hdl)::b) 
     in dup_fail (el @ ex) [];
 
@@ -97,7 +98,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     (* if implements, get the list of entries *)
     let to_implement = (match dc.implements with | None -> [] 
       | Some (i) -> (match List.assoc_opt i e.ifaces with 
-        | None -> failwith @@ "Contract " ^ dc.id ^ " extends an unknown interface " ^ i 
+        | None -> raise @@ DeclarationError("Contract '" ^ dc.id ^ "' extends an unknown interface '" ^ i ^ "'")
         | Some(el) -> el)
     ) in 
 
@@ -109,7 +110,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
         List.map (fun (i, a) -> i, snd @@ transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
     ) in
     if (snd ctor) <> [] && List.length (flds) <> List.length (snd ctor) then
-      failwith "Constructor left some fields uninitialized";
+      raise @@ DeclarationError ("Constructor left some fields uninitialized");
 
     (* entry list signature *)
     let elsig = List.map (fun (i, p, _) -> 
@@ -123,7 +124,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       let p_bind = List.map (fun (i,t) -> i, Local(t)) p' in
       let entry_bind = List.map (fun (i,t) -> i, StorageEntry(t)) elsig in
       let tt, ee = transform_expr ex e (p_bind @ flds_bind @ entry_bind) in 
-      if tt<>TList(TOperation) && tt<>TList(TAny) then failwith @@ "Entry " ^ i ^ " of contract " ^ dc.id ^ " does not evalute to an operation list";
+      if tt<>TList(TOperation) && tt<>TList(TAny) then raise @@ DeclarationError("Entry '" ^ i ^ "' of contract '" ^ dc.id ^ "' does not evalute to an operation list");
       (i, (p', ee))
     ) dc.entries in
 
@@ -132,13 +133,13 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | [] -> ()
       | (hdi, hdl)::tl -> 
         if (List.exists (fun (x,_) -> x = hdi) b)
-        then failwith @@ "Duplicate entry " ^ hdi ^ " in contract " ^ dc.id
+        then raise @@ DeclarationError("Duplicate entry '" ^ hdi ^ "' in contract '" ^ dc.id ^ "'")
         else dup_fail tl ((hdi, hdl)::b) 
     in dup_fail el [];
 
     (* assert all to_implement are implemented *)
     List.iter (fun (i, _) ->
-      if List.assoc_opt i @@ el = None then failwith @@ "Contract " ^ dc.id ^ " does not implement " ^ i;
+      if List.assoc_opt i @@ el = None then raise @@ DeclarationError("Contract '" ^ dc.id ^ "' does not implement '" ^ i ^ "'");
       ()
     ) to_implement;
 

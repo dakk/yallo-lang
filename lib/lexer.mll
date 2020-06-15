@@ -1,6 +1,7 @@
 {
   open Parser
   open Lexing
+	open Errors
 
   let reserved = [ 
     "interface"; 
@@ -30,7 +31,6 @@
   ]
 
 
-	exception SyntaxError of string
 
 	let next_line lexbuf =
 		let pos = lexbuf.lex_curr_p in

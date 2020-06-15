@@ -1,4 +1,9 @@
 exception SyntaxError of string
 exception ParsingError of string
 exception TypeError of string
-exception SymbolNotFound of string * string
+exception SymbolNotFound of string
+exception DuplicateSymbolError of string
+exception DeclarationError of string
+exception InvalidExpression of string
+exception ContractError of string
+exception APIError of string
