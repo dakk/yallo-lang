@@ -79,7 +79,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     let rec dup_fail lst b = match lst with
       | [] -> ()
       | (hdi, hdl)::tl -> 
-        if (List.exists (fun (x,l) -> x = hdi) b)
+        if (List.exists (fun (x,_) -> x = hdi) b)
         then failwith @@ "Duplicate identifier " ^ hdi ^ " in interface " ^ di.id
         else dup_fail tl ((hdi, hdl)::b) 
     in dup_fail (el @ ex) [];
@@ -112,8 +112,8 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       failwith "Constructor left some fields uninitialized";
 
     (* entry list signature *)
-    let elsig = List.map (fun (i, p, ex) -> 
-      let p' = List.map (fun (ii, pp) -> transform_type pp e) p in i, p') dc.entries
+    let elsig = List.map (fun (i, p, _) -> 
+      let p' = List.map (fun (_, pp) -> transform_type pp e) p in i, p') dc.entries
     in
     
     (* entry list *)
@@ -131,7 +131,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     let rec dup_fail lst b = match lst with
       | [] -> ()
       | (hdi, hdl)::tl -> 
-        if (List.exists (fun (x,l) -> x = hdi) b)
+        if (List.exists (fun (x,_) -> x = hdi) b)
         then failwith @@ "Duplicate entry " ^ hdi ^ " in contract " ^ dc.id
         else dup_fail tl ((hdi, hdl)::b) 
     in dup_fail el [];

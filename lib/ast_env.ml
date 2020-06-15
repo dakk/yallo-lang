@@ -71,7 +71,7 @@ module Env = struct
     | Some (Contract) -> TContractCode  
     | Some (Interface) -> 
       let esl = List.assoc sn e.ifaces in 
-      let esl' = List.map (fun (i, pl) -> i, List.map (fun (i, pt) -> pt) pl) esl in 
+      let esl' = List.map (fun (i, pl) -> i, List.map (fun (_, pt) -> pt) pl) esl in 
       TInterface (esl')
     | _ -> failwith @@ "Symbol '" ^ sn ^ "' not found in env"
 end

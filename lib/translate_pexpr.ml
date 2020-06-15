@@ -58,7 +58,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       | "amount", [] -> TMutez, TezosAmount
       | "balance", [] -> TMutez, TezosBalance
       | "now", [] -> TTimestamp, TezosNow
-      | "address", [(TContract(ct), ad)] -> TAddress, TezosAddressOfContract (ad)
+      | "address", [(TContract(_), ad)] -> TAddress, TezosAddressOfContract (ad)
       (* | "contract", [(TAddress, ad)] -> TContract(TUnit), TezosContractOfAddress (ad) *)
       | "setDelegate", [(TOption (TKeyHash), kho)] -> TOperation, TezosSetDelegate (kho)
       | "setDelegate", [(TOption (TAny), None)] -> TOperation, TezosSetDelegate (None)
@@ -169,7 +169,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
         | None -> failwith @@ "Unkown contract entrypoint '" ^ i ^ "'"
         | Some(tl) when List.length tl > 1 -> TContract(TTuple(tl)), Entrypoint(ee, i)
         | Some(tl) when List.length tl = 1 -> TContract(List.hd tl), Entrypoint(ee, i)
-        | Some(tl) when List.length tl = 0 -> TContract(TUnit), Entrypoint(ee, i))
+        | Some(_) -> TContract(TUnit), Entrypoint(ee, i))
 
     (* PEDot record access *)
     | TRecord(t) -> 
@@ -422,7 +422,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
     | TContractCode -> 
       (* TODO: check constructor parameters *)
-      let cc = (match ee with | GlobalRef (c) -> c) in
+      let cc = (match ee with | GlobalRef (c) -> c | _ -> failwith "Expected a globalref") in
       TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage (cc, List.map (fun e -> snd @@ transform_expr e env' ic) el)
       
     | _ -> failwith @@ "Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el)))
@@ -462,7 +462,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
     if not @@ compare_type_lazy tt t' then failwith @@ "LetIn type mismatch; " ^ show_ttype_got_expect tt t';
-    let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
+    let (_, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
     tt, LetIn (i, t', ee, ee1)
 
   | PESeq(PELet(i, Some(t), e), en) -> 
@@ -474,7 +474,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
   | PELetIn(i, None, e, e1) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(tt)) ic in 
+    let (_, ee1) = transform_expr e1 env' @@ push_ic i (Local(tt)) ic in 
     tt, LetIn (i, tt, ee, ee1)
 
   | PELetTuple(tl, e) -> 
@@ -483,13 +483,13 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     tt, LetTuple(tl', ee)
 
   | PELetTupleIn(tl, e, e1) -> 
-    let (tt, ee) = transform_expr e env' ic in 
+    let (_, ee) = transform_expr e env' ic in 
     let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
     let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
     tt1, LetTupleIn(tl', ee, ee1)
 
   | PESeq(PELetTuple(tl, e), en) -> 
-    let (tt, ee) = transform_expr e env' ic in 
+    let (_, ee) = transform_expr e env' ic in 
     let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
     let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
     tnt, Seq(LetTuple(tl', ee), ene)

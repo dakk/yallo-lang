@@ -1,3 +1,3 @@
 open Ast
 
-let generate_michelson (ast: t) = ""
+let generate_ligo (ast: t) (contract: string) = ""
