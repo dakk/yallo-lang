@@ -1,0 +1,3 @@
+type a = enum (Hello | World);
+const b = match a#Hello with | a#Hello -> true | a#World -> false;
+const c = match 2 with | 1 -> a#Hello | 2 -> a#World;

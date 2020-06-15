@@ -27,6 +27,12 @@
 %token <int> MTZ
 %token <string> CONT
 
+%left EQEQ, NEQ
+%left LTE, LT, GT, GTE
+%left ADD, SUB
+%left MOD
+%left MUL, DIV
+
 %start <Parse_tree.t> program
 
 %%

@@ -29,6 +29,10 @@ let () =
       "typemod", `Quick, compile true "test/misc/typemod.yallo" None;
       "types", `Quick, compile true "test/misc/types.yallo" None;
     ];
+    "expr", [
+      "assoc", `Quick, compile true "test/expr/assoc.yallo" None;
+      "match", `Quick, compile true "test/expr/match.yallo" None;
+    ];
     "const", [
       "cont", `Quick, compile true "test/const/cont.yallo" None;
       "numeric", `Quick, compile true "test/const/numeric.yallo" None;
