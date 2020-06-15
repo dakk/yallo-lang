@@ -8,6 +8,11 @@ contract usingAToken {
 		[op]
 	}
 
+	entry sendTezosInCall(a: address) {
+		let op = Tezos.transfer (IToken.of(tokenContractAddress).getBalance, (a, this.checkBalanceCallback), 12mtz);
+		[ op ]
+	}
+
 	entry checkBalanceCallback(b: nat) {
 		[]
 	}

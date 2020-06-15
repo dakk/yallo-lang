@@ -159,10 +159,19 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
         failwith @@ "Invalid apply of " ^ i ^ " over '" ^ show_ttype te ^ "'"
     )
 
-  (* PEDot record access *)
+  (* PEDot *)
   | PEDot (e, i) -> 
     let (te, ee) = transform_expr e env' ic in
     (match te with 
+    (* PEDot entrypoint access *)
+    | TContractInstance(TInterface(ct)) -> 
+      (match List.assoc_opt i ct with 
+        | None -> failwith @@ "Unkown contract entrypoint '" ^ i ^ "'"
+        | Some(tl) when List.length tl > 1 -> TContract(TTuple(tl)), Entrypoint(ee, i)
+        | Some(tl) when List.length tl = 1 -> TContract(List.hd tl), Entrypoint(ee, i)
+        | Some(tl) when List.length tl = 0 -> TContract(TUnit), Entrypoint(ee, i))
+
+    (* PEDot record access *)
     | TRecord(t) -> 
       (match List.assoc_opt i t with 
         | None -> failwith @@ "Unkown record field '" ^ i ^ "'"
