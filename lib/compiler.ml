@@ -17,9 +17,9 @@ let default_options = {
   verbose = true;
 }
 
-let print_position outx lexbuf =
+let str_position lexbuf =
   let pos = lexbuf.lex_curr_p in
-  fprintf outx "%s:%d:%d" pos.pos_fname
+  sprintf "%s:%d:%d" pos.pos_fname
     pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
 let parse filename s = 
@@ -27,11 +27,9 @@ let parse filename s =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   try Parser.program Lexer.token lexbuf with 
   | SyntaxError msg ->
-    fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    raise @@ SyntaxError("Syntax error")
+    raise @@ SyntaxError(sprintf "%s: %s\n" (str_position lexbuf) msg)
   | Parser.Error ->
-    fprintf stderr "%a: syntax error\n" print_position lexbuf;
-    raise @@ SyntaxError("Syntax error")
+    raise @@ SyntaxError(sprintf "%s: syntax error\n" (str_position lexbuf))
 
 let rec readfile ic = 
   try let line = input_line ic in (line ^ "\n")::(readfile ic) with _ -> close_in_noerr ic; []
@@ -57,6 +55,9 @@ let rec inject_import (pt: Parse_tree.t): Parse_tree.t =
 (* dump the parse tree, debug only *)
 let print_pt (pt: Parse_tree.t) = pt |> Parse_tree.show |> print_endline; print_endline ""
 
+(* dump the ast, debug only *)
+let print_ast (ast: Ast.t) = ast |> Ast_env.Env.show |> print_endline; print_endline ""
+
 (* [ap b f] conditionally apply f or iden if b or not b *)
 let ap b f = if b then f else (fun x -> x)
 
@@ -69,7 +70,7 @@ let compile (filename: string) opt =
     |> parse_file                   (* parse the starting file *)
     |> inject_import                (* parse and inject imports *)
     |> app opt.print_pt print_pt    (* print pt *)
-    |> Ast.of_parse_tree
-    |> app opt.print_ast (fun e -> e |> Ast_env.Env.show |> print_endline)
+    |> Ast.of_parse_tree            (* transform pt to ast *)
+    |> app opt.print_ast print_ast  (* print ast *)
 
     |> (fun _ -> ())
