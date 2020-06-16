@@ -4,6 +4,7 @@ open Yallo
 let run action filename opt = 
   (match action with 
   | "compile" -> Compiler.compile filename opt
+  | "extract-interface" -> Compiler.extract_interface filename opt
   | _ -> failwith @@ "Invalid compiler action: " ^ action
   )
 
@@ -14,7 +15,7 @@ let command =
     (let open Command.Let_syntax in
       let open Command.Param in
       let%map
-          action      = anon ("action" %: string)
+            action      = anon ("action" %: string)
         and filename  = anon ("filename" %: string)
         and contract  = flag "-contract" (optional string) ~doc:" selected contract"
         and past      = flag "-print-ast" no_arg ~doc:" print ast"

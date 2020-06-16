@@ -202,7 +202,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 
 let generate_ligo (ast: t) (contract: string) = 
   if List.assoc_opt contract ast.contracts = None then 
-    raise @@ GenerateLigoError ("Unknown contract '" ^ contract ^ "'");
+    raise @@ CompilerError ("Unknown contract '" ^ contract ^ "'");
   let (flds, ctor, entries) = List.assoc contract ast.contracts in
 
   (* dump const *)

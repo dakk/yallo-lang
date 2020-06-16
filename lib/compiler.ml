@@ -67,7 +67,7 @@ let ap b f = if b then f else (fun x -> x)
 let app b f = if b then (fun x -> let _: unit = f x in x) else (fun x -> x)
 
 
-let compile (filename: string) opt =
+let build_ast (filename: string) opt =
   filename
     |> parse_file                   (* parse the starting file *)
     |> inject_import                (* parse and inject imports *)
@@ -75,10 +75,23 @@ let compile (filename: string) opt =
     |> Ast.of_parse_tree            (* transform pt to ast *)
     |> app opt.print_ast print_ast  (* print ast *)
 
+    
+    
+let compile (filename: string) opt =
+  build_ast filename opt
     (* output to a final language *)
     |> (fun ast -> match opt.out_lang, opt.contract with 
       | None, _ -> ""
       | Some ("ligo"), Some(ctr) -> Generate_ligo.generate_ligo ast ctr
       | Some (_), None -> failwith "No contract specified for compilation"
+    )
+    |> print_endline
+
+
+let extract_interface (filename: string) opt =
+  build_ast filename opt
+    |> (fun ast -> match opt.contract with 
+      | None -> failwith "No contract specified for interface extraction"
+      | Some(ctr) -> Generate_interface.generate_interface ast ctr
     )
     |> print_endline

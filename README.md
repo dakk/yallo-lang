@@ -70,17 +70,19 @@ import "IToken.yallo";
 const tokenContractAddress: address = @KT1ThEdxfUcWUwqsdergy3QnbCWGHSUHeHJq;
 
 contract usingAToken {
-	...
+	field bal: nat;
 
 	entry checkBalance(a: address) {
 		[IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback)]
 	}
 
 	entry checkBalanceCallback(b: nat) {
+		this.bal = b;
 		[]
 	}
 }
 ```
+
 
 Or, if we want to deploy a token contract from another contract:
 
