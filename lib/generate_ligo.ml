@@ -175,19 +175,20 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   "(Tezos.transaction (" ^ to_ligo_expr ast pp ^ ") (0mutez) (" ^ to_ligo_expr ast (tce, Entrypoint((tci, ContractInstance(e)), i)) ^"))"
 | Apply(lam, par) -> 
   to_ligo_expr ast lam ^ "(" ^ to_ligo_expr ast par ^ ")"
+
 (* 
 | MatchWith of expr * (expr * expr) list
-| Apply of expr * expr
 
-| Fail of expr
 | FailIf of expr
 | FailIfMessage of expr * expr *)
+| Fail (e) -> let_surround ("failwith " ^ to_ligo_expr ast e)
 | Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else failwith \"Assertion\"")
      
 | Let (id, tt, e) -> "let " ^ id ^ ": " ^ show_ttype tt ^ " = " ^ to_ligo_expr ast e ^ " in"
+| LetIn (id, tt, e, e2) -> 
+  "let " ^ id ^ ": " ^ show_ttype tt ^ " = " ^ to_ligo_expr ast e ^ " in" ^ to_ligo_expr ast e2
 | SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in"
 (*
-| LetIn of iden * ttype * expr * expr
 | LetTuple of (iden * ttype) list * expr 
 | LetTupleIn of (iden * ttype) list * expr * expr
 | SRecAssign of iden * iden * expr  *)
