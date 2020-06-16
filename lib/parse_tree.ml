@@ -94,7 +94,7 @@ type contract_constructor = (iden * ptype) list * (iden * pexpr) list [@@derivin
 
 (* a declaration could be a type alias, a modifier, an interface or a contract *)
 type declaration = 
-  (* path import *)
+  | DPragma of string 
   | DImport of string
 
   (* constant value *)

@@ -8,11 +8,12 @@
 %token EOF
 // QUOTE SIZE HT ASTERISK AT GET HAS QUESTION ASSERT
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, LSQUARE, RSQUARE
-%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, IMPORT, FUNCTION, FIELD
+%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, FUNCTION, FIELD
 %token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
 %token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, WITH, MATCH
 %token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT, LET, IN
 %token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO
+%token PRAGMA, IMPORT
 %token <string> MODIFIER
 %token <string> IDENT
 %token <string> STRING
@@ -36,7 +37,7 @@
 %start <Parse_tree.t> program
 
 %%
-  program: il=list(dimport) dl=list(declaration) EOF { il @ dl }
+  program: pl=list(dpragma) il=list(dimport) dl=list(declaration) EOF { il @ dl }
 
   parameter: | i=IDENT COLON t=type_sig { (i, t) }
 
@@ -61,7 +62,8 @@
 
   type_expr: | te=type_sig {te}
 
-  dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p)}
+	dpragma: | PRAGMA p=STRING SEMICOLON { Parse_tree.DPragma (p) }
+  dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p) }
 
   emap_element:
     | LPAR a=expr COLON b=expr RPAR { (a, b) }

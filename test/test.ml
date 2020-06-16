@@ -28,6 +28,7 @@ let compile exc path cname _ =
 let () =
   Alcotest.run "yallo" [
     "misc", [
+      "pragma", `Quick, compile None "test/misc/pragma.yallo" None;
       "expr", `Quick, compile None "test/misc/expr.yallo" None;
       "literal", `Quick, compile None "test/misc/literal.yallo" None;
       "record", `Quick, compile None "test/misc/record.yallo" None;

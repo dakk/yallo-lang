@@ -54,6 +54,15 @@ let rec inject_import (pt: Parse_tree.t): Parse_tree.t =
     | _ -> ptl @ [dec]
   ) [] pt
 
+let rec extract_pragma (pt: Parse_tree.t) opt: (Parse_tree.t * options) =
+  (List.filter (fun i -> match i with | Parse_tree.DPragma(_) -> false | _ -> true) pt),
+  (List.fold_left (fun opt dec -> 
+    match dec with 
+    | Parse_tree.DPragma (rule) -> opt
+    | _ -> opt
+  ) opt pt)
+
+
 (* dump the parse tree, debug only *)
 let print_pt (pt: Parse_tree.t) = pt |> Parse_tree.show |> print_endline; print_endline ""
 
@@ -68,9 +77,9 @@ let app b f = if b then (fun x -> let _: unit = f x in x) else (fun x -> x)
 
 
 let build_ast (filename: string) opt =
-  filename
-    |> parse_file                   (* parse the starting file *)
-    |> inject_import                (* parse and inject imports *)
+  let pt = filename |> parse_file in       (* parse the starting file *)
+  let (pt, opt) = extract_pragma pt opt in (* extract and process pragma rules *)
+  pt|> inject_import                (* parse and inject imports *)
     |> app opt.print_pt print_pt    (* print pt *)
     |> Ast.of_parse_tree            (* transform pt to ast *)
     |> app opt.print_ast print_ast  (* print ast *)

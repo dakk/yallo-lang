@@ -1,4 +1,4 @@
-<program> ::= <dimport>* <declaration>* EOF
+<program> ::= <dpragma>* <dimport>* <declaration>* EOF
 
 <parameter> ::= IDENT COLON <type_sig>
 
@@ -16,6 +16,8 @@
              | LPAR <type_sig> RPAR
 
 <type_expr> ::= <type_sig>
+
+<dpragma> ::= PRAGMA STRING SEMICOLON
 
 <dimport> ::= IMPORT STRING SEMICOLON
 
