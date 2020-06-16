@@ -50,15 +50,15 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | Mutez (i) -> sprintf "%dmutez" i
 | Address (a) -> sprintf "(\"%s\": address)" a
 | String (s) -> sprintf "\"%s\"" s
+| Key (a) -> sprintf "(\"%s\": key)" a
+| KeyHash (a) -> sprintf "(\"%s\": key_hash)" a
+| Some(a) -> "Some (" ^ to_ligo_expr ast a ^ ")"
 (*
 | ChainId of int
 | Bytes of bytes
-| KeyHash of string
-| Key of string 
 | Signature of string
-| Some of expr
-| Enum of ttype * string
-| Typed of expr * ttype *)
+| Enum of ttype * string*)
+| Typed (e, t) -> "(" ^ to_ligo_expr ast e ^ ": " ^ show_ttype t ^ ")"
 | List (el) -> "[" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
 | EnumValue (i) -> i
 
@@ -66,23 +66,33 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | Set of expr list 
 | Map of (expr * expr) list
 | BigMap of (expr * expr) list
-| Tuple of expr list
-| Lambda of (iden * ttype) list * expr
+| Tuple of expr list *)
+| Lambda (il, e) -> 
+  "(fun (" ^ merge_list il ", " (fun (i,t) -> i ^ ": " ^ show_ttype t) ^ ") -> " ^ to_ligo_expr ast e ^ ")"
+
+(* 
 | Record of (iden * expr) list
 | RecordAccess of expr * iden
 
 (* map *)
-| MapEmpty
-| MapGetOpt of expr * expr
-| MapGet of expr * expr * expr
 | MapMem of expr * expr
 | MapSize of expr
 | MapMapWith of expr * expr
-| MapFold of expr * expr * expr
-| MapUpdate of expr * expr * expr 
-| MapRemove of expr * expr 
+| MapFold of expr * expr * expr *)
+| MapEmpty -> "Map.empty"
+| MapGet (mape, vkey) ->
+  "(match Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
+  ^ " with | None -> failwith \"Missing key\" | Some (v) -> v)"
+| MapGetOpt (mape, vkey) ->
+  "Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape
+| MapUpdate (mape, vkey, vval) -> 
+  "Map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape ^ ";"
+| MapRemove (mape, vkey) -> 
+  "Map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape ^ ";"
+  
 
 (* bigmap *)
+(*
 | BigMapEmpty
 | BigMapGetOpt of expr * expr
 | BigMapGet of expr * expr * expr
@@ -114,32 +124,35 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | TupleFst of expr
 | TupleSnd of expr
 
-(* aritmetic *)
-| Add of expr * expr
-| Sub of expr * expr
-| Mul of expr * expr
-| Div of expr * expr
+(* aritmetic *) 
+*)
+| Add(a,b) -> "(" ^ to_ligo_expr ast a ^ ") + (" ^ to_ligo_expr ast b ^ ")"
+| Sub(a,b) -> "(" ^ to_ligo_expr ast a ^ ") - (" ^ to_ligo_expr ast b ^ ")"
+| Mul(a,b) -> "(" ^ to_ligo_expr ast a ^ ") * (" ^ to_ligo_expr ast b ^ ")"
+| Div(a,b) -> "(" ^ to_ligo_expr ast a ^ ") / (" ^ to_ligo_expr ast b ^ ")"
+(*
 | Mod of expr * expr
 | Abs of expr
 | Ediv of expr * expr
 | Neg of expr
 | IsNat of expr
+*)
 
 (* bool *)
-| And of expr * expr
-| Or of expr * expr
-| Not of expr
-| Lt of expr * expr
-| Lte of expr * expr*)
+| Not(a) -> "! (" ^ to_ligo_expr ast a ^ ")"
+| And(a,b) -> "(" ^ to_ligo_expr ast a ^ ") && (" ^ to_ligo_expr ast b ^ ")"
+| Or(a,b) -> "(" ^ to_ligo_expr ast a ^ ") || (" ^ to_ligo_expr ast b ^ ")"
 
+| Lt (a, b) -> "(" ^ to_ligo_expr ast a ^ ") < (" ^ to_ligo_expr ast b ^ ")"
+| Lte (a, b) -> "(" ^ to_ligo_expr ast a ^ ") <= (" ^ to_ligo_expr ast b ^ ")"
 | Gt (a, b) -> "(" ^ to_ligo_expr ast a ^ ") > (" ^ to_ligo_expr ast b ^ ")"
+| Gte (a, b) -> "(" ^ to_ligo_expr ast a ^ ") >= (" ^ to_ligo_expr ast b ^ ")"
+| Eq (a, b) -> "(" ^ to_ligo_expr ast a ^ ") = (" ^ to_ligo_expr ast b ^ ")"
+| Neq (a, b) -> "(" ^ to_ligo_expr ast a ^ ") <> (" ^ to_ligo_expr ast b ^ ")"
 
-(*
-| Gte of expr * expr
-| Eq of expr * expr
-| Neq of expr * expr
+| IfThenElse (c, a, b) -> "(if " ^ to_ligo_expr ast c ^ " then " ^ to_ligo_expr ast a ^ " else " ^ to_ligo_expr ast b ^ ")"
 
-| IfThenElse of expr * expr * expr 
+(* 
 | MatchWith of expr * (expr * expr) list
 | Apply of expr * expr
 
