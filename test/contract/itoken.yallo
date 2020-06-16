@@ -1,5 +1,5 @@
 interface IToken {
-	entry transfer(from: address, to: address, val: nat);
+	entry transfer(from: address, tto: address, vval: nat);
 	entry getBalance(ad: address, cb: nat contract);
 }
 

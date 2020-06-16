@@ -11,19 +11,19 @@ contract Token implements IToken {
 		this.symbol = symbol;
 	}
 
-	entry transfer(from: address, to: address, val: nat) {
-		assert (val > 0);
+	entry transfer(from: address, tto: address, vval: nat) {
+		assert (vval > 0);
 		let a = this.balances.get(from, 0n);
-		let b: nat = this.balances.get(to, 0n);
-		assert(a > val);
-		this.balances.update(from, a - val);
-		this.balances.update(to, b + val); 
+		let b: nat = this.balances.get(tto, 0n);
+		assert(a > vval);
+		this.balances.update(from, a - vval);
+		this.balances.update(tto, b + vval); 
 		[]
 	}
 
 	entry getBalance(ad: address, cb: nat contract) {
-		let balance: nat = this.balances.get(ad, 0n);
-		let op: operation = cb(balance);
+		let b: nat = this.balances.get(ad, 0n);
+		let op: operation = cb(b);
 		[op]
 	}
 }
