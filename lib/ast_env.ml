@@ -5,8 +5,8 @@ open Errors
 module Env = struct 
   type st = | Type | Interface | Const | Contract [@@deriving show {with_path = false}]
   type entry_sig = (iden * (iden * ttype) list)  [@@deriving show {with_path = false}]
-  type ctor = (iden * ttype) list * (iden * expr) list [@@deriving show {with_path = false}]
-  type entry = iden * (iden * ttype) list * expr [@@deriving show {with_path = false}]
+  type ctor = (iden * ttype) list * (iden * texpr) list [@@deriving show {with_path = false}]
+  type entry = iden * (iden * ttype) list * texpr [@@deriving show {with_path = false}]
   type contract = ((iden * ttype) list * ctor * entry list) [@@deriving show {with_path = false}]
 
   type t = {

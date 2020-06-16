@@ -7,12 +7,11 @@ Internally, the language is a functional language with side effects (storage ass
 This is only a research project, it is not (yet) intendeed for real usage.
 
 
-## Progress
-- [x] Grammar
-- [x] Parser
-- [ ] AST
-- [ ] Typecheck
-- [ ] Output
+## Usage
+
+```bash
+./_build/default/src/yallo.exe compile contract_file.yallo -out-lang ligo -contract TestContract
+```
 
 
 ## OOlike abstraction example
