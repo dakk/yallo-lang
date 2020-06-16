@@ -1,30 +1,30 @@
 open Ast_ttype
 
 type expr = 
-| ContractInstance of expr 
+| ContractInstance of texpr 
 | StorageEntry of iden
-| BuildContractCodeAndStorage of iden * expr list
-| Entrypoint of expr * iden
+| BuildContractCodeAndStorage of iden * texpr list
+| Entrypoint of texpr * iden
 
 | TezosNow
 | TezosAmount
 | TezosBalance
 | TezosChainId
 | TezosSelf
-| TezosSetDelegate of expr
+| TezosSetDelegate of texpr
 | TezosSource
 | TezosSender
-| TezosAddressOfContract of expr
-| TezosContractOfAddress of expr
-| TezosTransfer of expr * expr * expr
-| TezosCreateContract of expr * expr * expr
-| TezosImplicitAccount of expr
+| TezosAddressOfContract of texpr
+| TezosContractOfAddress of texpr
+| TezosTransfer of texpr * texpr * texpr
+| TezosCreateContract of texpr * texpr * texpr
+| TezosImplicitAccount of texpr
 
-| CryptoBlake2B of expr
-| CryptoCheckSignature of expr * expr * expr
-| CryptoHashKey of expr 
-| CryptoSha256 of expr
-| CryptoSha512 of expr
+| CryptoBlake2B of texpr
+| CryptoCheckSignature of texpr * texpr * texpr
+| CryptoHashKey of texpr 
+| CryptoSha256 of texpr
+| CryptoSha512 of texpr
 
 | LocalRef of iden 
 | StorageRef of iden
@@ -43,104 +43,104 @@ type expr =
 | KeyHash of string
 | Key of string 
 | Signature of string
-| Some of expr
+| Some of texpr
 | Enum of ttype * string
-| Typed of expr * ttype
-| List of expr list 
-| Set of expr list 
-| Map of (expr * expr) list
-| BigMap of (expr * expr) list
-| Tuple of expr list
-| Lambda of (iden * ttype) list * expr
-| Record of (iden * expr) list
+| Typed of texpr * ttype
+| List of texpr list 
+| Set of texpr list 
+| Map of (texpr * texpr) list
+| BigMap of (texpr * texpr) list
+| Tuple of texpr list
+| Lambda of (iden * ttype) list * texpr
+| Record of (iden * texpr) list
 | EnumValue of (iden)
-| RecordAccess of expr * iden
+| RecordAccess of texpr * iden
 
 (* map *)
 | MapEmpty
-| MapGetOpt of expr * expr
-| MapGet of expr * expr * expr
-| MapMem of expr * expr
-| MapSize of expr
-| MapMapWith of expr * expr
-| MapFold of expr * expr * expr
-| MapUpdate of expr * expr * expr 
-| MapRemove of expr * expr 
+| MapGetOpt of texpr * texpr
+| MapGet of texpr * texpr * texpr
+| MapMem of texpr * texpr
+| MapSize of texpr
+| MapMapWith of texpr * texpr
+| MapFold of texpr * texpr * texpr
+| MapUpdate of texpr * texpr * texpr 
+| MapRemove of texpr * texpr 
 
 (* bigmap *)
 | BigMapEmpty
-| BigMapGetOpt of expr * expr
-| BigMapGet of expr * expr * expr
-| BigMapMem of expr * expr
-| BigMapUpdate of expr * expr * expr 
-| BigMapRemove of expr * expr 
+| BigMapGetOpt of texpr * texpr
+| BigMapGet of texpr * texpr * texpr
+| BigMapMem of texpr * texpr
+| BigMapUpdate of texpr * texpr * texpr 
+| BigMapRemove of texpr * texpr 
 
 (* set *)
 | SetEmpty
-| SetMem of expr * expr
-| SetSize of expr
-| SetUpdate of expr * expr * expr 
+| SetMem of texpr * texpr
+| SetSize of texpr
+| SetUpdate of texpr * texpr * texpr 
 
 (* list *)
 | ListEmpty
-| ListSize of expr
-| ListPrepend of expr * expr
-| ListMapWith of expr * expr
-| ListHead of expr
-| ListTail of expr
-| ListFold of expr * expr * expr
+| ListSize of texpr
+| ListPrepend of texpr * texpr
+| ListMapWith of texpr * texpr
+| ListHead of texpr
+| ListTail of texpr
+| ListFold of texpr * texpr * texpr
 
 (* string *)
-| StringConcat of expr * expr 
-| StringSlice of expr * expr * expr
-| StringSize of expr
+| StringConcat of texpr * texpr 
+| StringSlice of texpr * texpr * texpr
+| StringSize of texpr
 
 (* tuple *)
-| TupleFst of expr
-| TupleSnd of expr
+| TupleFst of texpr
+| TupleSnd of texpr
 
 (* aritmetic *)
-| Add of expr * expr
-| Sub of expr * expr
-| Mul of expr * expr
-| Div of expr * expr
-| Mod of expr * expr
-| Abs of expr
-| Ediv of expr * expr
-| Neg of expr
-| IsNat of expr
+| Add of texpr * texpr
+| Sub of texpr * texpr
+| Mul of texpr * texpr
+| Div of texpr * texpr
+| Mod of texpr * texpr
+| Abs of texpr
+| Ediv of texpr * texpr
+| Neg of texpr
+| IsNat of texpr
 
 (* bool *)
-| And of expr * expr
-| Or of expr * expr
-| Not of expr
-| Lt of expr * expr
-| Lte of expr * expr
-| Gt of expr * expr
-| Gte of expr * expr
-| Eq of expr * expr
-| Neq of expr * expr
+| And of texpr * texpr
+| Or of texpr * texpr
+| Not of texpr
+| Lt of texpr * texpr
+| Lte of texpr * texpr
+| Gt of texpr * texpr
+| Gte of texpr * texpr
+| Eq of texpr * texpr
+| Neq of texpr * texpr
 
-| IfThenElse of expr * expr * expr 
-| MatchWith of expr * (expr * expr) list
-| Apply of expr * expr
+| IfThenElse of texpr * texpr * texpr 
+| MatchWith of texpr * (texpr * texpr) list
+| Apply of texpr * texpr
 
-| Fail of expr
-| FailIf of expr
-| FailIfMessage of expr * expr
-| Assert of expr    
+| Fail of texpr
+| FailIf of texpr
+| FailIfMessage of texpr * texpr
+| Assert of texpr    
      
-| LetIn of iden * ttype * expr * expr
-| Let of iden * ttype * expr 
-| LetTuple of (iden * ttype) list * expr 
-| LetTupleIn of (iden * ttype) list * expr * expr
-| SAssign of iden * expr
-| SRecAssign of iden * iden * expr 
+| LetIn of iden * ttype * texpr * texpr
+| Let of iden * ttype * texpr 
+| LetTuple of (iden * ttype) list * texpr 
+| LetTupleIn of (iden * ttype) list * texpr * texpr
+| SAssign of iden * texpr
+| SRecAssign of iden * iden * texpr 
 
-| Seq of expr * expr
+| Seq of texpr * texpr
 
 [@@deriving show {with_path = false}]
 
 
 
-type texpr = (ttype * expr) [@@deriving show {with_path = false}]
+and texpr = (ttype * expr) [@@deriving show {with_path = false}]

@@ -38,7 +38,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
   | PENone -> TOption (TAny), None
   | PESome (e) -> 
     let (tt, te) = transform_expr e env' ic in
-    TOption (tt), Some (te)
+    TOption (tt), Some (tt, te)
 
   (* Literals *)
   | PEUnit -> TUnit, Unit
@@ -56,13 +56,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
   (* Composed types *)
   | PETuple (el) -> 
-    let (ttl, tel) = List.map (fun x -> transform_expr x env' ic) el |> List.split in
-    TTuple(ttl), Tuple(tel)
+    let tel = List.map (fun x -> transform_expr x env' ic) el in
+    TTuple(fst @@ List.split tel), Tuple(tel)
 
   | PEList (el) -> 
-    let (ttl, tel) = List.map (fun x -> transform_expr x env' ic) el |> List.split in
+    let ttres = List.map (fun x -> transform_expr x env' ic) el in
+    let (ttl, tel) = ttres |> List.split in
     if List.length ttl > 0 then 
-      let lt = fold_container_type "List elements" ttl in TList(lt), List(tel)
+      let lt = fold_container_type "List elements" ttl in TList(lt), List(ttres)
     else 
       TList(TAny), List([])
 
@@ -74,7 +75,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     let keyt = fold_container_type "Map keys" (fst @@ List.split keys) in 
     let valuet = fold_container_type "Map values" (fst @@ List.split values) in 
 
-    TMap(keyt, valuet), Map (List.combine (snd @@ List.split keys) (snd @@ List.split values))
+    TMap(keyt, valuet), Map (List.combine keys values)
 
   | PETyped (e, et) -> 
     let (tt, ee) = transform_expr e env' ic in 
@@ -98,12 +99,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       | 1 -> snd @@ List.hd rl
       | _ -> TTuple (snd @@ List.split rl)
     ) in
-    TLambda (arg, tt), Lambda(rl, ee)
+    TLambda (arg, tt), Lambda(rl, (tt, ee))
 
   | PERecord (l) -> 
     let l' = List.map (fun (i,e) -> i, transform_expr e env' ic) l in 
     let (idtt, idee) = List.map (fun (i, (tt, ee)) -> (i, tt), (i, ee)) l' |> List.split in
-    TRecord (idtt), Record (idee)
+    TRecord (idtt), Record (l')
 
     
   (* Enum value *)
@@ -133,17 +134,19 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       | "amount", [] -> TMutez, TezosAmount
       | "balance", [] -> TMutez, TezosBalance
       | "now", [] -> TTimestamp, TezosNow
-      | "address", [(TContract(_), ad)] -> TAddress, TezosAddressOfContract (ad)
-      | "contract", [(TAddress, ad)] -> TContract(TAny), TezosContractOfAddress (ad)
-      | "setDelegate", [(TOption (TKeyHash), kho)] -> TOperation, TezosSetDelegate (kho)
-      | "setDelegate", [(TOption (TAny), None)] -> TOperation, TezosSetDelegate (None)
-      | "implicitAccount", [(TKeyHash, kh)] -> TContract (TUnit), TezosImplicitAccount(kh)
+      | "address", [(TContract(ctt), ad)] -> TAddress, TezosAddressOfContract (TContract(ctt), ad)
+      | "contract", [(TAddress, ad)] -> TContract(TAny), TezosContractOfAddress (TAddress, ad)
+      | "setDelegate", [(TOption (TKeyHash), kho)] -> TOperation, TezosSetDelegate (TOption(TKeyHash), kho)
+      | "setDelegate", [(TOption (TAny), None)] -> TOperation, TezosSetDelegate (TOption(TKeyHash), None)
+      | "implicitAccount", [(TKeyHash, kh)] -> TContract (TUnit), TezosImplicitAccount(TKeyHash, kh)
       | "transfer", [(TContract(ct), c); (ct', cv); (TMutez, am)] when ct'=ct -> 
-        TOperation, TezosTransfer (c, cv, am)
+        TOperation, TezosTransfer ((TContract(ct), c), (ct', cv), (TMutez, am))
       | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TKeyHash), kho); (TMutez, v)] -> 
-        TTuple([TOperation; TAddress]), TezosCreateContract(BuildContractCodeAndStorage(a, b), kho, v)
+        TTuple([TOperation; TAddress]), 
+        TezosCreateContract(BuildContractCodeAndStorage(a, b), kho, v)
       | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TAny), None); (TMutez, v)] -> 
-        TTuple([TOperation; TAddress]), TezosCreateContract(BuildContractCodeAndStorage(a, b), None, v)
+        TTuple([TOperation; TAddress]), 
+        TezosCreateContract(BuildContractCodeAndStorage(a, b), None, v)
       (* | TezosSelf *)
       | _, _ -> 
         List.iter (fun (t,e) -> (show_expr e ^ " : " ^ show_ttype t) |> print_endline) el';
