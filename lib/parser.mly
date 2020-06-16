@@ -90,9 +90,9 @@
     | x=KEY				 		{ Parse_tree.PEKey (x) }
     | x=KEY_HASH	 		{ Parse_tree.PEKeyHash (x) }
     | x=ADDRESS		 		{ Parse_tree.PEAddress (x) }
+    | x=INT 					{ Parse_tree.PEInt (x) }
     | x=MTZ 					{ Parse_tree.PEMutez (x) }
     | x=NAT 					{ Parse_tree.PENat (x) }
-    | x=INT 					{ Parse_tree.PEInt (x) }
     | SOME LPAR x=expr RPAR 	  { Parse_tree.PESome (x) }
     | LBRACE tl=separated_nonempty_list(COMMA, erec_element) RBRACE
                                 { Parse_tree.PERecord (tl) }

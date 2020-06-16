@@ -7,10 +7,13 @@ open Printf
 let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
 let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)
 let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)
+let let_surround s = "let ovverraidable = " ^ s ^ " in"
 
 let rec to_ligo_expr (ast: t) (e: expr) = match e with 
+
+| StorageEntry (i) -> "(Tezos.self \"%" ^ i ^ "\")"
+| Entrypoint(ContractInstance(e), i) -> "match Tezos.get_entrypoint_opt \"%" ^ i ^ "\" (" ^ to_ligo_expr ast e ^ ") with | None -> failwith \"Invalid entrypoint\" | Some (ep) -> ep"
 (* | ContractInstance of expr 
-| StorageEntry of iden
 | BuildContractCodeAndStorage of iden * expr list
 | Entrypoint of expr * iden
 
@@ -25,7 +28,7 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | TezosAddressOfContract of expr
 | TezosContractOfAddress of expr *)
 | TezosTransfer (ct, par, v) -> 
-  "Tezos.transfer (" ^ to_ligo_expr ast ct ^ ") (" ^ to_ligo_expr ast par ^ ") (" ^ to_ligo_expr ast v ^ ")"
+  "Tezos.transaction (" ^ to_ligo_expr ast par ^ ") (" ^ to_ligo_expr ast v ^ ") (" ^ to_ligo_expr ast ct ^ ")"
 
 (*
 | TezosCreateContract of expr * expr * expr
@@ -67,6 +70,8 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | Map of (expr * expr) list
 | BigMap of (expr * expr) list
 | Tuple of expr list *)
+| Tuple (el) -> 
+  "(" ^ merge_list el ", " (fun v -> to_ligo_expr ast v) ^ ")"
 | Lambda (il, e) -> 
   "(fun (" ^ merge_list il ", " (fun (i,t) -> i ^ ": " ^ show_ttype t) ^ ") -> " ^ to_ligo_expr ast e ^ ")"
 
@@ -80,18 +85,31 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | MapMapWith of expr * expr
 | MapFold of expr * expr * expr *)
 | MapEmpty -> "Map.empty"
-| MapGet (mape, vkey) ->
+| MapGet (mape, vkey, vdef) ->
   "(match Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
-  ^ " with | None -> failwith \"Missing key\" | Some (v) -> v)"
+  ^ " with | None -> " ^ to_ligo_expr ast vdef ^ " | Some (v) -> v)"
 | MapGetOpt (mape, vkey) ->
   "Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape
 | MapUpdate (mape, vkey, vval) -> 
-  "Map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape ^ ";"
+  let_surround ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape ^ "")
 | MapRemove (mape, vkey) -> 
-  "Map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape ^ ";"
+  let_surround ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape)
   
 
 (* bigmap *)
+| BigMapEmpty -> "Big_map.empty"
+| BigMapGet (mape, vkey, vdef) ->
+  "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
+  ^ " with | None -> " ^ to_ligo_expr ast vdef ^ " | Some (v) -> v)"
+| BigMapGetOpt (mape, vkey) ->
+  "Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape
+| BigMapUpdate (mape, vkey, vval) -> 
+  let_surround ("Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape)
+| BigMapRemove (mape, vkey) -> 
+  let_surround ("Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape)
+
+
+
 (*
 | BigMapEmpty
 | BigMapGetOpt of expr * expr
@@ -152,6 +170,9 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 
 | IfThenElse (c, a, b) -> "(if " ^ to_ligo_expr ast c ^ " then " ^ to_ligo_expr ast a ^ " else " ^ to_ligo_expr ast b ^ ")"
 
+| Apply(Entrypoint(ContractInstance(e), i), pp) ->
+  "(Tezos.transaction (" ^ to_ligo_expr ast pp ^ ") (0mutez) (" ^ to_ligo_expr ast (Entrypoint(ContractInstance(e), i))^"))"
+
 (* 
 | MatchWith of expr * (expr * expr) list
 | Apply of expr * expr
@@ -159,7 +180,7 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | Fail of expr
 | FailIf of expr
 | FailIfMessage of expr * expr *)
-| Assert (e) -> "assert(" ^ to_ligo_expr ast e ^ ");"
+| Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else failwith \"Assertion\"")
      
 | Let (id, tt, e) -> "let " ^ id ^ ": " ^ show_ttype tt ^ " = " ^ to_ligo_expr ast e ^ " in"
 | SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in"
@@ -169,7 +190,10 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | LetTupleIn of (iden * ttype) list * expr * expr
 | SRecAssign of iden * iden * expr  *)
 
-| Seq(a, b) -> "  " ^ to_ligo_expr ast a ^ "\n  " ^ to_ligo_expr ast b
+| Seq(a, List(e)) -> 
+  "  " ^ to_ligo_expr ast a ^ "\n  ((" ^ to_ligo_expr ast (List(e)) ^ ": operation list), (s: storage))"
+
+| Seq(a, b) -> "  " ^ to_ligo_expr ast a ^ "\n" ^ to_ligo_expr ast b
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
 | _ -> "Unable to generate ligo code for expression " ^ show_expr e
 
@@ -184,9 +208,14 @@ let generate_ligo (ast: t) (contract: string) =
   ) ast.consts) in 
 
   (* generate the storage record *)
-  let str = "type storage = {\n" ^
-    merge_list flds ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ show_ttype t) ^
-    ";\n}\n\n" in 
+  let str = 
+    if List.length flds = 0 then 
+      "type storage = unit;\n\n"    
+    else 
+      "type storage = {\n" ^
+      merge_list flds ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ show_ttype t) ^
+      ";\n}\n\n" 
+  in 
 
   (* generate the action variant *)
   let act = "type action = " ^ 

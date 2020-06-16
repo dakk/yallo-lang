@@ -22,6 +22,9 @@
 		"option";
 		"let";
 		"in";
+		"to";
+		"val";
+		"balance";
 		"true";
 		"false";
 		"and";

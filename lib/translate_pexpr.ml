@@ -192,7 +192,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
       (* BigMap *)
       | TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> TOption(kv), BigMapGetOpt(ee, e)
-      | TBigMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kv=kvv && kk = kt -> kv, BigMapGet(ee, e, kvd)
+      | TBigMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = kt -> kv, BigMapGet(ee, e, kvd)
       | TBigMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, BigMapMem(ee, e)
       | TBigMap (kt, _), "remove", [(kk, e)] when kk = kt -> TUnit, BigMapRemove(ee, e)
       | TBigMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
@@ -221,9 +221,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
         | None -> raise @@ ContractError ("Unknown contract entrypoint '" ^ i ^ "' on contract instance")
         | Some(es) when es=(fst @@ List.split tl) -> TOperation, (
           match List.length tl with 
-          | 0 -> Apply(ee, Unit)
-          | 1 -> Apply(ee, List.hd @@ snd @@ List.split tl)
-          | _ -> Apply(ee, Tuple(snd @@ List.split tl))
+          | 0 -> Apply(Entrypoint(ee, i), Unit)
+          | 1 -> Apply(Entrypoint(ee, i), List.hd @@ snd @@ List.split tl)
+          | _ -> Apply(Entrypoint(ee, i), Tuple(snd @@ List.split tl))
         )
         | _ -> raise @@ TypeError ("Invalid types on contract instance apply")
       )

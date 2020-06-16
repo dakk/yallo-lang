@@ -42,9 +42,9 @@
          | KEY
          | KEY_HASH
          | ADDRESS
+         | INT
          | MTZ
          | NAT
-         | INT
          | SOME LPAR <expr> RPAR
          | LBRACE <erec_element> (COMMA <erec_element>)* RBRACE
          | LSQUARE [<expr> (COMMA <expr>)*] RSQUARE
