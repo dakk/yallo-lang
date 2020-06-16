@@ -57,7 +57,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
     transform p' { e with 
       symbols=(df.id, Const)::e.symbols;
-      consts=(df.id, (TLambda(TTuple(snd @@ List.split pars), rettype), Lambda(pars, se)))::e.consts;
+      consts=(df.id, (TLambda(TTuple(snd @@ List.split pars), rettype), Lambda(pars, (st, se))))::e.consts;
     }
 
   (* interface *)
@@ -107,7 +107,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | Some (par, ass) -> 
         let par' = List.map (fun (i, a) -> i, transform_type a e) par in
         par',
-        List.map (fun (i, a) -> i, snd @@ transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
+        List.map (fun (i, a) -> i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
     ) in
     if (snd ctor) <> [] && List.length (flds) <> List.length (snd ctor) then
       raise @@ DeclarationError ("Constructor left some fields uninitialized");
@@ -125,7 +125,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       let entry_bind = List.map (fun (i,t) -> i, StorageEntry(t)) elsig in
       let tt, ee = transform_expr ex e (p_bind @ flds_bind @ entry_bind) in 
       if tt<>TList(TOperation) && tt<>TList(TAny) then raise @@ DeclarationError("Entry '" ^ i ^ "' of contract '" ^ dc.id ^ "' does not evalute to an operation list");
-      (i, (p', ee))
+      (i, (p', (tt, ee)))
     ) dc.entries in
 
     (* assert no duplicated entry *)

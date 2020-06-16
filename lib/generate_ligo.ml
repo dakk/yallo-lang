@@ -9,10 +9,11 @@ let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)
 let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)
 let let_surround s = "let ovverraidable = " ^ s ^ " in"
 
-let rec to_ligo_expr (ast: t) (e: expr) = match e with 
-
-| StorageEntry (i) -> "(Tezos.self \"%" ^ i ^ "\")"
-| Entrypoint(ContractInstance(e), i) -> "match Tezos.get_entrypoint_opt \"%" ^ i ^ "\" (" ^ to_ligo_expr ast e ^ ") with | None -> failwith \"Invalid entrypoint\" | Some (ep) -> ep"
+let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with 
+| StorageEntry (i) -> "((Tezos.self \"%" ^ i ^ "\"): " ^ show_ttype te ^ ")"
+| Entrypoint((te2, ContractInstance((tt,e))), i) -> 
+  "match ((Tezos.get_entrypoint_opt \"%" ^ i ^ "\" (" ^ to_ligo_expr ast (tt,e) ^ ")): (" 
+  ^ show_ttype te ^ ") option) with | None -> (failwith \"Invalid entrypoint\": " ^ show_ttype te ^ ") | Some (ep) -> ep"
 (* | ContractInstance of expr 
 | BuildContractCodeAndStorage of iden * expr list
 | Entrypoint of expr * iden
@@ -170,9 +171,10 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 
 | IfThenElse (c, a, b) -> "(if " ^ to_ligo_expr ast c ^ " then " ^ to_ligo_expr ast a ^ " else " ^ to_ligo_expr ast b ^ ")"
 
-| Apply(Entrypoint(ContractInstance(e), i), pp) ->
-  "(Tezos.transaction (" ^ to_ligo_expr ast pp ^ ") (0mutez) (" ^ to_ligo_expr ast (Entrypoint(ContractInstance(e), i))^"))"
-
+| Apply((tce, Entrypoint((tci, ContractInstance(e)), i)), pp) ->
+  "(Tezos.transaction (" ^ to_ligo_expr ast pp ^ ") (0mutez) (" ^ to_ligo_expr ast (tce, Entrypoint((tci, ContractInstance(e)), i)) ^"))"
+| Apply(lam, par) -> 
+  to_ligo_expr ast lam ^ "(" ^ to_ligo_expr ast par ^ ")"
 (* 
 | MatchWith of expr * (expr * expr) list
 | Apply of expr * expr
@@ -190,8 +192,8 @@ let rec to_ligo_expr (ast: t) (e: expr) = match e with
 | LetTupleIn of (iden * ttype) list * expr * expr
 | SRecAssign of iden * iden * expr  *)
 
-| Seq(a, List(e)) -> 
-  "  " ^ to_ligo_expr ast a ^ "\n  ((" ^ to_ligo_expr ast (List(e)) ^ ": operation list), (s: storage))"
+| Seq(a, (tl, List(e))) -> 
+  "  " ^ to_ligo_expr ast a ^ "\n  ((" ^ to_ligo_expr ast (tl, List(e)) ^ ": operation list), (s: storage))"
 
 | Seq(a, b) -> "  " ^ to_ligo_expr ast a ^ "\n" ^ to_ligo_expr ast b
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
@@ -204,7 +206,7 @@ let generate_ligo (ast: t) (contract: string) =
 
   (* dump const *)
   let consts = list_to_string (List.map (fun (i, (t,e)) -> 
-    "let " ^ i ^ " = " ^ to_ligo_expr ast e ^ "\n"
+    "let " ^ i ^ " = " ^ to_ligo_expr ast (t,e) ^ "\n"
   ) ast.consts) in 
 
   (* generate the storage record *)
