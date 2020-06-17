@@ -12,7 +12,7 @@
 %token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
 %token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, WITH, MATCH
 %token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT, LET, IN
-%token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO
+%token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO, UNDERSCORE
 %token PRAGMA, IMPORT
 %token <string> MODIFIER
 %token <string> IDENT
@@ -75,6 +75,7 @@
     | i=IDENT EQ b=expr { (i, b) }
 	match_case:
 		| PIPE e=expr LAMBDA v=expr { (e, v) }
+		| PIPE UNDERSCORE LAMBDA v=expr { (Parse_tree.PECaseAny, v) }
 
 
 	left:

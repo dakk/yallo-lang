@@ -29,6 +29,7 @@
 <erec_element> ::= IDENT EQ <expr>
 
 <match_case> ::= PIPE <expr> LAMBDA <expr>
+               | PIPE UNDERSCORE LAMBDA <expr>
 
 <left> ::= <left> DOT IDENT
          | IDENT

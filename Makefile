@@ -12,8 +12,11 @@ grammar:
 	@echo Pretty-printing grammar... docs/grammar.ebnf
 	@obelisk lib/parser.mly > docs/grammar.ebnf
 
-#list-errors:
-# menhir --list-errors lib/parser.mly > lib/parser.messages
+# list-errors:
+#  menhir --list-errors lib/parser.mly > lib/parser.messages
+
+# update-errors:
+# 	menhir --update-errors lib/parser.messages lib/parser.mly > lib/parser.messages
 
 #pin: 
 #	opam pin add nmea . -n --working-dir && opam remove nmea && opam install nmea --working-dir

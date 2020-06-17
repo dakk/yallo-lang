@@ -1,23 +1,24 @@
-(library
- (public_name yallo)
- (name yallo)
- (preprocess (pps ppx_jane ppx_deriving.show))
- (libraries core ppx_deriving menhirLib)
- (modules parse_tree ast_ttype ast_expr ast_env errors generate_coq generate_ligo
-  generate_interface
-  translate_pdecl translate_ptype translate_pexpr ast parser lexer compiler))
-
 (ocamllex lexer)
+
+(menhir 
+ (modules parser)
+ (flags --explain --inspection --table --dump)
+)
 
 (rule
  (targets parser_messages.ml)
  (deps parser.messages parser.mly)
  (action  (with-stdout-to %{targets} (run menhir --compile-errors %{deps}))))
 
-(menhir 
- (modules parser)
- (flags --explain --inspection --table --dump)
-)
+(library
+ (public_name yallo)
+ (name yallo)
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries core ppx_deriving menhirLib)
+ (modules parse_tree parser_messages ast_ttype ast_expr ast_env errors generate_coq generate_ligo
+  generate_interface
+  translate_pdecl translate_ptype translate_pexpr ast parser lexer compiler))
+
 
 (env
   (dev
