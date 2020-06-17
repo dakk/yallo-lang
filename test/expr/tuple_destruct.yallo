@@ -1,0 +1,9 @@
+function test (): int {
+	let (a: int, b: int, c: int) = (12, 13, 14) in
+	a*b*c
+}
+
+function test3 (): int {
+	let (a, b, c) = (12, 13, 14) in
+	a*b*c
+}

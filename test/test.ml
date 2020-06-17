@@ -39,6 +39,7 @@ let () =
     "expr", [
       "assoc", `Quick, compile None "test/expr/assoc.yallo" None;
       "match", `Quick, compile None "test/expr/match.yallo" None;
+      "tuple_destruct", `Quick, compile None "test/expr/tuple_destruct.yallo" None;
     ];
     "const", [
       "cont", `Quick, compile None "test/const/cont.yallo" None;

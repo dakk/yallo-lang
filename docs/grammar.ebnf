@@ -2,6 +2,9 @@
 
 <parameter> ::= IDENT COLON <type_sig>
 
+<param_opt_typed> ::= IDENT COLON <type_sig>
+                    | IDENT
+
 <ident> ::= IDENT
 
 <signature> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
@@ -58,8 +61,10 @@
          | LET IDENT COLON <type_sig> EQ <expr>
          | LET IDENT EQ <expr> IN <expr>
          | LET IDENT EQ <expr>
-         | LET LPAR <parameter> (COMMA <parameter>)* RPAR EQ <expr> IN <expr>
-         | LET LPAR <parameter> (COMMA <parameter>)* RPAR EQ <expr>
+         | LET LPAR <param_opt_typed> (COMMA <param_opt_typed>)* RPAR EQ
+           <expr> IN <expr>
+         | LET LPAR <param_opt_typed> (COMMA <param_opt_typed>)* RPAR EQ
+           <expr>
          | <left> EQ <expr>
          | <expr> ADD <expr>
          | <expr> SUB <expr>

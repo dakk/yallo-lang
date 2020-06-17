@@ -71,8 +71,8 @@ and pexpr =
 
   | PELetIn of iden * ptype option * pexpr * pexpr
   | PELet of iden * ptype option * pexpr 
-  | PELetTuple of (iden * ptype) list * pexpr 
-  | PELetTupleIn of (iden * ptype) list * pexpr * pexpr
+  | PELetTuple of (iden * ptype option) list * pexpr 
+  | PELetTupleIn of (iden * ptype option) list * pexpr * pexpr
   | PEAssign of pexpr * pexpr
   | PESRecAssign of iden * iden * pexpr 
   | PECallBultin of iden * pexpr list

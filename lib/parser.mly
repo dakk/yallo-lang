@@ -41,6 +41,10 @@
 
   parameter: | i=IDENT COLON t=type_sig { (i, t) }
 
+  param_opt_typed: 
+	| i=IDENT COLON t=type_sig 	{ (i, Some(t)) }
+	| i=IDENT  									{ (i, None) }
+
   ident: | i=IDENT { i }
 
   signature: 
@@ -113,9 +117,9 @@
 		| LET i=IDENT EQ e=expr IN ee=expr { Parse_tree.PELetIn (i, None, e, ee) }
 		| LET i=IDENT EQ e=expr { Parse_tree.PELet (i, None, e) }
 
-		| LET LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR EQ e=expr IN ee=expr 
+		| LET LPAR tl=separated_nonempty_list(COMMA, param_opt_typed) RPAR EQ e=expr IN ee=expr 
 			{ Parse_tree.PELetTupleIn (tl, e, ee) }
-		| LET LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR EQ e=expr 
+		| LET LPAR tl=separated_nonempty_list(COMMA, param_opt_typed) RPAR EQ e=expr 
 			{ Parse_tree.PELetTuple (tl, e) }
 
 		// storage assignment

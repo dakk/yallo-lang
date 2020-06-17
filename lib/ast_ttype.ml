@@ -117,5 +117,15 @@ let pp_ttype fmt (t: ttype) = Format.pp_print_string fmt (show_ttype t); ()
 
 let compare t1 t2 = t1 = t2
 
+let compare_type_lazy t t' = (match t', t with 
+  | TList(_), TList(TAny) -> true 
+  | TSet(_), TSet(TAny) -> true 
+  | TMap(_,_), TMap(TAny,TAny) -> true 
+  | TBigMap(_,_), TBigMap(TAny,TAny) -> true 
+  | a, b when a=b -> true
+  | _, _ -> false
+) 
+
 let compare_list t1 t2 = 
   List.length (List.filter (fun (a,b) -> a<>b) @@ List.combine t1 t2) = 0
+

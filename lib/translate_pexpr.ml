@@ -12,23 +12,19 @@ type iref =
 | Storage of ttype
 | StorageEntry of ttype list
 | Local of ttype
+[@@deriving show {with_path = false}]
+
+type bindings = (iden * iref) list
+[@@deriving show {with_path = false}]
 
 (* transform an pexpr to (ttype * expr) *)
-let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) list) : texpr = 
+let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : texpr = 
   let argv_to_list pel = match pel with | TTuple(tl) -> tl | _ -> [pel] in
   let transform_expr_list pel = List.map (fun p -> transform_expr p env' ic) pel in
   let transform_iexpr_list pel = List.map (fun (i, p) -> i, transform_expr p env' ic) pel in
   let transform_itype_list pel = List.map (fun (i, p) -> i, transform_type p env') pel in
-  let push_ic i ii ic = (i, ii)::ic in
-  let push_local_many rl ic = (List.map (fun (i,x) -> i, Local(x)) rl) @ ic in
-  let compare_type_lazy t t' = (match t', t with 
-    | TList(_), TList(TAny) -> true 
-    | TSet(_), TSet(TAny) -> true 
-    | TMap(_,_), TMap(TAny,TAny) -> true 
-    | TBigMap(_,_), TBigMap(TAny,TAny) -> true 
-    | a, b when a=b -> true
-    | _, _ -> false
-  ) in
+  let push_ic i ii ic = (i, ii)::(List.remove_assoc i ic) in
+  let push_local_many rl ic = List.fold_left (fun ic (i,x) -> (i, Local(x))::(List.remove_assoc i ic)) ic rl in
   let fold_container_type debs l =
     List.fold_left (fun acc xt -> if acc <> xt then 
       raise @@ TypeError (debs ^ " must have the same type: " ^ show_ttype acc ^ " <> " ^ show_ttype xt)
@@ -164,7 +160,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
   | PEApply (PEDot (PERef("List"), "empty"), []) -> TList(TAny), ListEmpty
   | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
   | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
-  
+
   (* PEApply(PEDot) base type apis *)
   | PEApply (PEDot(e,i), el) -> 
     let (te, ee) = transform_expr e env' ic in
@@ -499,20 +495,37 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
   | PELetTuple(tl, e) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let tl' = tl |> transform_itype_list in
-    tt, LetTuple(tl', (tt, ee))
+    (* TODO optional types of tl are ignored! *)
+    let ti = fst @@ List.split tl in
+    (match tt with 
+      | TTuple(tl') -> tt, LetTuple(List.combine ti tl', (tt, ee))
+      | _ -> failwith "Expected a tuple"
+    )
 
   | PELetTupleIn(tl, e, e1) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let tl' = tl |> transform_itype_list in
-    let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
-    tt1, LetTupleIn(tl', (tt,ee), (tt1,ee1))
+    (* TODO optional types of tl are ignored! *)
+    let ti = fst @@ List.split tl in
+    (match tt with 
+      | TTuple(tl') -> 
+        let tl' = List.combine ti tl' in 
+        let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
+        tt1, LetTupleIn(tl', (tt, ee), (tt1, ee1))
+      | _ -> failwith "Expected a tuple"
+    )
 
   | PESeq(PELetTuple(tl, e), en) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let tl' = tl |> transform_itype_list in
-    let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
-    tnt, Seq((TUnit, LetTuple(tl', (tt, ee))), (tnt, ene))
+    (* TODO optional types of tl are ignored! *)
+    let ti = fst @@ List.split tl in
+    (match tt with 
+      | TTuple(tl') -> 
+        let tl' = List.combine ti tl' in 
+        let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
+        tnt, Seq((TUnit, LetTuple(tl', (tt, ee))), (tnt, ene))
+      | _ -> failwith "Expected a tuple"
+    )
+
 
   | PESeq(PELet(i, None, e), en) -> 
     let (tt, ee) = transform_expr e env' ic in 
@@ -528,7 +541,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
   (* Storage assign *)
   | PEAssign (PESRef (x), e) -> 
     let (tte, eee) = transform_expr e env' ic in 
-    if Storage(tte) <> List.assoc x ic then raise @@ InvalidExpression ("Invalid assignment");
+    let se = List.assoc x ic in 
+    if Storage(tte) <> se then raise @@ InvalidExpression ("Invalid assignment: " ^ show_iref (Storage(tte)) ^ " " ^ show_iref se);
     TUnit, SAssign(x, (tte, eee))
 
   (* Storage record assign *)
