@@ -33,3 +33,7 @@ function test_redeclare_let (): int {
 	let c = 12;
 	12 + c
 }
+
+function test_if (a: int): int {
+	if a == 15 then 12 else let c = 14 in a*c
+}

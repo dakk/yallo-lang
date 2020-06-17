@@ -11,6 +11,10 @@ let rec transform_type (pt: Parse_tree.ptype) (e: Env.t): ttype = match pt with
 | Parse_tree.PTTuple (tl) -> 
   TTuple (List.map (fun tt -> transform_type tt e) tl)
 | Parse_tree.PTCont (c, tt) -> (
+  let assert_notbm_value a = if not (attributes a).bm_val then 
+    raise @@ TypeError ("Type '" ^ show_ttype a ^ "' is not usable as value for bigmap")
+    else () 
+  in
   let assert_cmp_key a = if not (attributes a).cmp then 
     raise @@ TypeError ("Type '" ^ show_ttype a ^ "' is not comparable and cannot be used as key of " ^ c)
     else () 
@@ -19,10 +23,15 @@ let rec transform_type (pt: Parse_tree.ptype) (e: Env.t): ttype = match pt with
   match c with 
   | "list" -> TList (tt') 
   | "map" -> (match tt' with 
-    | TTuple (a::b::[]) -> assert_cmp_key a; TMap (a, b)
+    | TTuple (a::b::[]) -> 
+      assert_cmp_key a; 
+      TMap (a, b)
     | _ -> raise @@ TypeError ("Type for map should be a tuple ('a, 'b'), got: " ^ show_ttype tt'))
   | "big_map" -> (match tt' with 
-    | TTuple (a::b::[]) -> assert_cmp_key a; TBigMap (a, b)
+    | TTuple (a::b::[]) -> 
+      assert_cmp_key a;
+      assert_notbm_value b;
+      TBigMap (a, b)
     | _ -> raise @@ TypeError ("Type for big_map should be a tuple ('a', 'b'), got: " ^ show_ttype tt'))
   | "set" -> assert_cmp_key tt'; TSet (tt')
   | "option" -> TOption (tt')

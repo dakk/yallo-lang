@@ -44,8 +44,22 @@ type tattr = {
   bm_val: bool;
 } [@@deriving show {with_path = false}]
 
+(* 
+  Comparable
+      Comparable values can be stored in sets, can be passed as argument to COMPARE, etc.
+  Passable
+      Passable types are those that can be taken as a parameter in contracts.
+  Storable
+      Storable types can be used as a storage in contracts.
+  Pushable
+      Literal values of pushable types can be given as parameter to the PUSH primitive.
+  Packable
+      Values of packable types can be given as serialized using the PACK primitive.
+  big_map value
+      These are types that be used in the domain of big_maps. 
+*)
+
 let attributes (t: ttype) = match t with 
-  | TAny ->           { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TUnit ->          { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TAddress ->       { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TInt ->           { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
@@ -60,17 +74,19 @@ let attributes (t: ttype) = match t with
   | TString ->        { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TBytes ->         { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TLambda (_, _) -> { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
-  | TEnum (_) ->      { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false } (* ? *)
+  | TEnum (_) ->      { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  } 
   | TList (_) ->      { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TSet (_) ->       { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TMap (_,_) ->     { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TBigMap (_,_) ->  { cmp=false; pass=true;  store=true;  push=false; pack=false; bm_val=false }
   | TOption (_) ->    { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
-  | TRecord (_) ->    { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false } (* ? *)
+  | TRecord (_) ->    { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  } 
   | TTuple (_) ->     { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TContract (_) ->  { cmp=false; pass=true;  store=false; push=false; pack=true;  bm_val=true  }
   | TOperation ->     { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
 
+  (* internal types *)
+  | TAny ->           { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TContractStorage ->  
                       { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }

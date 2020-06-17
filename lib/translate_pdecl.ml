@@ -93,7 +93,11 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
   (* contracts *)
   | Parse_tree.DContract (dc) :: p' -> 
     Env.assert_symbol_absence e dc.id;
-    let flds = List.map (fun (i,t) -> i, transform_type t e) dc.fields in
+    let flds = List.map (fun (i,t) -> 
+      let tt = transform_type t e in 
+      if not (attributes tt).store then raise @@ TypeError ("Type '" ^ show_ttype tt ^ "' is not storable");
+      i, tt
+    ) dc.fields in
 
     (* if implements, get the list of entries *)
     let to_implement = (match dc.implements with | None -> [] 
