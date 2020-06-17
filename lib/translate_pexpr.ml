@@ -14,7 +14,11 @@ type iref =
 | Local of ttype
 
 (* transform an pexpr to (ttype * expr) *)
-let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) list) : (ttype * expr) = 
+let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) list) : texpr = 
+  let argv_to_list pel = match pel with | TTuple(tl) -> tl | _ -> [pel] in
+  let transform_expr_list pel = List.map (fun p -> transform_expr p env' ic) pel in
+  let transform_iexpr_list pel = List.map (fun (i, p) -> i, transform_expr p env' ic) pel in
+  let transform_itype_list pel = List.map (fun (i, p) -> i, transform_type p env') pel in
   let push_ic i ii ic = (i, ii)::ic in
   let push_local_many rl ic = (List.map (fun (i,x) -> i, Local(x)) rl) @ ic in
   let compare_type_lazy t t' = (match t', t with 
@@ -56,11 +60,11 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
   (* Composed types *)
   | PETuple (el) -> 
-    let tel = List.map (fun x -> transform_expr x env' ic) el in
+    let tel = el |> transform_expr_list in
     TTuple(fst @@ List.split tel), Tuple(tel)
 
   | PEList (el) -> 
-    let ttres = List.map (fun x -> transform_expr x env' ic) el in
+    let ttres = el |> transform_expr_list in
     let (ttl, tel) = ttres |> List.split in
     if List.length ttl > 0 then 
       let lt = fold_container_type "List elements" ttl in TList(lt), List(ttres)
@@ -81,18 +85,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     let (tt, ee) = transform_expr e env' ic in 
     let tt' = transform_type et env' in
     (match tt, tt', ee with 
-    (* | TString, TKeyHash, String (a) -> TKeyHash, KeyHash (a)
-    | TString, TKey, String (a) -> TKey, Key (a)
-    | TString, TSignature, String (a) -> TSignature, Signature (a)
-    | TString, TAddress, String (a) -> TAddress, Address (a)
-    | TString, TBytes, String (a) -> TBytes, Bytes (Bytes.of_string a)
-    | TBytes, TString, Bytes (a) -> TString, String (Bytes.to_string a) *)
     | TOption (TAny), TOption(t), None -> TOption(t), None
     | a, b, _ when a=b -> a, ee
     | a, b, c -> raise @@ TypeError ("Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c))
 
   | PELambda (argl, e) -> 
-    let rl = List.map (fun (i,t) -> i, transform_type t env') argl in
+    let rl = argl |> transform_itype_list in
     let (tt, ee) = transform_expr e env' (push_local_many rl ic) in 
     let arg = (match List.length rl with 
       | 0 -> TUnit
@@ -102,7 +100,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     TLambda (arg, tt), Lambda(rl, (tt, ee))
 
   | PERecord (l) -> 
-    let l' = List.map (fun (i,e) -> i, transform_expr e env' ic) l in 
+    let l' = l |> transform_iexpr_list in 
     let (idtt, idee) = List.map (fun (i, (tt, ee)) -> (i, tt), (i, ee)) l' |> List.split in
     TRecord (idtt), Record (l')
 
@@ -118,15 +116,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
     | None -> raise @@ TypeError ("Unknown enum type '" ^ ii ^ "'")
     | _ -> raise @@ TypeError ("Accessor # is only usable on enum type"))
 
-  (* PEDot on base *)
-  | PEApply (PEDot (PERef("Set"), "empty"), []) -> TSet(TAny), SetEmpty
-  | PEApply (PEDot (PERef("List"), "empty"), []) -> TList(TAny), ListEmpty
-  | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
-  | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
 
   (* PEApply(PETRef) tezos apis *)
   | PEApply (PETRef (i), el) ->
-    let el' = List.map (fun a -> transform_expr a env' ic) el in 
+    let el' = el |> transform_expr_list in 
     (match i, el' with 
       | "sender", [] -> TAddress, TezosSender 
       | "source", [] -> TAddress, TezosSource
@@ -155,7 +148,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
   (* PEApply(PECRef) crypto apis *)
   | PEApply (PECRef (i), el) -> 
-    let el' = List.map (fun a -> transform_expr a env' ic) el in 
+    let el' = el |> transform_expr_list in 
     (match i, el' with 
       | "blake2b", [(TBytes, e)] -> TBytes, CryptoBlake2B(TBytes, e)
       | "hashKey", [(TKey, e)] -> TKeyHash, CryptoHashKey(TBytes, e)
@@ -166,10 +159,16 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
       | _, _ -> raise @@ APIError ("Invalid call to Crypto." ^ i)
     )
 
+  (* PEDot on base *)
+  | PEApply (PEDot (PERef("Set"), "empty"), []) -> TSet(TAny), SetEmpty
+  | PEApply (PEDot (PERef("List"), "empty"), []) -> TList(TAny), ListEmpty
+  | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
+  | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
+  
   (* PEApply(PEDot) base type apis *)
   | PEApply (PEDot(e,i), el) -> 
     let (te, ee) = transform_expr e env' ic in
-    let el' = List.map (fun a -> transform_expr a env' ic) el in 
+    let el' = el |> transform_expr_list in 
     (match te, i, el' with 
       (* List *)
       | TList (_), "size", [] -> TNat, ListSize (te, ee)
@@ -420,37 +419,30 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
   | PEApply (e, el) -> 
     let (tt,ee) = transform_expr e env' ic in 
     (match tt with 
-    | TLambda (TTuple(argl), rettype) when (List.length argl) = (List.length el) -> 
-      let ap = List.map (fun (arg, ex) -> 
-        let (ptt, pee) = transform_expr ex env' ic in 
-        if ptt <> arg then 
-          raise @@ TypeError ("Invalid argument on apply: " ^ show_ttype_got_expect ptt arg)
-        else ptt, pee
-      ) @@ List.combine argl el 
-      in rettype, Apply((tt, ee), (TTuple(argl), Tuple(ap)))
+    (* Apply on lambda  *)
+    | TLambda (arv, rettype) -> 
+      let argl = argv_to_list arv in 
+      let ap = el |> transform_expr_list in
+      if List.length argl <> List.length ap then 
+        raise @@ InvalidExpression ("Invalid argument number for lambda apply");
+      if not @@ Ast_ttype.compare_list argl (fst @@ List.split ap) then 
+        raise @@ TypeError ("Invalid argument types apply");
+      if List.length argl = 1 then 
+        rettype, Apply((tt, ee), (TTuple(argl), Tuple(ap)))
+      else 
+        rettype, Apply((tt, ee), List.hd ap)
 
-    | TLambda (TTuple(argl), _) when (List.length argl) <> (List.length el) -> 
-      raise @@ InvalidExpression ("Invalid argument number for lambda apply")
-
-    | TLambda (t, rettype) when (List.length el) = 1 -> 
-      let (ptt, pee) = transform_expr (List.hd el) env' ic in 
-      if ptt <> t then 
-        raise @@ TypeError ("Invalid argument on apply: " ^ show_ttype_got_expect ptt t)
-      else
-        rettype, Apply((tt, ee), (ptt, pee))
-
-    | TLambda (_, _) when (List.length el) > 1 -> 
-      raise @@ InvalidExpression ("This lambda expect only one argument")
-
+    (* Apply on contract, it is a transfer without mutez *)
     | TContract (ttl) ->
       let (ptt, pee) = transform_expr (List.hd el) env' ic in 
       if ptt <> ttl then raise @@ InvalidExpression ("Invalid arguments for callback");
       TOperation, TezosTransfer((tt, ee), (ptt, pee), (TMutez, Mutez (0)))
 
+    (* Apply on contract name, it is a buildcontractcodeandstorage, which is the argument of create_contract *)
     | TContractCode -> 
       (* TODO: check constructor parameters *)
       let cc = (match ee with | GlobalRef (c) -> c | _ -> raise @@ InvalidExpression ("Expected a globalref")) in
-      TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage (cc, List.map (fun e -> transform_expr e env' ic) el)
+      TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage (cc, el |> transform_expr_list)
       
     | _ -> raise @@ TypeError ("Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el))))
   )
@@ -507,18 +499,18 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: (iden * iref) l
 
   | PELetTuple(tl, e) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
+    let tl' = tl |> transform_itype_list in
     tt, LetTuple(tl', (tt, ee))
 
   | PELetTupleIn(tl, e, e1) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
+    let tl' = tl |> transform_itype_list in
     let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
     tt1, LetTupleIn(tl', (tt,ee), (tt1,ee1))
 
   | PESeq(PELetTuple(tl, e), en) -> 
     let (tt, ee) = transform_expr e env' ic in 
-    let tl' = List.map (fun (i,x) -> i, transform_type x env') tl in
+    let tl' = tl |> transform_itype_list in
     let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
     tnt, Seq((TUnit, LetTuple(tl', (tt, ee))), (tnt, ene))
 
