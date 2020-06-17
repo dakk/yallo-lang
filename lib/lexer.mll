@@ -22,9 +22,6 @@
 		"option";
 		"let";
 		"in";
-		"to";
-		"val";
-		"balance";
 		"true";
 		"false";
 		"and";
@@ -33,7 +30,6 @@
 		"constructor";
 		"using";
   ]
-
 
 
 	let next_line lexbuf =

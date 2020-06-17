@@ -75,7 +75,7 @@
     | i=IDENT EQ b=expr { (i, b) }
 	match_case:
 		| PIPE e=expr LAMBDA v=expr { (e, v) }
-		| PIPE UNDERSCORE LAMBDA v=expr { (Parse_tree.PECaseAny, v) }
+		| PIPE UNDERSCORE LAMBDA v=expr { (Parse_tree.PECaseDefault, v) }
 
 
 	left:
@@ -164,6 +164,7 @@
 		
     | LPAR e=expr RPAR 				  { e }
     | LPAR v=expr COLON t=type_sig RPAR { Parse_tree.PETyped (v, t) }
+		| LPAR e1=expr SEMICOLON f=fun_body RPAR { Parse_tree.PESeq (e1, f) }
 
   fun_body:
 		| e1=expr SEMICOLON f=fun_body { Parse_tree.PESeq (e1, f) }

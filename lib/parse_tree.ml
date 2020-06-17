@@ -62,7 +62,7 @@ and pexpr =
   (* ifthenelse expression *)
   | PEIfThenElse of pexpr * pexpr * pexpr 
   | PEMatchWith of pexpr * (pexpr * pexpr) list
-  | PECaseAny
+  | PECaseDefault
 
   (* function apply *)
   | PEHt of iden * iden

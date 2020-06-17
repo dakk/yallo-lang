@@ -92,6 +92,7 @@
          | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
          | LPAR <expr> RPAR
          | LPAR <expr> COLON <type_sig> RPAR
+         | LPAR <expr> SEMICOLON <fun_body> RPAR
 
 <fun_body> ::= <expr> (SEMICOLON <expr>)*
 

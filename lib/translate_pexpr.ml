@@ -458,19 +458,21 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     let bl' = List.map (fun (cv, cex)  -> 
       let (tt, ee) = transform_expr cv env' ic in
       let (tcex, ecex) = transform_expr cex env' ic in
-      if (tt <> te) then
+      if (tt <> te) && (tt <> TAny) then
         raise @@ TypeError ("Match case has an invalid value type; " ^ show_ttype_got_expect tt te)
       else 
         ((tt, ee), tcex, (tcex, ecex)) 
     ) bl in
     (* assert that every branch as the same type *)
     let rett: ttype = List.fold_left (fun acc (_, tcex, _) -> 
-      if acc <> tcex then 
+      if acc <> tcex && tcex <> TAny then  (* TODO: tunit is only allowed by fail *)
         raise @@ TypeError ("Match branches should have same type; " ^ show_ttype_got_expect tcex acc)
       else 
         tcex
     ) (let (_,b,_) = List.hd bl' in b) bl' 
     in rett, MatchWith ((te, ee), List.map (fun (a,_,c) -> (a,c)) bl')
+
+  | PECaseDefault -> TAny, CaseDefault
 
 
   (* let-binding and sequences *)

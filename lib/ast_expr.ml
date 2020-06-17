@@ -123,6 +123,7 @@ type expr =
 
 | IfThenElse of texpr * texpr * texpr 
 | MatchWith of texpr * (texpr * texpr) list
+| CaseDefault
 | Apply of texpr * texpr
 
 | Fail of texpr
