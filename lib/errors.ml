@@ -1,5 +1,3 @@
-type pos = (string * int * int)
-
 exception SyntaxError of Loc.l option * string
 exception ParsingError of Loc.l option * string
 exception TypeError of Loc.l option * string
