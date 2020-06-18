@@ -7,12 +7,12 @@ let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (Li
 let interface_of_contract (_, _, el) = List.map (fun (a, b, c) -> (a, b)) el
 
 let generate_interface (ast: t) (contract: string) = 
-  let iface = (match List.assoc_opt contract ast.symbols with 
-  | None -> raise @@ CompilerError ("Unknown contract or interface '" ^ contract ^ "'")
-  | Some(Contract) -> interface_of_contract @@ List.assoc contract ast.contracts 
-  | Some(Interface) -> List.assoc contract ast.ifaces) in 
-  "interface " ^ contract ^ " {\n"
+  let extract ci = "interface " ^ contract ^ " {\n"
   ^ list_to_string (List.map (fun (i, tl) -> 
     "  entry " ^ i ^ "(" ^ merge_list tl ", " (fun (ti, tt) -> ti ^ ": " ^ show_ttype tt) ^ ");\n"  
-  ) iface) 
-  ^ "}\n"
+  ) ci) 
+  ^ "}\n" in
+  (match List.assoc_opt contract ast.contracts, List.assoc_opt contract ast.ifaces with 
+  | None, None -> raise @@ CompilerError ("Unknown contract or interface '" ^ contract ^ "'")
+  | Some(c), _ -> interface_of_contract c |> extract
+  | None, Some(ci) -> extract ci)

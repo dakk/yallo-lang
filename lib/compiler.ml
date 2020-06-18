@@ -100,7 +100,9 @@ let rec extract_pragma (pt: Parse_tree.t) opt: (Parse_tree.t * options) =
 let print_pt (pt: Parse_tree.t) = pt |> Parse_tree.show |> print_endline; print_endline ""
 
 (* dump the ast, debug only *)
-let print_ast (ast: Ast.t) = ast |> Ast_env.Env.show |> print_endline; print_endline ""
+let print_ast (ast: Ast.t) = ast |> Ast.show |> print_endline; print_endline ""
+
+let print_str s t = s |> print_endline; print_endline ""
 
 (* [ap b f] conditionally apply f or iden if b or not b *)
 let ap b f = if b then f else (fun x -> x)
@@ -110,10 +112,14 @@ let app b f = if b then (fun x -> let _: unit = f x in x) else (fun x -> x)
 
 
 let build_ast (filename: string) opt =
+  if opt.verbose then printf "===> Parsing %s\n\n%!" filename;
   let pt = filename |> parse_file in       (* parse the starting file *)
+  if opt.verbose then printf "===> Extracting pragma\n\n%!";
   let (pt, opt) = extract_pragma pt opt in (* extract and process pragma rules *)
+  if opt.verbose then printf "===> Injecting imports\n\n%!";
   pt|> inject_import                (* parse and inject imports *)
     |> app opt.print_pt print_pt    (* print pt *)
+    |> app opt.verbose @@ print_str "===> Translating Parse_tree to Ast"
     |> Ast.of_parse_tree            (* transform pt to ast *)
     |> app opt.print_ast print_ast  (* print ast *)
 
@@ -124,8 +130,11 @@ let compile (filename: string) opt =
     (* output to a final language *)
     |> (fun ast -> match opt.out_lang, opt.contract with 
       | None, _ -> ""
-      | Some ("ligo"), Some(ctr) -> Generate_ligo.generate_ligo ast ctr
+      | Some ("ligo"), Some(ctr) -> 
+        if opt.verbose then printf "===> Generating ligo code\n\n%!";        
+        Generate_ligo.generate_ligo ast ctr
       | Some ("ligo"), None when (List.length ast.contracts) = 1 -> 
+        if opt.verbose then printf "===> Generating ligo code\n\n%!";        
         Generate_ligo.generate_ligo ast (fst @@ List.hd ast.contracts)
       | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
     )
@@ -136,6 +145,8 @@ let extract_interface (filename: string) opt =
   build_ast filename opt
     |> (fun ast -> match opt.contract with 
       | None -> raise @@ CompilerError ("No contract specified for interface extraction")
-      | Some(ctr) -> Generate_interface.generate_interface ast ctr
+      | Some(ctr) -> 
+        if opt.verbose then printf "===> Extracting interface\n\n%!";        
+        Generate_interface.generate_interface ast ctr
     )
     |> print_endline
