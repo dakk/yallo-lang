@@ -18,8 +18,10 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | BuildContractCodeAndStorage of iden * expr list
 | Entrypoint of expr * iden
 
-| TezosAddressOfContract of expr
-| TezosContractOfAddress of expr *)
+| TezosAddressOfContract of expr*)
+| TezosContractOfAddress (ad) -> 
+  "match (Tezos.get_contract_opt " ^ to_ligo_expr ast ad ^ " : unit contract option) with"
+  ^ "| None -> (failwith \"invalid contract\": unit contract) | Some(c) -> c"
 | TezosNow -> "Tezos.now"
 | TezosAmount -> "Tezos.amount"
 | TezosBalance -> "Tezos.balance"
@@ -131,6 +133,10 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | StringConcat of expr * expr 
 | StringSlice of expr * expr * expr
 | StringSize of expr
+*)
+| StringConcat (s1, s2) -> to_ligo_expr ast s1 ^ " ^ " ^ to_ligo_expr ast s2
+
+(*
 
 (* tuple *)
 | TupleFst of expr
@@ -169,12 +175,21 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Apply(lam, par) -> 
   to_ligo_expr ast lam ^ "(" ^ to_ligo_expr ast par ^ ")"
 
-(* 
-| MatchWith of expr * (expr * expr) list
+| MatchWith (e, el) -> 
+  let rec rr el = (match el with 
+  | [] -> ""
+  | (e', te')::((_, CaseDefault), tee')::el' -> 
+    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ") else (" ^ to_ligo_expr ast tee' ^ ")"
+  | (e', te')::elle::el' -> 
+    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ") else " ^ rr @@ elle::el' 
+  | (e', te')::[] -> 
+    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ") " 
+  ) in "let tmwttemp = " ^ to_ligo_expr ast e ^ " in " ^ rr el
 
-| FailIf of expr
-| FailIfMessage of expr * expr *)
-| Fail (e) -> let_surround ("failwith " ^ to_ligo_expr ast e)
+  
+| FailIfMessage (e, m) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then failwith (" ^ to_ligo_expr ast m ^ ") else ()")
+| FailIf (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then failwith \"Assertion\" else ()")
+| Fail (e) -> let_surround ("failwith (" ^ to_ligo_expr ast e ^ ")")
 | Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else failwith \"Assertion\"")
      
 | Let (id, tt, e) -> "let " ^ id ^ ": " ^ show_ttype tt ^ " = " ^ to_ligo_expr ast e ^ " in"

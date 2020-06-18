@@ -154,7 +154,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
     (* assert all to_implement are implemented *)
     List.iter (fun (i, _) ->
-      if List.assoc_opt i @@ el = None then raise @@ DeclarationError(Loc.dline p, "Contract '" ^ dc.id ^ "' does not implement '" ^ i ^ "'");
+      if List.assoc_opt i el = None then raise @@ DeclarationError(Loc.dline p, "Contract '" ^ dc.id ^ "' does not implement '" ^ i ^ "'");
       ()
     ) to_implement;
 

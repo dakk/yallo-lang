@@ -25,7 +25,7 @@ let command =
         and out_lang  = flag "-out-lang" (optional string) ~doc:" output language"
       in fun () -> 
         let opt = Compiler.{
-          out_lang = out_lang;
+          out_lang = if is_none out_lang then Some("ligo") else out_lang;
           contract = contract;
           print_pt = ppt;
           print_ast = past;

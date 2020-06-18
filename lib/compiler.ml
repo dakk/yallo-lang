@@ -125,6 +125,8 @@ let compile (filename: string) opt =
     |> (fun ast -> match opt.out_lang, opt.contract with 
       | None, _ -> ""
       | Some ("ligo"), Some(ctr) -> Generate_ligo.generate_ligo ast ctr
+      | Some ("ligo"), None when (List.length ast.contracts) = 1 -> 
+        Generate_ligo.generate_ligo ast (fst @@ List.hd ast.contracts)
       | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
     )
     |> print_endline
