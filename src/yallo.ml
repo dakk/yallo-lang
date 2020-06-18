@@ -9,10 +9,18 @@ let run action filename opt =
   | _ -> raise @@ CompilerError ("Invalid compiler action: " ^ action)
   )
 
+let summary = ""
+^ "=== actions ===\n\n"
+^ "  compile file.yallo [-dcontract ContractName] [-out-lang ligo]\n"
+^ "                 compiles a contract ContractName to ligo language\n\n"
+^ "  extract-interface file.yallo -dcontract ContractName\n"
+^ "                 extracts the yallo interface for the given contract\n"
+
+
 let command =
   Command.basic
     ~summary:"Yallo-lang compiler"
-    ~readme:(fun () -> "More detailed information")
+    ~readme:(fun () -> summary)
     (let open Command.Let_syntax in
       let open Command.Param in
       let%map

@@ -9,8 +9,30 @@ This is only a research project, it is not (yet) intendeed for real usage.
 
 ## Usage
 
-```bash
-./_build/default/src/yallo.exe compile contract_file.yallo -out-lang ligo -contract TestContract
+```
+Yallo-lang compiler
+
+  yallo.exe ACTION FILENAME
+
+=== actions ===
+
+  compile file.yallo [-dcontract ContractName] [-out-lang ligo]
+                 compiles a contract ContractName to ligo language
+
+  extract-interface file.yallo -dcontract ContractName
+                 extracts the yallo interface for the given contract
+
+=== flags ===
+
+  [-contract _]  selected contract
+  [-out-lang _]  output language
+  [-print-ast]   print ast
+  [-print-pt]    print parse-tree
+  [-verbose]     enable verbosity
+  [-build-info]  print info about this build and exit
+  [-version]     print the version of this build and exit
+  [-help]        print this help text and exit
+                 (alias: -?)
 ```
 
 
