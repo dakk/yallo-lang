@@ -111,14 +111,19 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       | Some (par, ass) -> 
         let par' = List.map (fun (i, a) -> i, transform_type a e) par in
         par',
-        List.map (fun (i, a) -> i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
+        List.map (fun (i, a) -> 
+          if not (List.mem i (fst @@ List.split flds)) then 
+            raise @@ SymbolNotFound (Loc.dline p, "Field '" ^ i ^ "' not present in contract '" ^ dc.id ^ "'")
+          else
+            i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
     ) in
-    if (snd ctor) <> [] && List.length (flds) <> List.length (snd ctor) then (
+    if (snd ctor) <> [] then (
       let (a, b) = fst @@ List.split @@ snd ctor, fst @@ List.split @@ flds in
-      let left_empty = List.fold_left (fun acc x ->  
+      let left_empty = List.fold_left (fun acc (x,xx) ->  
         if List.mem x a then acc else x ^ " " ^ acc
-      ) "" b in 
-      raise @@ DeclarationError (Loc.dline p, "Constructor left some fields uninitialized: " ^ left_empty)
+      ) "" flds in 
+      if left_empty <> "" then
+        raise @@ DeclarationError (Loc.dline p, "Constructor left some fields uninitialized: " ^ left_empty)
     );
 
     (* entry list signature *)

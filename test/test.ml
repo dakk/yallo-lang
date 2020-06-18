@@ -19,6 +19,7 @@ let compile exc path cname _ =
   | Some(TypeError(_,_)), Some(TypeError(_,_)) -> ()
   | Some(DuplicateSymbolError(_,_)), Some(DuplicateSymbolError(_,_)) -> ()
   | Some(DeclarationError(_,_)), Some(DeclarationError(_,_)) -> ()
+  | Some(SymbolNotFound(_,_)), Some(SymbolNotFound(_,_)) -> ()
   | Some(f), _ -> failwith @@ "Invalid" ^ Printexc.to_string f
   | None, Some(e) -> failwith @@ "Expected an exception, none catched: " ^ Printexc.to_string e)
 
@@ -77,6 +78,7 @@ let () =
       "token_using", `Quick, compile None "test/contract/token_using.yallo" None;
       "crec", `Quick, compile None "test/contract/crec.yallo" None;
       "cenum", `Quick, compile None "test/contract/cenum.yallo" None;
+      "unbound_field", `Quick, compile (Some(SymbolNotFound(None, ""))) "test/contract/unbound_field.yallo" None;
       "ctor_fail", `Quick, compile (Some(DeclarationError(None, ""))) "test/contract/ctor_fail.yallo" None;
     ]
   ]

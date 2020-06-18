@@ -1,0 +1,7 @@
+contract Test {
+	field z: int;
+	
+	constructor (a: int) {
+		this.c = a;
+	}
+}
