@@ -57,12 +57,13 @@ let rec parse_inc lexbuf (checkpoint : Parse_tree.t I.checkpoint) =
 let parse filename s = 
   let lexbuf = Lexing.from_string s in 
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  Loc.filename := filename;
 
   try parse_inc lexbuf (Parser.Incremental.program lexbuf.lex_curr_p)
   with SyntaxErrorLoced (pos, err) ->
     match pos with
-    | Some (line, pos) -> raise @@ SyntaxError (Printf.sprintf "%s:%d:%d syntax error: %s" filename line pos err)
-    | None -> raise @@ SyntaxError (Printf.sprintf "%s syntax error: %s" filename err)
+    | Some (line, pos) -> raise @@ SyntaxError (Some (filename, line, pos), err)
+    | None -> raise @@ SyntaxError (Some(filename, -1, 0), err)
 
 
 let rec readfile ic = 

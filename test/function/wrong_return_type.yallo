@@ -1,3 +1,4 @@
 function testFunction (a: int): bool {
-	a * 512 + c;
+	let c = 12 in 
+	a * 512 + c
 }

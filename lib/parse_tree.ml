@@ -138,3 +138,16 @@ type declaration =
 
 (* a parse tree is a list of declarations; includes are unrolled by the parser *)
 type t = declaration list [@@deriving show {with_path = false}]
+
+
+(* https://stackoverflow.com/questions/45024211/menhir-associate-ast-nodes-with-token-locations-in-source-file *)
+(* type empt = | Decl of t | Expr of pexpr
+
+module LocationTable = Ephemeron.K1.Make(struct
+  type t = empt
+  let hash = Hashtbl.hash (* or your own hash if you have one *)
+  let equal = (=) (* or a specilized equal operator *)
+end)  *)
+
+
+(* locations:   (string, Parse_tree.empt) Ephemeron.K1.t; *)

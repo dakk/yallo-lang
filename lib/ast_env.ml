@@ -2,6 +2,7 @@ open Ast_ttype
 open Ast_expr
 open Errors
 
+
 module Env = struct 
   type st = | Type | Interface | Const | Contract [@@deriving show {with_path = false}]
   type entry_sig = (iden * (iden * ttype) list)  [@@deriving show {with_path = false}]
@@ -59,19 +60,19 @@ module Env = struct
   let assert_symbol_absence (e: t) s = 
     match List.assoc_opt s e.symbols with 
     | None -> ()
-    | Some (st) -> raise @@ DuplicateSymbolError ("Symbol '" ^ s ^ "' is already defined as " ^ show_st st)
+    | Some (st) -> raise @@ DuplicateSymbolError (None, "Symbol '" ^ s ^ "' is already defined as " ^ show_st st)
 
 
   let get_type_opt tn (e: t) = List.assoc_opt tn e.types
 
   let get_ref sn (e: t) = 
     match List.assoc_opt sn e.symbols with 
-    | None -> raise @@ SymbolNotFound("Unknown reference to symbol '" ^ sn ^ "'")
+    | None -> raise @@ SymbolNotFound(None, "Unknown reference to symbol '" ^ sn ^ "'")
     | Some (Const) -> let (tt, _) = List.assoc sn e.consts in tt     
     | Some (Contract) -> TContractCode  
     | Some (Interface) -> 
       let esl = List.assoc sn e.ifaces in 
       let esl' = List.map (fun (i, pl) -> i, List.map (fun (_, pt) -> pt) pl) esl in 
       TInterface (esl')
-    | _ -> raise @@ SymbolNotFound("Symbol '" ^ sn ^ "' not found in env")
+    | _ -> raise @@ SymbolNotFound(None, "Symbol '" ^ sn ^ "' not found in env")
 end

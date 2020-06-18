@@ -1,7 +1,8 @@
 {
   open Parser
   open Lexing
-	open Errors
+	
+	exception SyntaxError2 of string
 
   let reserved = [ 
     "interface"; 
@@ -155,10 +156,10 @@ rule token = parse
   | signature as s  { SIGNATURE (String.sub s 2 ((String.length s) - 3)) }
 
   | modifier as m   { MODIFIER m }
-  | ident as i      { if List.exists (fun r -> r = i) reserved then raise (SyntaxError ("Using reserved word for identifier")) else IDENT i }
+  | ident as i      { if List.exists (fun r -> r = i) reserved then raise (SyntaxError2 ("Using reserved word for identifier")) else IDENT i }
 
   | eof             { EOF }
-  | _ as c          { raise (SyntaxError (Format.sprintf "invalid string starting with %C" c)) }
+  | _ as c          { raise (SyntaxError2 (Format.sprintf "Invalid string starting with %C" c)) }
 
 and comment_line = parse
   | "//"      			{ comment_line lexbuf }

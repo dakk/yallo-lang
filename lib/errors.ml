@@ -1,13 +1,13 @@
 type pos = (string * int * int)
 
-exception SyntaxError of string
-exception ParsingError of string
-exception TypeError of string
-exception SymbolNotFound of string
-exception DuplicateSymbolError of string
-exception DeclarationError of string
-exception InvalidExpression of string
-exception ContractError of string
-exception APIError of string
-exception GenerateLigoError of string
+exception SyntaxError of Loc.l option * string
+exception ParsingError of Loc.l option * string
+exception TypeError of Loc.l option * string
+exception SymbolNotFound of Loc.l option * string
+exception DuplicateSymbolError of Loc.l option * string
+exception DeclarationError of Loc.l option * string
+exception InvalidExpression of Loc.l option * string
+exception ContractError of Loc.l option * string
+exception APIError of Loc.l option * string
+exception GenerateLigoError of Loc.l option * string
 exception CompilerError of string

@@ -1,4 +1,6 @@
 %{
+	open Loc 
+
   (* (a,b,c) destructing *)
   let t3trd (a,b,c) = c
   let t3fst (a,b,c) = a
@@ -222,11 +224,11 @@
       { Parse_tree.DConst ({ id=x; t=None; v=v }) }
 
   declaration:
-    | i=dinterface { i }
-    | c=dcontract  { c }
-    | f=dfunction  { f }
-    | t=dtype      { t }
-    | cc=dconst    { cc }
+    | i=dinterface { locd $startpos $endpos i }
+    | c=dcontract  { locd $startpos $endpos c }
+    | f=dfunction  { locd $startpos $endpos f }
+    | t=dtype      { locd $startpos $endpos t }
+    | cc=dconst    { locd $startpos $endpos cc }
     // | m=modifier  { m }
 
 

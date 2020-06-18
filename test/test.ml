@@ -15,10 +15,10 @@ let compile exc path cname _ =
 
   (match compile_failure, exc with 
   | None, None -> ()
-  | Some(SyntaxError(_)), Some(SyntaxError(_)) -> ()
-  | Some(TypeError(_)), Some(TypeError(_)) -> ()
-  | Some(DuplicateSymbolError(_)), Some(DuplicateSymbolError(_)) -> ()
-  | Some(DeclarationError(_)), Some(DeclarationError(_)) -> ()
+  | Some(SyntaxError(_,_)), Some(SyntaxError(_,_)) -> ()
+  | Some(TypeError(_,_)), Some(TypeError(_,_)) -> ()
+  | Some(DuplicateSymbolError(_,_)), Some(DuplicateSymbolError(_,_)) -> ()
+  | Some(DeclarationError(_,_)), Some(DeclarationError(_,_)) -> ()
   | Some(f), _ -> failwith @@ "Invalid" ^ Printexc.to_string f
   | None, Some(e) -> failwith @@ "Expected an exception, none catched: " ^ Printexc.to_string e)
 
@@ -46,7 +46,7 @@ let () =
       "numeric", `Quick, compile None "test/const/numeric.yallo" None;
       "string", `Quick, compile None "test/const/string.yallo" None;
       "lambda", `Quick, compile None "test/const/lambda.yallo" None;
-      "lambda_fail", `Quick, compile (Some(TypeError(""))) "test/const/lambda_fail.yallo" None;
+      "lambda_fail", `Quick, compile (Some(TypeError(None, ""))) "test/const/lambda_fail.yallo" None;
       "expr", `Quick, compile None "test/const/expr.yallo" None;
       "let_expr", `Quick, compile None "test/const/let_expr.yallo" None;
       "enum", `Quick, compile None "test/const/enum.yallo" None;
@@ -62,11 +62,11 @@ let () =
       "i1", `Quick, compile None "test/interface/i1.yallo" None;
       "extend", `Quick, compile None "test/interface/extend.yallo" None;
       "empty", `Quick, compile None "test/interface/empty.yallo" None;
-      "duplicate_fail", `Quick, compile (Some(DuplicateSymbolError(""))) "test/interface/duplicate_fail.yallo" None;
-      "dup_entry_fail", `Quick, compile (Some(DeclarationError(""))) "test/interface/dup_entry_fail.yallo" None;
+      "duplicate_fail", `Quick, compile (Some(DuplicateSymbolError(None, ""))) "test/interface/duplicate_fail.yallo" None;
+      "dup_entry_fail", `Quick, compile (Some(DeclarationError(None, ""))) "test/interface/dup_entry_fail.yallo" None;
     ];
     "function", [
-      "wrong_return_type", `Quick, compile (Some(SyntaxError(""))) "test/function/wrong_return_type.yallo" None;
+      "wrong_return_type", `Quick, compile (Some(TypeError(None, ""))) "test/function/wrong_return_type.yallo" None;
       "base_fun", `Quick, compile None "test/function/base_fun.yallo" None;
     ];
     "contract", [
@@ -77,6 +77,6 @@ let () =
       "token_using", `Quick, compile None "test/contract/token_using.yallo" None;
       "crec", `Quick, compile None "test/contract/crec.yallo" None;
       "cenum", `Quick, compile None "test/contract/cenum.yallo" None;
-      "ctor_fail", `Quick, compile (Some(DeclarationError(""))) "test/contract/ctor_fail.yallo" None;
+      "ctor_fail", `Quick, compile (Some(DeclarationError(None, ""))) "test/contract/ctor_fail.yallo" None;
     ]
   ]
