@@ -6,7 +6,8 @@ contract Token implements IToken {
 	field symbol: string;
 
 	constructor (supply: nat, symbol: string) {
-		this.balances = BigMap.empty();
+		this.balances = [ (@1234: 0n + supply) ];
+		// BigMap.empty();
 		this.totalSupply = supply;
 		this.symbol = symbol;
 	}
