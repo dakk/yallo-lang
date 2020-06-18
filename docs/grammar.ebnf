@@ -24,7 +24,7 @@
 
 <dimport> ::= IMPORT STRING SEMICOLON
 
-<emap_element> ::= LPAR <expr> COLON <expr> RPAR
+<emap_element> ::= LBRACE <expr> COLON <expr> RBRACE
 
 <erec_element> ::= IDENT EQ <expr>
 

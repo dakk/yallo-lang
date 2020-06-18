@@ -75,7 +75,7 @@
   dimport: | IMPORT p=STRING SEMICOLON { Parse_tree.DImport (p) }
 
   emap_element:
-    | LPAR a=expr COLON b=expr RPAR { (a, b) }
+    | LBRACE a=expr COLON b=expr RBRACE { (a, b) }
   erec_element:
     | i=IDENT EQ b=expr { (i, b) }
 	match_case:

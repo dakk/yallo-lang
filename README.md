@@ -39,8 +39,8 @@ contract Token implements IToken {
 	field totalSupply: nat;
 	field symbol: string;
 
-	constructor (supply: nat, symbol: string) {
-		this.balances = empty;
+	constructor (owner: address, supply: nat, symbol: string) {
+		this.balances = [ { owner: supply } ];
 		this.totalSupply = supply;
 		this.symbol = symbol;
 	}
