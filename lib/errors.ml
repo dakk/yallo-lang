@@ -1,3 +1,5 @@
+type pos = (string * int * int)
+
 exception SyntaxError of string
 exception ParsingError of string
 exception TypeError of string

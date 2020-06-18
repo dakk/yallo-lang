@@ -1,11 +1,12 @@
 open Core
 open Yallo
+open Errors
 
 let run action filename opt = 
   (match action with 
   | "compile" -> Compiler.compile filename opt
   | "extract-interface" -> Compiler.extract_interface filename opt
-  | _ -> failwith @@ "Invalid compiler action: " ^ action
+  | _ -> raise @@ CompilerError ("Invalid compiler action: " ^ action)
   )
 
 let command =
@@ -29,6 +30,22 @@ let command =
           print_pt = ppt;
           print_ast = past;
           verbose = verbose;
-        } in run action filename opt)
-
+        } in (
+          try 
+            run action filename opt
+          with 
+          | CompilerError (m) -> print_endline @@ "CompilerError: " ^ m
+          | SyntaxError (m) -> print_endline @@ "SyntaxError: " ^ m
+          | ParsingError (m) -> print_endline @@ "ParsingError: " ^ m
+          | TypeError (m) -> print_endline @@ "TypeError: " ^ m
+          | SymbolNotFound (m) -> print_endline @@ "SymbolNotFound: " ^ m
+          | DuplicateSymbolError (m) -> print_endline @@ "DuplicateSymbolError: " ^ m
+          | DeclarationError (m) -> print_endline @@ "DeclarationError: " ^ m
+          | InvalidExpression (m) -> print_endline @@ "InvalidExpression: " ^ m
+          | ContractError (m) -> print_endline @@ "ContractError: " ^ m
+          | APIError (m) -> print_endline @@ "APIError: " ^ m
+          | GenerateLigoError (m) -> print_endline @@ "GenerateLigoError: " ^ m
+        )
+      )
+        
 let () = Command.run ~version:"0.1" ~build_info:"git" command

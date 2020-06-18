@@ -517,7 +517,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     let ti = fst @@ List.split tl in
     (match tt with 
       | TTuple(tl') -> tt, LetTuple(List.combine ti tl', (tt, ee))
-      | _ -> failwith "Expected a tuple"
+      | _ -> raise @@ TypeError ("Expected a tuple")
     )
 
   | PELetTupleIn(tl, e, e1) -> 
@@ -529,7 +529,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         let tl' = List.combine ti tl' in 
         let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
         tt1, LetTupleIn(tl', (tt, ee), (tt1, ee1))
-      | _ -> failwith "Expected a tuple"
+      | _ -> raise @@ TypeError ("Expected a tuple")
     )
 
   | PESeq(PELetTuple(tl, e), en) -> 
@@ -541,7 +541,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         let tl' = List.combine ti tl' in 
         let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
         tnt, Seq((TUnit, LetTuple(tl', (tt, ee))), (tnt, ene))
-      | _ -> failwith "Expected a tuple"
+      | _ -> raise @@ TypeError ("Expected a tuple")
     )
 
 

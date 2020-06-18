@@ -124,7 +124,7 @@ let compile (filename: string) opt =
     |> (fun ast -> match opt.out_lang, opt.contract with 
       | None, _ -> ""
       | Some ("ligo"), Some(ctr) -> Generate_ligo.generate_ligo ast ctr
-      | Some (_), None -> failwith "No contract specified for compilation"
+      | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
     )
     |> print_endline
 
@@ -132,7 +132,7 @@ let compile (filename: string) opt =
 let extract_interface (filename: string) opt =
   build_ast filename opt
     |> (fun ast -> match opt.contract with 
-      | None -> failwith "No contract specified for interface extraction"
+      | None -> raise @@ CompilerError ("No contract specified for interface extraction")
       | Some(ctr) -> Generate_interface.generate_interface ast ctr
     )
     |> print_endline
