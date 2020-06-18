@@ -22,9 +22,6 @@
 		"option";
 		"let";
 		"in";
-		"to";
-		"val";
-		"balance";
 		"true";
 		"false";
 		"and";
@@ -33,7 +30,6 @@
 		"constructor";
 		"using";
   ]
-
 
 
 	let next_line lexbuf =
@@ -61,7 +57,7 @@ let hex_digit = ['a'-'f'] | ['A' - 'F'] | ['0' - '9']
 let blank = [' ' '\t' '\r']
 let newline = '\n'
 let quote = '"'
-let string = quote (letter | digit | ' ' | '\'' | '=' | '_' | '.' | '/')* quote
+let string = quote (letter | digit | ' ' | '\'' | '=' | ':' | '_' | '.' | '/')* quote
 
 let address = '@' (letter | digit)*
 let key_hash = 'h' string 
@@ -128,6 +124,7 @@ rule token = parse
   | ","             { COMMA }
   | ":"             { COLON }
   | ";"             { SEMICOLON }
+	| "_"							{ UNDERSCORE }
   | "|"             { PIPE }
   (* | "\""				  	{ QUOTE } *)
   (* | "?"					  	{ QUESTION } *)

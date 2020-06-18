@@ -12,7 +12,7 @@
 %token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
 %token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, WITH, MATCH
 %token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT, LET, IN
-%token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO
+%token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO, UNDERSCORE
 %token PRAGMA, IMPORT
 %token <string> MODIFIER
 %token <string> IDENT
@@ -28,6 +28,9 @@
 %token <int> MTZ
 %token <string> CONT
 
+%left NOT
+%left OR
+%left AND
 %left EQEQ, NEQ
 %left LTE, LT, GT, GTE
 %left ADD, SUB
@@ -75,6 +78,7 @@
     | i=IDENT EQ b=expr { (i, b) }
 	match_case:
 		| PIPE e=expr LAMBDA v=expr { (e, v) }
+		| PIPE UNDERSCORE LAMBDA v=expr { (Parse_tree.PECaseDefault, v) }
 
 
 	left:
@@ -163,6 +167,7 @@
 		
     | LPAR e=expr RPAR 				  { e }
     | LPAR v=expr COLON t=type_sig RPAR { Parse_tree.PETyped (v, t) }
+		| LPAR e1=expr SEMICOLON f=fun_body RPAR { Parse_tree.PESeq (e1, f) }
 
   fun_body:
 		| e1=expr SEMICOLON f=fun_body { Parse_tree.PESeq (e1, f) }

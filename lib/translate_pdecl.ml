@@ -113,8 +113,13 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
         par',
         List.map (fun (i, a) -> i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ass
     ) in
-    if (snd ctor) <> [] && List.length (flds) <> List.length (snd ctor) then
-      raise @@ DeclarationError ("Constructor left some fields uninitialized");
+    if (snd ctor) <> [] && List.length (flds) <> List.length (snd ctor) then (
+      let (a, b) = fst @@ List.split @@ snd ctor, fst @@ List.split @@ flds in
+      let left_empty = List.fold_left (fun acc x ->  
+        if List.mem x a then acc else x ^ " " ^ acc
+      ) "" b in 
+      raise @@ DeclarationError ("Constructor left some fields uninitialized: " ^ left_empty)
+    );
 
     (* entry list signature *)
     let elsig = List.map (fun (i, p, _) -> 

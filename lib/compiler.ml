@@ -3,6 +3,10 @@ open Lexer
 open Printf
 open Errors
 
+module I = Parser.MenhirInterpreter
+
+exception SyntaxErrorLoced of (int * int) option * string 
+
 type options = {
   contract: string option;
   out_lang: string option;
@@ -13,25 +17,53 @@ type options = {
 
 let default_options = {
   contract = None;
-  out_lang = None;
+  out_lang = Some ("ligo");
   print_pt = true;
   print_ast = true;
   verbose = true;
 }
 
-let str_position lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  sprintf "%s:%d:%d" pos.pos_fname
-    pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
+let pos lexbuf = let pos = Lexing.lexeme_start_p lexbuf in (pos.pos_lnum, pos.pos_cnum - pos.pos_bol + 1)
+
+let get_parse_error env =
+    match I.stack env with
+    | lazy Nil -> "Invalid syntax"
+    | lazy (Cons (I.Element (state, _, _, _), _)) ->
+        try (Parser_messages.message (I.number state)) with
+        | Not_found -> "invalid syntax (no specific message for this eror)"
+
+
+let rec parse_inc lexbuf (checkpoint : Parse_tree.t I.checkpoint) =
+  match checkpoint with
+  | I.InputNeeded _env ->
+      let token = Lexer.token lexbuf in
+      let startp = lexbuf.lex_start_p
+      and endp = lexbuf.lex_curr_p in
+      let checkpoint = I.offer checkpoint (token, startp, endp) in
+      parse_inc lexbuf checkpoint
+  | I.Shifting _
+  | I.AboutToReduce _ ->
+      let checkpoint = I.resume checkpoint in
+      parse_inc lexbuf checkpoint
+  | I.HandlingError _env ->
+      let line, pos = pos lexbuf in
+      let err = get_parse_error _env in
+      raise (SyntaxErrorLoced (Some (line, pos), err))
+  | I.Accepted v -> v
+  | I.Rejected ->
+       raise (SyntaxErrorLoced (None, "invalid syntax (parser rejected the input)"))
+
 
 let parse filename s = 
   let lexbuf = Lexing.from_string s in 
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  try Parser.program Lexer.token lexbuf with 
-  | SyntaxError msg ->
-    raise @@ SyntaxError(sprintf "%s: %s\n" (str_position lexbuf) msg)
-  | Parser.Error ->
-    raise @@ SyntaxError(sprintf "%s: syntax error\n" (str_position lexbuf))
+
+  try parse_inc lexbuf (Parser.Incremental.program lexbuf.lex_curr_p)
+  with SyntaxErrorLoced (pos, err) ->
+    match pos with
+    | Some (line, pos) -> raise @@ SyntaxError (Printf.sprintf "%s:%d:%d syntax error: %s" filename line pos err)
+    | None -> raise @@ SyntaxError (Printf.sprintf "%s syntax error: %s" filename err)
+
 
 let rec readfile ic = 
   try let line = input_line ic in (line ^ "\n")::(readfile ic) with _ -> close_in_noerr ic; []
@@ -92,7 +124,7 @@ let compile (filename: string) opt =
     |> (fun ast -> match opt.out_lang, opt.contract with 
       | None, _ -> ""
       | Some ("ligo"), Some(ctr) -> Generate_ligo.generate_ligo ast ctr
-      | Some (_), None -> failwith "No contract specified for compilation"
+      | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
     )
     |> print_endline
 
@@ -100,7 +132,7 @@ let compile (filename: string) opt =
 let extract_interface (filename: string) opt =
   build_ast filename opt
     |> (fun ast -> match opt.contract with 
-      | None -> failwith "No contract specified for interface extraction"
+      | None -> raise @@ CompilerError ("No contract specified for interface extraction")
       | Some(ctr) -> Generate_interface.generate_interface ast ctr
     )
     |> print_endline

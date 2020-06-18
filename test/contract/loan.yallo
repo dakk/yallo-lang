@@ -1,0 +1,76 @@
+import "test/contract/itoken.yallo";
+
+type tstate = enum (WaitingBorrower | Loaned | CheckingRefund | Expired | Executed | Terminated);
+
+const loanBaker: key_hash = h"3423432";
+const d28 = 86400 * 28; // aka Timestamp.oneDay
+const d5 = 86400 * 5;
+
+function addressOfToken(tokName: string): address {
+	match tokName with 
+	| "tzbtc" -> @tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx
+	| _ -> fail ("unknown token: " + tokName)
+}
+
+contract Loan {
+	field state: tstate;
+	field lender: address;
+	field borrower: address;
+	field token: string;
+	field amount: nat;
+	field collateral: mutez;
+	field expiration: timestamp;
+
+	constructor (token: string, amount: nat, lender: address, coll: mutez) {
+		this.state = tstate#WaitingBorrower;
+		this.token = token;
+		this.amount = amount;
+		this.lender = lender;
+		this.expiration = 0;
+		this.borrower = @0;
+		this.collateral = coll;
+	}
+
+	entry borrow() {
+		assert (Tezos.amount() == this.collateral);
+		assert (this.state == tstate#WaitingBorrower);
+		
+		let sdop = Tezos.setDelegate (Some (loanBaker));
+		this.state = tstate#Loaned;
+		this.borrower = Tezos.sender();
+		this.expiration = Tezos.now() + d28;
+		let op = IToken.of(addressOfToken (this.token)).transfer (Tezos.selfAddress(), Tezos.sender(), this.amount);
+		[ sdop, op ]
+	}
+
+	entry refund() {
+		assert (Tezos.sender() == this.borrower);
+		assert (this.state == tstate#Loaned);
+		assert (this.expiration < Tezos.now());
+
+		this.state = tstate#CheckingRefund;
+		
+		[ IToken.of(addressOfToken (this.token)).getBalance(this.borrower, this.refundBalanceCallback) ]
+	}
+
+	entry refundBalanceCallback (bal: nat) {
+		assert (Tezos.sender() == addressOfToken (this.token));
+		assert (this.state == tstate#CheckingRefund);
+		if (bal >= this.amount) then
+			( this.state = tstate#Executed;
+			[ Tezos.transfer (this.borrower, this.collateral) ] )
+		else 
+			( this.state = tstate#Loaned;
+			[])
+	}
+
+	entry claim() {
+		assert (this.state == tstate#Executed or this.state == tstate#Expired);
+		failif (this.state == tstate#Executed and Tezos.now() < (this.expiration + d5));
+		assert (Tezos.sender() == this.lender);
+
+		this.state = tstate#Terminated;
+		
+		[ Tezos.transfer (this.lender, Tezos.balance()) ]
+	}
+}

@@ -18,29 +18,29 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | BuildContractCodeAndStorage of iden * expr list
 | Entrypoint of expr * iden
 
-| TezosNow
-| TezosAmount
-| TezosBalance
-| TezosChainId
-| TezosSelf
-| TezosSetDelegate of expr
-| TezosSource
-| TezosSender
 | TezosAddressOfContract of expr
 | TezosContractOfAddress of expr *)
+| TezosNow -> "Tezos.now"
+| TezosAmount -> "Tezos.amount"
+| TezosBalance -> "Tezos.balance"
+| TezosChainId -> "Tezos.chain_id"
+| TezosSource -> "Tezos.source"
+| TezosSender -> "Tezos.sender"
+| TezosSelf -> "Tezos.self"
+| TezosSetDelegate (a) -> "Tezos.set_delegate (" ^ to_ligo_expr ast a ^ ")"
 | TezosTransfer (ct, par, v) -> 
   "Tezos.transaction (" ^ to_ligo_expr ast par ^ ") (" ^ to_ligo_expr ast v ^ ") (" ^ to_ligo_expr ast ct ^ ")"
 
 (*
 | TezosCreateContract of expr * expr * expr
 | TezosImplicitAccount of expr
-
-| CryptoBlake2B of expr
-| CryptoCheckSignature of expr * expr * expr
-| CryptoHashKey of expr 
-| CryptoSha256 of expr
-| CryptoSha512 of expr
 *)
+
+| CryptoBlake2B (a) -> "Crypto.blake2b (" ^ to_ligo_expr ast a ^ ")"
+| CryptoCheckSignature (a,b,c) -> "Crypto.check_signature (" ^ to_ligo_expr ast a ^ ") (" ^ to_ligo_expr ast b ^ ") (" ^ to_ligo_expr ast c ^ ")"
+| CryptoHashKey (a) -> "Crypto.hask_key (" ^ to_ligo_expr ast a ^ ")"
+| CryptoSha256 (a) -> "Crypto.sha256 (" ^ to_ligo_expr ast a ^ ")"
+| CryptoSha512 (a) -> "Crypto.sha512 (" ^ to_ligo_expr ast a ^ ")"
 
 | LocalRef (id) -> id
 | StorageRef (id) -> "s." ^ id
@@ -57,10 +57,10 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Key (a) -> sprintf "(\"%s\": key)" a
 | KeyHash (a) -> sprintf "(\"%s\": key_hash)" a
 | Some(a) -> "Some (" ^ to_ligo_expr ast a ^ ")"
+| Bytes (s) -> sprintf "(\"%s\": bytes)" (Bytes.to_string s)
+| Signature (s) -> sprintf "(\"%s\": signature)" s
 (*
 | ChainId of int
-| Bytes of bytes
-| Signature of string
 | Enum of ttype * string*)
 | Typed (e, t) -> "(" ^ to_ligo_expr ast e ^ ": " ^ show_ttype t ^ ")"
 | List (el) -> "[" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
@@ -70,7 +70,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Set of expr list 
 | Map of (expr * expr) list
 | BigMap of (expr * expr) list
-| Tuple of expr list *)
+*)
 | Tuple (el) -> 
   "(" ^ merge_list el ", " (fun v -> to_ligo_expr ast v) ^ ")"
 | Lambda (il, e) -> 
@@ -109,15 +109,8 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | BigMapRemove (mape, vkey) -> 
   let_surround ("Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape)
 
-
-
 (*
-| BigMapEmpty
-| BigMapGetOpt of expr * expr
-| BigMapGet of expr * expr * expr
 | BigMapMem of expr * expr
-| BigMapUpdate of expr * expr * expr 
-| BigMapRemove of expr * expr 
 
 (* set *)
 | SetEmpty
@@ -198,7 +191,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 
 | Seq(a, b) -> "  " ^ to_ligo_expr ast a ^ "\n" ^ to_ligo_expr ast b
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
-| _ -> "Unable to generate ligo code for expression " ^ show_expr e
+| _ -> "<<translation not handled: " ^ show_expr e ^ ">>"
 
 let generate_ligo (ast: t) (contract: string) = 
   if List.assoc_opt contract ast.contracts = None then 

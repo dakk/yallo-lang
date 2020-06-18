@@ -74,7 +74,7 @@ let attributes (t: ttype) = match t with
   | TString ->        { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TBytes ->         { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TLambda (_, _) -> { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
-  | TEnum (_) ->      { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  } 
+  | TEnum (_) ->      { cmp=true; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  } 
   | TList (_) ->      { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TSet (_) ->       { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TMap (_,_) ->     { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }

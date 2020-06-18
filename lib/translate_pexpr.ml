@@ -123,11 +123,19 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       | "amount", [] -> TMutez, TezosAmount
       | "balance", [] -> TMutez, TezosBalance
       | "now", [] -> TTimestamp, TezosNow
+      | "self", [] -> TContract (TUnit), TezosSelf
+      | "selfAddress", [] -> TAddress, TezosSelfAddress
       | "address", [(TContract(ctt), ad)] -> TAddress, TezosAddressOfContract (TContract(ctt), ad)
       | "contract", [(TAddress, ad)] -> TContract(TAny), TezosContractOfAddress (TAddress, ad)
       | "setDelegate", [(TOption (TKeyHash), kho)] -> TOperation, TezosSetDelegate (TOption(TKeyHash), kho)
       | "setDelegate", [(TOption (TAny), None)] -> TOperation, TezosSetDelegate (TOption(TKeyHash), None)
       | "implicitAccount", [(TKeyHash, kh)] -> TContract (TUnit), TezosImplicitAccount(TKeyHash, kh)
+      | "transfer", [(TAddress, a); (TMutez, am)] -> 
+        TOperation, TezosTransfer(
+          (TContract(TUnit), TezosContractOfAddress (TAddress, a)),
+          (TUnit, Unit),
+          (TMutez, am)
+        )
       | "transfer", [(TContract(ct), c); (ct', cv); (TMutez, am)] when ct'=ct -> 
         TOperation, TezosTransfer ((TContract(ct), c), (ct', cv), (TMutez, am))
       | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TKeyHash), kho); (TMutez, v)] -> 
@@ -136,7 +144,6 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TAny), None); (TMutez, v)] -> 
         TTuple([TOperation; TAddress]), 
         TezosCreateContract((TAny, BuildContractCodeAndStorage(a, b)), (TOption (TKeyHash), None), (TMutez, v))
-      (* | TezosSelf *)
       | _, _ -> 
         List.iter (fun (t,e) -> (show_expr e ^ " : " ^ show_ttype t) |> print_endline) el';
         raise @@ APIError("Invalid call to Tezos." ^ i)
@@ -225,7 +232,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
           | 1 -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), i)), List.hd @@ tl)
           | _ -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), i)), (TTuple(fst @@ List.split tl), Tuple(tl)))
         )
-        | _ -> raise @@ TypeError ("Invalid types on contract instance apply")
+        | _ -> raise @@ TypeError ("Invalid types on contract instance apply over entrypoint '" ^ i ^ "'")
       )
 
       | _, i, _-> 
@@ -412,6 +419,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     if tt <> TString then raise @@ TypeError ("Fail need a string expression, got: " ^ show_ttype tt);
     TUnit, Fail(tt, ee)
 
+  | PEApply (PERef("failif"), c) ->
+    ( match c |> transform_expr_list with 
+    | [(TBool, co); (TString, m)] -> TUnit, FailIfMessage((TBool, co), (TString, m))
+    | [(TBool, co)] -> TUnit, FailIf((TBool, co))
+    | _ -> raise @@ APIError ("Invalid arguments for failif");
+    )
+
+
   | PEApply (e, el) -> 
     let (tt,ee) = transform_expr e env' ic in 
     (match tt with 
@@ -449,8 +464,11 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     let (te1, ee1) = transform_expr e1 env' ic in 
     let (te2, ee2) = transform_expr e2 env' ic in 
     (match tc, te1, te2 with 
-    | TBool, t, t' when t <> t' -> raise @@ TypeError ("If branches should have same type, got: '" ^ show_ttype t ^ "' and '" ^ show_ttype t' ^ "'")
+    | TBool, TList(t), TList(t') when t <> t' && (t <> TAny || t' <> TAny) ->
+      (if t <> TAny then TList(t) else TList(t')), IfThenElse ((tc, ec), (te1, ee1), (te2, ee2))
     | TBool, t, t' when t = t' -> t, IfThenElse ((tc, ec), (te1, ee1), (te2, ee2))
+    | TBool, t, t' when t <> t' -> 
+      raise @@ TypeError ("If branches should have same type, got: '" ^ show_ttype t ^ "' and '" ^ show_ttype t' ^ "'")
     | _, _, _ -> raise @@ TypeError ("If condition should be a boolean expression, got '" ^ show_ttype tc ^ "'"))
 
   | PEMatchWith (e, bl) -> 
@@ -458,19 +476,19 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     let bl' = List.map (fun (cv, cex)  -> 
       let (tt, ee) = transform_expr cv env' ic in
       let (tcex, ecex) = transform_expr cex env' ic in
-      if (tt <> te) then
+      if (tt <> te) && (tt <> TAny) then
         raise @@ TypeError ("Match case has an invalid value type; " ^ show_ttype_got_expect tt te)
-      else 
-        ((tt, ee), tcex, (tcex, ecex)) 
+      else ((tt, ee), tcex, (tcex, ecex)) 
     ) bl in
     (* assert that every branch as the same type *)
     let rett: ttype = List.fold_left (fun acc (_, tcex, _) -> 
-      if acc <> tcex then 
+      if acc <> tcex && tcex <> TUnit then  (* TODO: tany is only allowed for fail *)
         raise @@ TypeError ("Match branches should have same type; " ^ show_ttype_got_expect tcex acc)
-      else 
-        tcex
-    ) (let (_,b,_) = List.hd bl' in b) bl' 
+      else if tcex = TUnit then acc else tcex
+    ) (let (_,b,_) = List.hd bl' in b) bl'
     in rett, MatchWith ((te, ee), List.map (fun (a,_,c) -> (a,c)) bl')
+
+  | PECaseDefault -> TAny, CaseDefault
 
 
   (* let-binding and sequences *)
@@ -499,7 +517,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     let ti = fst @@ List.split tl in
     (match tt with 
       | TTuple(tl') -> tt, LetTuple(List.combine ti tl', (tt, ee))
-      | _ -> failwith "Expected a tuple"
+      | _ -> raise @@ TypeError ("Expected a tuple")
     )
 
   | PELetTupleIn(tl, e, e1) -> 
@@ -511,7 +529,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         let tl' = List.combine ti tl' in 
         let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
         tt1, LetTupleIn(tl', (tt, ee), (tt1, ee1))
-      | _ -> failwith "Expected a tuple"
+      | _ -> raise @@ TypeError ("Expected a tuple")
     )
 
   | PESeq(PELetTuple(tl, e), en) -> 
@@ -523,7 +541,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         let tl' = List.combine ti tl' in 
         let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
         tnt, Seq((TUnit, LetTuple(tl', (tt, ee))), (tnt, ene))
-      | _ -> failwith "Expected a tuple"
+      | _ -> raise @@ TypeError ("Expected a tuple")
     )
 
 
