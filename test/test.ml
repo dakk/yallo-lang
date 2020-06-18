@@ -71,6 +71,7 @@ let () =
     ];
     "contract", [
       "itoken", `Quick, compile None "test/contract/itoken.yallo" None;
+      "loan", `Quick, compile None "test/contract/loan.yallo" None;
       "token", `Quick, compile None "test/contract/token.yallo" None;
       "token_create", `Quick, compile None "test/contract/token_create.yallo" None;
       "token_using", `Quick, compile None "test/contract/token_using.yallo" None;

@@ -1,4 +1,6 @@
-type tstate = enum (WaitingBorrower | Loaned | Expired | Executed | Terminated);
+import "test/contract/itoken.yallo";
+
+type tstate = enum (WaitingBorrower | Loaned | CheckingRefund | Expired | Executed | Terminated);
 
 const loanBaker: key_hash = h"3423432";
 const d28 = 86400 * 28; // aka Timestamp.oneDay
@@ -10,44 +12,6 @@ function addressOfToken(tokName: string): address {
 	| _ -> fail ("unknown token: " + tokName)
 }
 
-interface IToken {
-	entry transfer(tto: address, vval: nat);
-	entry getBalance(off: address, cb: nat contract);
-}
-
-
-contract Token implements IToken {
-	field balances: (address, nat) big_map;
-	field totalSupply: nat;
-	field symbol: string;
-
-	constructor (supply: nat, symbol: string) {
-		this.balances = BigMap.empty();
-		this.totalSupply = supply;
-		this.symbol = symbol;
-	}
-
-	entry transfer(from: address, tto: address, vval: nat) {
-		assert (vval > 0);
-		let a = this.balances.get(from, 0n);
-		let b: nat = this.balances.get(tto, 0n);
-		assert(a > vval);
-		this.balances.update(from, a - vval);
-		this.balances.update(tto, b + vval); 
-		[]
-	}
-
-	entry borrow() {
-		[]
-	}
-
-	entry getBalance(ad: address, cb: nat contract) {
-		let b: nat = this.balances.get(ad, 0n);
-		let op: operation = cb(b);
-		[op]
-	}
-}
-
 contract Loan {
 	field state: tstate;
 	field lender: address;
@@ -57,11 +21,14 @@ contract Loan {
 	field collateral: mutez;
 	field expiration: timestamp;
 
-	constructor (token: string, amount: nat, lender: address) {
+	constructor (token: string, amount: nat, lender: address, coll: mutez) {
 		this.state = tstate#WaitingBorrower;
 		this.token = token;
 		this.amount = amount;
 		this.lender = lender;
+		this.expiration = 0;
+		this.borrower = @0;
+		this.collateral = coll;
 	}
 
 	entry borrow() {
@@ -72,7 +39,7 @@ contract Loan {
 		this.state = tstate#Loaned;
 		this.borrower = Tezos.sender();
 		this.expiration = Tezos.now() + d28;
-		let op = IToken.of(addressOfToken (this.token)).transfer (Tezos.sender(), this.amount);
+		let op = IToken.of(addressOfToken (this.token)).transfer (Tezos.selfAddress(), Tezos.sender(), this.amount);
 		[ sdop, op ]
 	}
 
@@ -91,7 +58,7 @@ contract Loan {
 		assert (this.state == tstate#CheckingRefund);
 		if (bal >= this.amount) then
 			( this.state = tstate#Executed;
-			[ Tezos.transfer (this.collateral, this.borrower) ] )
+			[ Tezos.transfer (this.borrower, this.collateral) ] )
 		else 
 			( this.state = tstate#Loaned;
 			[])
@@ -104,6 +71,6 @@ contract Loan {
 
 		this.state = tstate#Terminated;
 		
-		[ Tezos.transfer (Tezos.balance(), this.lender) ]
+		[ Tezos.transfer (this.lender, Tezos.balance()) ]
 	}
 }

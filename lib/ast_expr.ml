@@ -11,6 +11,7 @@ type expr =
 | TezosBalance
 | TezosChainId
 | TezosSelf
+| TezosSelfAddress
 | TezosSetDelegate of texpr
 | TezosSource
 | TezosSender

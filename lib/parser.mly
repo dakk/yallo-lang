@@ -28,6 +28,9 @@
 %token <int> MTZ
 %token <string> CONT
 
+%left NOT
+%left OR
+%left AND
 %left EQEQ, NEQ
 %left LTE, LT, GT, GTE
 %left ADD, SUB

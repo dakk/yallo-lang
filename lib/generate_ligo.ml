@@ -191,7 +191,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 
 | Seq(a, b) -> "  " ^ to_ligo_expr ast a ^ "\n" ^ to_ligo_expr ast b
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
-| _ -> "Unable to generate ligo code for expression " ^ show_expr e
+| _ -> "<<translation not handled: " ^ show_expr e ^ ">>"
 
 let generate_ligo (ast: t) (contract: string) = 
   if List.assoc_opt contract ast.contracts = None then 

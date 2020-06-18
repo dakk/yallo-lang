@@ -17,7 +17,7 @@ type options = {
 
 let default_options = {
   contract = None;
-  out_lang = None;
+  out_lang = Some ("ligo");
   print_pt = true;
   print_ast = true;
   verbose = true;
