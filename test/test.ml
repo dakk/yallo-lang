@@ -28,21 +28,25 @@ let compile exc path cname _ =
 
 let () =
   Alcotest.run "yallo" [
-    "misc", [
-      "pragma", `Quick, compile None "test/misc/pragma.yallo" None;
-      "expr", `Quick, compile None "test/misc/expr.yallo" None;
-      "literal", `Quick, compile None "test/misc/literal.yallo" None;
-      "record", `Quick, compile None "test/misc/record.yallo" None;
-      "statements", `Quick, compile None "test/misc/statements.yallo" None;
-      "typemod", `Quick, compile None "test/misc/typemod.yallo" None;
-      "types", `Quick, compile None "test/misc/types.yallo" None;
+    "compiler", [
+      "pragma", `Quick, compile None "test/compiler/pragma.yallo" None;
     ];
-    "expr", [
-      "assoc", `Quick, compile None "test/expr/assoc.yallo" None;
-      "match", `Quick, compile None "test/expr/match.yallo" None;
-      "tuple_destruct", `Quick, compile None "test/expr/tuple_destruct.yallo" None;
+    "type", [
+      "types", `Quick, compile None "test/type/types.yallo" None;
+      "list_methods", `Quick, compile None "test/type/list_methods.yallo" None;
     ];
-    "const", [
+    "expression", [
+      "record", `Quick, compile None "test/expr/record.yallo" None;
+      "literal", `Quick, compile None "test/expr/literal.yallo" None;
+      "literal_untyped", `Quick, compile None "test/expr/literal_untyped.yallo" None;
+      "literal_fail_infer", `Quick, compile (Some(TypeError(None, ""))) "test/expr/literal_fail_infer.yallo" None;
+      "lambda", `Quick, compile None "test/expr/lambda.yallo" None;
+      "assoc_bool", `Quick, compile None "test/expr/assoc_bool.yallo" None;
+      "match_case", `Quick, compile None "test/expr/match_case.yallo" None;
+      "tuple_destruct_typed", `Quick, compile None "test/expr/tuple_destruct_typed.yallo" None;
+      "tuple_destruct_untyped", `Quick, compile None "test/expr/tuple_destruct_untyped.yallo" None;
+    ];
+    "constants", [
       "cont", `Quick, compile None "test/const/cont.yallo" None;
       "numeric", `Quick, compile None "test/const/numeric.yallo" None;
       "string", `Quick, compile None "test/const/string.yallo" None;

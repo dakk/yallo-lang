@@ -1,7 +1,7 @@
 type iden = string [@@deriving show {with_path = false}]
 
 type ptype = 
-  | PTBuiltin of string                  (* type name *)
+  | PTBuiltin of string               (* type name *)
   | PTTuple of ptype list             (* tuple of other types *)
   | PTRecord of (string * ptype) list (* record is (iden * type) list *)
   | PTCont of string * ptype          (* container type * inner_type *)

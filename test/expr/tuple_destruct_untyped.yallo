@@ -1,0 +1,4 @@
+function test3 (): int {
+	let (a, b, c) = (12, 13, 14) in
+	a*b*c
+}

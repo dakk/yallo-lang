@@ -6,3 +6,4 @@ type tt = (nat, (nat, nat)) big_map;
 
 type tl = (nat -> nat);
 
+type tll = (b -> nat);

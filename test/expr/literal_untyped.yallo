@@ -1,0 +1,15 @@
+const litString = "hola";
+const litNat = 1n;
+const litInt = 12;
+const litMutez = 10mtz;
+const litSome = Some(12);
+const litTuple = (12, 32n, "ciao");
+const litList = [13, 14, 15];
+const litMap = [{1: "ciao"}, {2: "hello"}];
+const litTyped = @tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx;
+const litLambda	= (a: int) => (2);
+const litRec2 = { a="ciao", b=12 };
+const litMap2 = [ {1: { a="ciao", b=12 }}];
+
+type a = enum (Ciao | Mondo);
+const b = a#Ciao;

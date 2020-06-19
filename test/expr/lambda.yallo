@@ -9,6 +9,4 @@ const e_apply2: int -> int = (a: int) => (((b: int) => (b))(12));
 const e_apply3: int -> int = (a: int) => (e_apply2 (12));
 
 const e_if: int -> int = (a: int) => (if a > 12 then 12 else 14 + 15);
-const e_bool: bool = true or false;
-const e_matchwith: int -> (int option) = (a: int) => (match a with | 1 -> Some(12) | 2 -> (None: int option));
-const a: unit = Unit;
+const e_matchwith: int -> (int option) = (a: int) => (match a with | 1 -> Some(12) | _ -> (None: int option));
