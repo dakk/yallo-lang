@@ -1,6 +1,6 @@
-open Ast_ttype
-open Ast_expr
-open Errors
+open Ttype
+open Expr
+open Helpers.Errors
 
 
 module Env = struct 

@@ -1,0 +1,10 @@
+(library
+ (name ast_to_coq)
+ (public_name yallo.passes.ast_to_coq)
+ (libraries helpers ast)
+ (modules ast_to_coq))
+
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

@@ -1,5 +1,5 @@
 open Yallo
-open Errors
+open Helpers.Errors
 
 let opt = Compiler.{
   contract = None;

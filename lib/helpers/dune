@@ -1,0 +1,9 @@
+(library
+ (public_name yallo.helpers)
+ (name helpers)
+ (modules errors loc gen_utils))
+
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

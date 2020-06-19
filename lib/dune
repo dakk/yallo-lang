@@ -1,23 +1,9 @@
-(ocamllex lexer)
-
-(menhir 
- (modules parser)
- (flags --explain --inspection --table --dump)
-)
-
-(rule
- (targets parser_messages.ml)
- (deps parser.messages parser.mly)
- (action  (with-stdout-to %{targets} (run menhir --compile-errors %{deps}))))
-
 (library
  (public_name yallo)
  (name yallo)
- (preprocess (pps ppx_jane ppx_deriving.show))
- (libraries core ppx_deriving menhirLib)
- (modules parse_tree parser_messages ast_ttype ast_expr ast_env errors generate_coq generate_ligo
-  generate_interface loc generate_utility
-  translate_pdecl translate_ptype translate_pexpr ast parser lexer compiler))
+ (libraries parse_tree parsing ast helpers
+  parse_tree_to_ast ast_to_ligo ast_to_interface ast_to_coq)
+ (modules compiler))
 
 
 (env

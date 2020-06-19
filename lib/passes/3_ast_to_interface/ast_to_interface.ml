@@ -1,7 +1,7 @@
 open Ast
 open Ast_ttype
-open Errors
-open Generate_utility
+open Helpers.Errors
+open Helpers.Gen_utils
 
 let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
 let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)

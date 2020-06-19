@@ -1,7 +1,9 @@
+open Ast
 open Ast_ttype
 open Ast_env
 open Ast_expr
-open Errors
+open Helpers.Errors
+open Parsing
 open Translate_ptype
 
 let show_ttype_got_expect t1 t2 = "got: '" ^ show_ttype t1 ^ "' expect '" ^ show_ttype t2 ^ "'"
@@ -18,7 +20,7 @@ type bindings = (iden * iref) list
 [@@deriving show {with_path = false}]
 
 (* transform an pexpr to (ttype * expr) *)
-let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : texpr = 
+let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) : texpr = 
   let argv_to_list pel = match pel with | TTuple(tl) -> tl | _ -> [pel] in
   let transform_expr_list pel = List.map (fun p -> transform_expr p env' ic) pel in
   let transform_iexpr_list pel = List.map (fun (i, p) -> i, transform_expr p env' ic) pel in
@@ -103,7 +105,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     
   (* Enum value *)
   | PEHt (ii, i) -> 
-    (match Env.get_type_opt ii env' with 
+    (match Ast_env.get_type_opt ii env' with 
     | Some(TEnum (el)) -> 
       if List.find_opt (fun x -> x=i) el <> None then
         TEnum(el), EnumValue(i)
@@ -401,7 +403,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   
   | PERef (i) -> 
     (match List.assoc_opt i ic with 
-    | None -> Env.get_ref i env', GlobalRef (i)
+    | None -> Ast_env.get_ref i env', GlobalRef (i)
     | Some (Local(t)) -> t, LocalRef (i)
     | _ -> raise @@ SymbolNotFound (None, "Symbol '" ^ i ^ "' is not a valid ref")
     )

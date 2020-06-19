@@ -10,7 +10,7 @@ run-test:
 
 grammar:
 	@echo Pretty-printing grammar... docs/grammar.ebnf
-	@obelisk lib/parser.mly > docs/grammar.ebnf
+	#@obelisk lib/1_parser/parser.mly > docs/grammar.ebnf
 
 local-install:
 	sudo cp ./_build/default/src/yallo.exe /usr/local/bin

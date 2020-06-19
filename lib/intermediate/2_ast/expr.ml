@@ -1,4 +1,4 @@
-open Ast_ttype
+open Ttype
 
 type expr = 
 | ContractInstance of texpr 

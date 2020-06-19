@@ -1,14 +1,17 @@
+open Ast
 open Ast_env
 open Ast_ttype
 open Translate_pexpr
 open Translate_ptype
-open Errors
+open Helpers.Loc
+open Helpers.Errors
+open Parsing
 
-let rec transform (p: Parse_tree.t) (e: Env.t): Env.t = 
+let rec transform (p: Parse_tree.t) (e: Ast_env.t): Ast_env.t = 
   match p with 
   (* type definition *)
   | Parse_tree.DType (dt) :: p' -> 
-    Env.assert_symbol_absence e dt.id;
+    Ast_env.assert_symbol_absence e dt.id;
 
     transform p' { e with 
       symbols=(dt.id, Type)::e.symbols;
@@ -17,7 +20,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
   (* global const *)
   | Parse_tree.DConst (dc) :: p' -> 
-    Env.assert_symbol_absence e dc.id;
+    Ast_env.assert_symbol_absence e dc.id;
 
     let (t, exp) = (match dc.t with
     | None -> 
@@ -49,7 +52,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
   (* functions *)
   | Parse_tree.DFunction (df) :: p' ->
-    Env.assert_symbol_absence e df.id;
+    Ast_env.assert_symbol_absence e df.id;
     let rettype = transform_type df.rettype e in 
     let pars = List.map (fun (i, t) -> (i, transform_type t e)) df.params in 
     let (st, se) = transform_expr df.exp e @@ List.map (fun (i,t) -> i, Local(t)) pars in 
@@ -62,7 +65,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
   (* interface *)
   | Parse_tree.DInterface (di) :: p' -> 
-    Env.assert_symbol_absence e di.id;
+    Ast_env.assert_symbol_absence e di.id;
 
     (* if extends, get the list of entries *)
     let ex = (match di.extends with | None -> [] 
@@ -92,7 +95,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
 
   (* contracts *)
   | Parse_tree.DContract (dc) :: p' -> 
-    Env.assert_symbol_absence e dc.id;
+    Ast_env.assert_symbol_absence e dc.id;
     let flds = List.map (fun (i,t) -> 
       let tt = transform_type t e in 
       if not (attributes tt).store then raise @@ TypeError (Loc.dline p, "Type '" ^ show_ttype tt ^ "' is not storable");

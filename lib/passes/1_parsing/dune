@@ -1,0 +1,23 @@
+(ocamllex lexer)
+
+(menhir 
+ (modules parser)
+ (flags --explain --inspection --table --dump)
+)
+
+(rule
+ (targets parser_messages.ml)
+ (deps parser.messages parser.mly)
+ (action (with-stdout-to %{targets} (run menhir --compile-errors %{deps}))))
+
+(library
+ (name parsing)
+ (public_name yallo.parsing)
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries ppx_deriving menhirLib helpers parse_tree)
+ (modules parsing parser_messages parser lexer loc))
+
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

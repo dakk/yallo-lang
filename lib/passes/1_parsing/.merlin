@@ -33,15 +33,9 @@ B /home/dakk/.opam/default/lib/time_now
 B /home/dakk/.opam/default/lib/typerep
 B /home/dakk/.opam/default/lib/variantslib
 B /usr/lib/ocaml
-B ../_build/default/lib/.yallo.objs/byte
-B ../_build/default/lib/helpers/.helpers.objs/byte
-B ../_build/default/lib/intermediate/1_parse_tree/.parse_tree.objs/byte
-B ../_build/default/lib/intermediate/2_ast/.ast.objs/byte
-B ../_build/default/lib/passes/1_parsing/.parsing.objs/byte
-B ../_build/default/lib/passes/2_parse_tree_to_ast/.parse_tree_to_ast.objs/byte
-B ../_build/default/lib/passes/3_ast_to_coq/.ast_to_coq.objs/byte
-B ../_build/default/lib/passes/3_ast_to_interface/.ast_to_interface.objs/byte
-B ../_build/default/lib/passes/3_ast_to_ligo/.ast_to_ligo.objs/byte
+B ../../../_build/default/lib/helpers/.helpers.objs/byte
+B ../../../_build/default/lib/intermediate/1_parse_tree/.parse_tree.objs/byte
+B ../../../_build/default/lib/passes/1_parsing/.parsing.objs/byte
 S /home/dakk/.opam/default/lib/base
 S /home/dakk/.opam/default/lib/base/base_internalhash_types
 S /home/dakk/.opam/default/lib/base/caml
@@ -76,13 +70,8 @@ S /home/dakk/.opam/default/lib/time_now
 S /home/dakk/.opam/default/lib/typerep
 S /home/dakk/.opam/default/lib/variantslib
 S /usr/lib/ocaml
+S ../../helpers
+S ../../intermediate/1_parse_tree
 S .
-S helpers
-S intermediate/1_parse_tree
-S intermediate/2_ast
-S passes/1_parsing
-S passes/2_parse_tree_to_ast
-S passes/3_ast_to_coq
-S passes/3_ast_to_interface
-S passes/3_ast_to_ligo
-FLG -open Yallo -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A
+FLG -ppx '/home/dakk/Repositories/MyRepos/tezlang/_build/default/.ppx/4b82ef4a253ffa2f3871dcd81243673b/ppx.exe --as-ppx --cookie '\''library-name="parsing"'\'''
+FLG -open Parsing__ -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -warn-error -A

@@ -1,15 +1,17 @@
 open Printf
 open Lexing
 
+
 type empt = | Decl of Parse_tree.declaration | Iden of Parse_tree.iden | Expr of Parse_tree.pexpr
 
+(* todo: transform to functor over empt, move to Helpers.Loc *)
 module LocationTable = Ephemeron.K1.Make(struct
   type t = empt
   let hash = Hashtbl.hash 
   let equal = (=) 
 end) 
 
-type l = (string * int * int )
+type l = Helpers.Loc.l
 
 let filename = ref ""
 let locations = ref @@ LocationTable.create 10000

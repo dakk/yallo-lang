@@ -1,0 +1,10 @@
+(library
+ (name parse_tree_to_ast)
+ (public_name yallo.passes.parse_tree_to_ast)
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries ppx_deriving helpers parse_tree ast parsing)
+ (modules parse_tree_to_ast translate_pdecl translate_pexpr translate_ptype))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

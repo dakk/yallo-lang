@@ -1,9 +1,10 @@
 open Ast
 open Ast_ttype
 open Ast_expr
-open Errors
+open Helpers.Errors
+open Parsing
 open Printf
-open Generate_utility
+open Helpers.Gen_utils
 
 let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
 let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)

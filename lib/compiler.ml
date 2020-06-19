@@ -1,11 +1,10 @@
-open Lexing
-open Lexer
+open Parsing
 open Printf
-open Errors
+open Helpers.Errors
+open Parse_tree
+open Ast
+open Parse_tree_to_ast
 
-module I = Parser.MenhirInterpreter
-
-exception SyntaxErrorLoced of (int * int) option * string 
 
 type options = {
   contract: string option;
@@ -23,47 +22,7 @@ let default_options = {
   verbose = true;
 }
 
-let pos lexbuf = let pos = Lexing.lexeme_start_p lexbuf in (pos.pos_lnum, pos.pos_cnum - pos.pos_bol + 1)
 
-let get_parse_error env =
-    match I.stack env with
-    | lazy Nil -> "Invalid syntax"
-    | lazy (Cons (I.Element (state, _, _, _), _)) ->
-        try (Parser_messages.message (I.number state)) with
-        | Not_found -> "invalid syntax (no specific message for this eror)"
-
-
-let rec parse_inc lexbuf (checkpoint : Parse_tree.t I.checkpoint) =
-  match checkpoint with
-  | I.InputNeeded _env ->
-      let token = Lexer.token lexbuf in
-      let startp = lexbuf.lex_start_p
-      and endp = lexbuf.lex_curr_p in
-      let checkpoint = I.offer checkpoint (token, startp, endp) in
-      parse_inc lexbuf checkpoint
-  | I.Shifting _
-  | I.AboutToReduce _ ->
-      let checkpoint = I.resume checkpoint in
-      parse_inc lexbuf checkpoint
-  | I.HandlingError _env ->
-      let line, pos = pos lexbuf in
-      let err = get_parse_error _env in
-      raise (SyntaxErrorLoced (Some (line, pos), err))
-  | I.Accepted v -> v
-  | I.Rejected ->
-       raise (SyntaxErrorLoced (None, "invalid syntax (parser rejected the input)"))
-
-
-let parse filename s = 
-  let lexbuf = Lexing.from_string s in 
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  Loc.filename := filename;
-
-  try parse_inc lexbuf (Parser.Incremental.program lexbuf.lex_curr_p)
-  with SyntaxErrorLoced (pos, err) ->
-    match pos with
-    | Some (line, pos) -> raise @@ SyntaxError (Some (filename, line, pos), err)
-    | None -> raise @@ SyntaxError (Some(filename, -1, 0), err)
 
 
 let rec readfile ic = 
@@ -75,7 +34,7 @@ let parse_file (filename: string): Parse_tree.t =
   |> open_in 
   |> readfile 
   |> List.fold_left (fun acc x -> acc ^ x) "" 
-  |> parse filename
+  |> Parsing.parse filename
 
 (* replace all imports in a Parse_tree with the content of the file *)
 let rec inject_import (pt: Parse_tree.t): Parse_tree.t =
@@ -120,7 +79,7 @@ let build_ast (filename: string) opt =
   pt|> inject_import                (* parse and inject imports *)
     |> app opt.print_pt print_pt    (* print pt *)
     |> app opt.verbose @@ print_str "===> Translating Parse_tree to Ast"
-    |> Ast.of_parse_tree            (* transform pt to ast *)
+    |> Parse_tree_to_ast.translate  (* transform pt to ast *)
     |> app opt.print_ast print_ast  (* print ast *)
 
     
@@ -132,10 +91,10 @@ let compile (filename: string) opt =
       | None, _ -> ""
       | Some ("ligo"), Some(ctr) -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
-        Generate_ligo.generate_ligo ast ctr
+        Ast_to_ligo.generate_ligo ast ctr
       | Some ("ligo"), None when (List.length ast.contracts) = 1 -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
-        Generate_ligo.generate_ligo ast (fst @@ List.hd ast.contracts)
+        Ast_to_ligo.generate_ligo ast (fst @@ List.hd ast.contracts)
       | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
     )
     |> print_endline
@@ -147,6 +106,6 @@ let extract_interface (filename: string) opt =
       | None -> raise @@ CompilerError ("No contract specified for interface extraction")
       | Some(ctr) -> 
         if opt.verbose then printf "===> Extracting interface\n\n%!";        
-        Generate_interface.generate_interface ast ctr
+        Ast_to_interface.generate_interface ast ctr
     )
     |> print_endline
