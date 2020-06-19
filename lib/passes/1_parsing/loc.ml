@@ -1,15 +1,11 @@
 open Printf
 open Lexing
 
+module PTEmp = struct 
+  type t = | Decl of Parse_tree.declaration | Iden of Parse_tree.iden | Expr of Parse_tree.pexpr
+end 
 
-type empt = | Decl of Parse_tree.declaration | Iden of Parse_tree.iden | Expr of Parse_tree.pexpr
-
-(* todo: transform to functor over empt, move to Helpers.Loc *)
-module LocationTable = Ephemeron.K1.Make(struct
-  type t = empt
-  let hash = Hashtbl.hash 
-  let equal = (=) 
-end) 
+module LocationTable = Helpers.Loc.LocationTable (PTEmp)
 
 type l = Helpers.Loc.l
 
