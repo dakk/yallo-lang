@@ -5,6 +5,8 @@ open Errors
 let run action filename opt = 
   (match action with 
   | "compile" -> Compiler.compile filename opt
+  (* | "build-storage" ->  *)
+  (* | "build-parameter" ->  *)
   | "extract-interface" -> Compiler.extract_interface filename opt
   | _ -> raise @@ CompilerError ("Invalid compiler action: " ^ action)
   )

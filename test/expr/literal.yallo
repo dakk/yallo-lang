@@ -15,3 +15,6 @@ const litMap2: (int, record { a: string, b: int}) map = [ {1: { a="ciao", b=12 }
 
 type a = enum (Ciao | Mondo);
 const b: a = a#Ciao;
+
+
+const litMutez2: mutez = 51.131tz;

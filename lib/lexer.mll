@@ -52,6 +52,7 @@ let modifier = "@" ident
 let nat = digit digit* "n"
 let int = digit digit*
 let mtz = digit digit* "mtz"
+let tz = digit digit* ('.' digit digit*)? "tz"
 
 let hex_digit = ['a'-'f'] | ['A' - 'F'] | ['0' - '9']
 
@@ -73,6 +74,7 @@ rule token = parse
   | int as i 			  { INT (int_of_string i) }
   | nat as i 			  { NAT (int_of_string (String.sub i 0 ((String.length i) - 1))) }
   | mtz as i 			  { MTZ (int_of_string (String.sub i 0 ((String.length i) - 3))) } 
+  | tz as i 			  { MTZ (int_of_float (1000000. *. float_of_string (String.sub i 0 ((String.length i) - 2)))) } 
 
   | "interface"     { INTERFACE }
   | "contract"      { CONTRACT }
