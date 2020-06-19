@@ -1,9 +1,18 @@
 (library
  (public_name yallo)
  (name yallo)
- (libraries parse_tree parsing ast helpers
-  parse_tree_to_ast ast_to_ligo ast_to_interface ast_to_coq)
- (modules compiler))
+ (libraries 
+  helpers
+  parse_tree
+  parsing  
+  parse_tree_postprocess
+  ast
+  parse_tree_to_ast
+  ast_to_ligo 
+  ast_to_interface 
+  ast_to_coq
+ )
+ (modules intermediate passes compiler))
 
 
 (env

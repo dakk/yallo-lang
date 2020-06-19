@@ -1,0 +1,10 @@
+(library
+ (name parse_tree_postprocess)
+ (public_name yallo.passes.parse_tree_postprocess)
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries ppx_deriving helpers parse_tree parsing)
+ (modules parse_tree_postprocess))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

@@ -47,10 +47,11 @@ B ../_build/default/lib/helpers/.helpers.objs/byte
 B ../_build/default/lib/intermediate/1_parse_tree/.parse_tree.objs/byte
 B ../_build/default/lib/intermediate/2_ast/.ast.objs/byte
 B ../_build/default/lib/passes/1_parsing/.parsing.objs/byte
-B ../_build/default/lib/passes/2_parse_tree_to_ast/.parse_tree_to_ast.objs/byte
-B ../_build/default/lib/passes/3_ast_to_coq/.ast_to_coq.objs/byte
-B ../_build/default/lib/passes/3_ast_to_interface/.ast_to_interface.objs/byte
-B ../_build/default/lib/passes/3_ast_to_ligo/.ast_to_ligo.objs/byte
+B ../_build/default/lib/passes/2_parse_tree_postprocess/.parse_tree_postprocess.objs/byte
+B ../_build/default/lib/passes/3_parse_tree_to_ast/.parse_tree_to_ast.objs/byte
+B ../_build/default/lib/passes/4_ast_to_coq/.ast_to_coq.objs/byte
+B ../_build/default/lib/passes/4_ast_to_interface/.ast_to_interface.objs/byte
+B ../_build/default/lib/passes/4_ast_to_ligo/.ast_to_ligo.objs/byte
 B ../_build/default/test/.test.eobjs/byte
 S /home/dakk/.opam/default/lib/alcotest
 S /home/dakk/.opam/default/lib/astring
@@ -100,9 +101,10 @@ S ../lib/helpers
 S ../lib/intermediate/1_parse_tree
 S ../lib/intermediate/2_ast
 S ../lib/passes/1_parsing
-S ../lib/passes/2_parse_tree_to_ast
-S ../lib/passes/3_ast_to_coq
-S ../lib/passes/3_ast_to_interface
-S ../lib/passes/3_ast_to_ligo
+S ../lib/passes/2_parse_tree_postprocess
+S ../lib/passes/3_parse_tree_to_ast
+S ../lib/passes/4_ast_to_coq
+S ../lib/passes/4_ast_to_interface
+S ../lib/passes/4_ast_to_ligo
 S .
 FLG -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A

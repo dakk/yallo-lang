@@ -34,7 +34,7 @@ B /home/dakk/.opam/default/lib/variantslib
 B /usr/lib/ocaml
 B ../../../_build/default/lib/helpers/.helpers.objs/byte
 B ../../../_build/default/lib/intermediate/2_ast/.ast.objs/byte
-B ../../../_build/default/lib/passes/3_ast_to_coq/.ast_to_coq.objs/byte
+B ../../../_build/default/lib/passes/4_ast_to_ligo/.ast_to_ligo.objs/byte
 S /home/dakk/.opam/default/lib/base
 S /home/dakk/.opam/default/lib/base/base_internalhash_types
 S /home/dakk/.opam/default/lib/base/caml

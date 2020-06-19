@@ -9,6 +9,7 @@ B /home/dakk/.opam/default/lib/bin_prot
 B /home/dakk/.opam/default/lib/bin_prot/shape
 B /home/dakk/.opam/default/lib/fieldslib
 B /home/dakk/.opam/default/lib/jane-street-headers
+B /home/dakk/.opam/default/lib/menhirLib
 B /home/dakk/.opam/default/lib/ppx_assert/runtime-lib
 B /home/dakk/.opam/default/lib/ppx_bench/runtime-lib
 B /home/dakk/.opam/default/lib/ppx_compare/runtime-lib
@@ -33,8 +34,9 @@ B /home/dakk/.opam/default/lib/typerep
 B /home/dakk/.opam/default/lib/variantslib
 B /usr/lib/ocaml
 B ../../../_build/default/lib/helpers/.helpers.objs/byte
-B ../../../_build/default/lib/intermediate/2_ast/.ast.objs/byte
-B ../../../_build/default/lib/passes/3_ast_to_interface/.ast_to_interface.objs/byte
+B ../../../_build/default/lib/intermediate/1_parse_tree/.parse_tree.objs/byte
+B ../../../_build/default/lib/passes/1_parsing/.parsing.objs/byte
+B ../../../_build/default/lib/passes/2_parse_tree_postprocess/.parse_tree_postprocess.objs/byte
 S /home/dakk/.opam/default/lib/base
 S /home/dakk/.opam/default/lib/base/base_internalhash_types
 S /home/dakk/.opam/default/lib/base/caml
@@ -45,6 +47,7 @@ S /home/dakk/.opam/default/lib/bin_prot
 S /home/dakk/.opam/default/lib/bin_prot/shape
 S /home/dakk/.opam/default/lib/fieldslib
 S /home/dakk/.opam/default/lib/jane-street-headers
+S /home/dakk/.opam/default/lib/menhirLib
 S /home/dakk/.opam/default/lib/ppx_assert/runtime-lib
 S /home/dakk/.opam/default/lib/ppx_bench/runtime-lib
 S /home/dakk/.opam/default/lib/ppx_compare/runtime-lib
@@ -69,6 +72,8 @@ S /home/dakk/.opam/default/lib/typerep
 S /home/dakk/.opam/default/lib/variantslib
 S /usr/lib/ocaml
 S ../../helpers
-S ../../intermediate/2_ast
+S ../../intermediate/1_parse_tree
+S ../1_parsing
 S .
+FLG -ppx '/home/dakk/Repositories/MyRepos/tezlang/_build/default/.ppx/4b82ef4a253ffa2f3871dcd81243673b/ppx.exe --as-ppx --cookie '\''library-name="parse_tree_postprocess"'\'''
 FLG -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -warn-error -A

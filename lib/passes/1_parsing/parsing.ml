@@ -49,3 +49,13 @@ let parse filename s =
     match pos with
     | Some (line, pos) -> raise @@ SyntaxError (Some (filename, line, pos), err)
     | None -> raise @@ SyntaxError (Some(filename, -1, 0), err)
+
+let parse_file filename = 
+  let rec readfile ic = 
+    try let line = input_line ic in (line ^ "\n")::(readfile ic) with _ -> close_in_noerr ic; []
+  in
+  filename 
+  |> open_in 
+  |> readfile 
+  |> List.fold_left (fun acc x -> acc ^ x) "" 
+  |> parse filename
