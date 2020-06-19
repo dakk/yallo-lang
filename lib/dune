@@ -16,7 +16,7 @@
  (preprocess (pps ppx_jane ppx_deriving.show))
  (libraries core ppx_deriving menhirLib)
  (modules parse_tree parser_messages ast_ttype ast_expr ast_env errors generate_coq generate_ligo
-  generate_interface loc
+  generate_interface loc generate_utility
   translate_pdecl translate_ptype translate_pexpr ast parser lexer compiler))
 
 

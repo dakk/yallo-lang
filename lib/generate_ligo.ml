@@ -3,6 +3,7 @@ open Ast_ttype
 open Ast_expr
 open Errors
 open Printf
+open Generate_utility
 
 let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
 let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)
@@ -208,58 +209,67 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
 | _ -> "<<translation not handled: " ^ show_expr e ^ ">>"
 
-let generate_ligo (ast: t) (contract: string) = 
+
+
+
+let generate_ligo_code (ast: t) (contract: string) = 
   if List.assoc_opt contract ast.contracts = None then 
     raise @@ CompilerError ("Unknown contract '" ^ contract ^ "'");
   let (flds, ctor, entries) = List.assoc contract ast.contracts in
 
   (* dump const *)
-  let consts = list_to_string (List.map (fun (i, (t,e)) -> 
-    "let " ^ i ^ " = " ^ to_ligo_expr ast (t,e) ^ "\n"
+  let consts = (List.map (fun (i, (t,e)) -> 
+    Str ("let " ^ i ^ " = " ^ to_ligo_expr ast (t,e) ^ "\n")
   ) ast.consts) in 
 
   (* generate the storage record *)
-  let str = 
+  let str = [
     if List.length flds = 0 then 
-      "type storage = unit;\n\n"    
+      Str("type storage = unit;\n\n")
     else 
-      "type storage = {\n" ^
+      Str ("type storage = {\n" ^
       merge_list flds ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ show_ttype t) ^
-      ";\n}\n\n" 
-  in 
+      ";\n}");
+    Empty; Empty
+  ] in 
 
   (* generate the action variant *)
-  let act = "type action = " ^ 
-    (List.map (fun (i, il, el) -> "\n  | " ^ String.capitalize_ascii i ^ 
-      if List.length il > 0 then " of " ^ merge_list il " * " (fun (ii, it) -> show_ttype it)
-      else " of unit"
-    ) entries |> list_to_string) ^ "\n\n"
-  in 
+  let act = [ 
+    Str("type action = "); 
+    Level(List.map (fun (i, il, el) -> 
+      Str("| " ^ String.capitalize_ascii i ^ 
+        if List.length il > 0 then " of " ^ merge_list il " * " (fun (ii, it) -> show_ttype it)
+        else " of unit")
+      ) entries
+    ); Empty; Empty
+   ] in 
 
   (* write entries *)
-  let entrs = 
-    (List.map (fun (i, il, el) -> 
-      "let " ^ i ^ " (" ^
+  let entrs = List.map (fun (i, il, el) -> 
+    Str("let " ^ i ^ " (" ^
       list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") il) ^
       "s: " ^ merge_list2 il " * " (fun (ii, it) -> show_ttype it) ^
       "storage) = \n" ^ to_ligo_expr ast el ^ "\n\n"
-    ) entries |> list_to_string) ^ "\n"
-  in
+    )
+  ) entries in
 
   (* write the main *)
-  let main = "let main(a, s: action * storage): (operation list * storage) = \n" ^
-    "  match a with" ^
-    (List.map (fun (i, il, el) -> 
-      "\n  | " ^ String.capitalize_ascii i ^ " (arg) -> " ^ 
-      if List.length il > 0 then 
-        "let (" ^
-        merge_list il ", " (fun (ii, it) -> ii)
-        ^ ") = arg in " ^ i ^ "(" ^
-        merge_list2 il ", " (fun (ii, it) -> ii)
-        ^ "s)"
-      else 
-        i ^ "(s)"
-    ) entries |> list_to_string) ^ "\n"
+  let main = [
+    Str ("let main(a, s: action * storage): (operation list * storage) = ");
+    Level([
+      Str ("match a with");
+      Level (List.map (fun (i, il, el) -> 
+          Str ("| " ^ String.capitalize_ascii i ^ " (arg) -> " ^ 
+          if List.length il > 0 then 
+            "let (" ^ merge_list il ", " (fun (ii, it) -> ii)
+            ^ ") = arg in " ^ i ^ "(" ^ merge_list2 il ", " (fun (ii, it) -> ii) ^ "s)"
+          else 
+            i ^ "(s)")
+      ) entries)
+    ])
+  ] in
+  Level (consts@str@act@entrs@main)
 
-  in
-  consts ^ "\n\n" ^ str ^ act ^ entrs ^ main
+
+let generate_ligo (ast: t) (contract: string) = 
+  generate_ligo_code ast contract |> code_to_string
