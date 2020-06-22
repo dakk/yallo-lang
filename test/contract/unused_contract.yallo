@@ -1,0 +1,31 @@
+import "test/contract/token.yallo";
+
+contract Test {
+
+}
+
+contract Ast {
+	entry test () {
+		[IToken.of(@asd).getBalance(@asd, this.callback)]
+	}
+
+	entry callback(b: nat) {
+		[]
+	}
+}
+
+interface TestInf {
+
+}
+
+contract B implements TestInf {
+	field dummy: int;
+	
+	entry test () {
+		[IToken.of(@asd).getBalance(@asd, this.callback)]
+	}
+
+	entry callback(b: nat) {
+		[]
+	}
+}

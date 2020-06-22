@@ -3,7 +3,7 @@
  (public_name yallo.intermediate.ast)
  (preprocess (pps ppx_jane ppx_deriving.show))
  (libraries ppx_deriving helpers)
- (modules ast env expr ttype))
+ (modules ast env expr ttype expr_traversal))
 
 (env
   (dev

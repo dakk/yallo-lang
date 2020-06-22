@@ -1,0 +1,14 @@
+(library
+ (name ast_remove_unused)
+ (public_name yallo.passes.ast_remove_unused)
+ (libraries helpers ast)
+ (modules 
+  ast_remove_unused 
+  unused_const
+  unused_contract
+  unused_field
+ ))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

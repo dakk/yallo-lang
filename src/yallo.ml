@@ -41,10 +41,7 @@ let command =
           print_ast = past;
           verbose = verbose;
         } in (
-          let rec pp_err p cc m = match p with 
-            | Some (fn, l, c) -> Printf.sprintf "File %s, line %d, character %d: %s\n\t\x1b[31mError:\x1b[0m %s" fn l c cc m
-            | None -> pp_err (Some ("?", -1, 0)) cc m
-          in 
+          let rec pp_err p cc m = pp_message p cc m true in 
           try 
             run action filename opt
           with 

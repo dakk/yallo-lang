@@ -69,6 +69,11 @@ let build_ast (filename: string) opt =
 (* text_file => ast => target *)
 let compile (filename: string) opt =
   build_ast filename opt
+    (* remove unused *)
+    |> app opt.verbose @@ print_str "===> Dropping unused code" 
+    |> Passes.Ast_remove_unused.remove_unused opt.contract
+    |> app opt.print_ast print_ast 
+
     (* output to a final language *)
     |> (fun ast -> match opt.target, opt.contract with 
       | None, _ -> ""
