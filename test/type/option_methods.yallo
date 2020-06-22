@@ -1,0 +1,5 @@
+const a = Some (12n);
+
+const b: bool = a.isSome();
+const c: bool = a.isNone();
+const d: nat = a.getSome();

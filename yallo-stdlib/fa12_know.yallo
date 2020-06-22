@@ -1,0 +1,9 @@
+// List of fa12 contracts
+import "ifa12.yallo";
+
+const fa12_tzbtc_address: address = @todo;
+
+// Return a contract instance of tzbtc 
+//function fa12_tzbtc_contract (): IFA12 instance {
+//	IFA12.of(fa12_tzbtc_address);
+//}

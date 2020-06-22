@@ -3,7 +3,7 @@ open Helpers.Errors
 
 let opt = Compiler.{
   contract = None;
-  out_lang = None;
+  target = None;
   print_pt = false;
   print_ast = false;
   verbose = false;
@@ -34,6 +34,7 @@ let () =
     "type", [
       "types", `Quick, compile None "test/type/types.yallo" None;
       "list_methods", `Quick, compile None "test/type/list_methods.yallo" None;
+      "option_methods", `Quick, compile None "test/type/option_methods.yallo" None;
     ];
     "expression", [
       "record", `Quick, compile None "test/expr/record.yallo" None;

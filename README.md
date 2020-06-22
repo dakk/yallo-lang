@@ -16,7 +16,7 @@ Yallo-lang compiler
 
 === actions ===
 
-  compile file.yallo [-dcontract ContractName] [-out-lang ligo]
+  compile file.yallo [-dcontract ContractName] [-target ligo]
                  compiles a contract ContractName to ligo language
 
   extract-interface file.yallo -dcontract ContractName
@@ -25,7 +25,7 @@ Yallo-lang compiler
 === flags ===
 
   [-contract _]  selected contract
-  [-out-lang _]  output language
+  [-target _]    target language
   [-print-ast]   print ast
   [-print-pt]    print parse-tree
   [-verbose]     enable verbosity

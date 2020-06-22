@@ -175,6 +175,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     let (te, ee) = transform_expr e env' ic in
     let el' = el |> transform_expr_list in 
     (match te, i, el' with 
+      | TOption (ts), "getSome", [] -> ts, OptionGetSome(te, ee)
+      | TOption (ts), "isSome", [] -> TBool, OptionIsSome(te, ee)
+      | TOption (ts), "isNone", [] -> TBool, OptionIsNone(te, ee)
+
       (* List *)
       | TList (_), "size", [] -> TNat, ListSize (te, ee)
       | TList (l), "head", [] -> l, ListHead (te, ee)

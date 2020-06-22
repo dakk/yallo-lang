@@ -57,6 +57,11 @@ type expr =
 | EnumValue of (iden)
 | RecordAccess of texpr * iden
 
+(* option *)
+| OptionGetSome of texpr 
+| OptionIsNone of texpr
+| OptionIsSome of texpr
+
 (* map *)
 | MapEmpty
 | MapGetOpt of texpr * texpr

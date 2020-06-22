@@ -3,7 +3,7 @@ open Helpers.Errors
 
 type options = {
   contract: string option;
-  out_lang: string option;
+  target: string option;
   print_pt: bool;
   print_ast: bool;
   verbose: bool;
@@ -11,7 +11,7 @@ type options = {
 
 let default_options = {
   contract = None;
-  out_lang = Some ("ligo");
+  target = Some ("ligo");
   print_pt = true;
   print_ast = true;
   verbose = true;
@@ -66,11 +66,11 @@ let build_ast (filename: string) opt =
   |> app opt.print_ast print_ast 
 
     
-(* text_file => ast => out-lang *)
+(* text_file => ast => target *)
 let compile (filename: string) opt =
   build_ast filename opt
     (* output to a final language *)
-    |> (fun ast -> match opt.out_lang, opt.contract with 
+    |> (fun ast -> match opt.target, opt.contract with 
       | None, _ -> ""
       | Some ("ligo"), Some(ctr) -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        

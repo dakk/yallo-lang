@@ -1,0 +1,6 @@
+// Yallo fa12 implementation
+import "ifa12.yallo";
+
+contract FA12 implements IFA12 {
+	
+}

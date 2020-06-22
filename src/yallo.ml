@@ -13,7 +13,7 @@ let run action filename opt =
 
 let summary = ""
 ^ "=== actions ===\n\n"
-^ "  compile file.yallo [-dcontract ContractName] [-out-lang ligo]\n"
+^ "  compile file.yallo [-dcontract ContractName] [-target ligo]\n"
 ^ "                 compiles a contract ContractName to ligo language\n\n"
 ^ "  extract-interface file.yallo -dcontract ContractName\n"
 ^ "                 extracts the yallo interface for the given contract\n"
@@ -32,10 +32,10 @@ let command =
         and past      = flag "-print-ast" no_arg ~doc:" print ast"
         and ppt       = flag "-print-pt" no_arg ~doc:" print parse-tree"
         and verbose   = flag "-verbose" no_arg ~doc:" enable verbosity"
-        and out_lang  = flag "-out-lang" (optional string) ~doc:" output language"
+        and target  = flag "-target" (optional string) ~doc:" target language"
       in fun () -> 
         let opt = Compiler.{
-          out_lang = if is_none out_lang then Some("ligo") else out_lang;
+          target = if is_none target then Some("ligo") else target;
           contract = contract;
           print_pt = ppt;
           print_ast = past;
