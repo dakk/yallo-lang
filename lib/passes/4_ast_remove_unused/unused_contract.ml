@@ -3,7 +3,7 @@ open Ast_expr
 open Ast_expr_traversal
 open Helpers
 
-(* remove contract *)
+(* remove unused contract *)
 
 module SymbolSet = Set.Make(String)
 
