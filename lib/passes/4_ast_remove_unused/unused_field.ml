@@ -17,11 +17,11 @@ let rec used_field_in_expr (t, e) =
   
 let rec used_field_in_contract cname (fl, (ct1, ct2), elist) = 
   let l = (List.fold_left (fun acc (_, _, e) -> SymbolSet.union acc @@ used_field_in_expr e) SymbolSet.empty elist) in 
-  let fl' = List.map (fun (i, f) -> 
-    if SymbolSet.mem i l then () else (
-      Errors.emit_warning None "Unused field" @@ "The field '" ^ i ^ "' of contract '" ^ cname ^ "' is defined but never used"
-    );
-    (i, f)
+  let fl' = List.filter (fun (i, f) -> 
+    if SymbolSet.mem i l then true else (
+      Errors.emit_warning None "Unused field" @@ "The field '" ^ i ^ "' of contract '" ^ cname ^ "' is defined but never used; dropping from ast";
+      false
+    )
   ) fl in 
   cname, (fl', (ct1, ct2), elist)
 
