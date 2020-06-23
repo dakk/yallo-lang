@@ -112,6 +112,7 @@ type expr =
 | Div of texpr * texpr
 | Mod of texpr * texpr
 | Abs of texpr
+| ToInt of texpr
 | Ediv of texpr * texpr
 | Neg of texpr
 | IsNat of texpr

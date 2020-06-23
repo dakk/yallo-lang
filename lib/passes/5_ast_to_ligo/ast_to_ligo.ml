@@ -51,7 +51,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | GlobalRef (id) -> id
 
 | None -> "None"
-| Unit -> "()"
+| Unit -> "unit"
 | Bool (i) -> sprintf "%b" i
 | Nat (i) -> sprintf "%dn" i
 | Int (i) -> sprintf "%d" i
@@ -157,9 +157,11 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Sub(a,b) -> "(" ^ to_ligo_expr ast a ^ ") - (" ^ to_ligo_expr ast b ^ ")"
 | Mul(a,b) -> "(" ^ to_ligo_expr ast a ^ ") * (" ^ to_ligo_expr ast b ^ ")"
 | Div(a,b) -> "(" ^ to_ligo_expr ast a ^ ") / (" ^ to_ligo_expr ast b ^ ")"
+| Abs(a) -> "abs(" ^ to_ligo_expr ast a ^ ")"
+| ToInt(a) -> "int(" ^ to_ligo_expr ast a ^ ")"
+| IsNat(a) -> "Michelson.is_nat(" ^ to_ligo_expr ast a ^ ")"
 (*
 | Mod of expr * expr
-| Abs of expr
 | Ediv of expr * expr
 | Neg of expr
 | IsNat of expr

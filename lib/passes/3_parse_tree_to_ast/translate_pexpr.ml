@@ -234,8 +234,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
         | None -> raise @@ ContractError (None, "Unknown contract entrypoint '" ^ i ^ "' on contract instance")
         | Some(es) when es=(fst @@ List.split tl) -> TOperation, (
           match List.length tl with 
-          | 0 -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), i)), (TUnit, Unit))
-          | 1 -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), i)), List.hd @@ tl)
+          | 0 -> Apply((TContract(TUnit), Entrypoint((te, ee), i)), (TUnit, Unit))
+          | 1 -> Apply((TContract(List.hd es), Entrypoint((te, ee), i)), List.hd @@ tl)
           | _ -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), i)), (TTuple(fst @@ List.split tl), Tuple(tl)))
         )
         | _ -> raise @@ TypeError (None, "Invalid types on contract instance apply over entrypoint '" ^ i ^ "'")
@@ -319,7 +319,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     let rt = (match tt1, tt2 with 
-      | TNat, TNat -> TNat
+      | TNat, TNat -> TInt
       | TNat, TInt -> TInt 
       | TInt, TNat -> TInt
       | TInt, TInt -> TInt
@@ -329,6 +329,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | _, _ -> raise @@ TypeError (None, "Sub " ^ show_ttype_between_na tt1 tt2)
     ) in
     rt, Sub ((tt1, ee1), (tt2, ee2))
+
 
   (* Boolean *)
   | PENot (e1) -> 
@@ -413,16 +414,38 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     )
 
   (* apply *)
+
+  | PEApply (PERef("abs"), c) -> 
+    if List.length c <> 1 then raise @@ APIError (None, "abs need only one argument");
+    let e1 = List.hd c in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    if tt1 <> TInt then raise @@ TypeError (None, "Abs " ^ show_ttype_between_na tt1 TInt);
+    TNat, Abs ((tt1, ee1))
+
+  | PEApply (PERef("int"), c) -> 
+    if List.length c <> 1 then raise @@ APIError (None, "int need only one argument");
+    let e1 = List.hd c in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    if tt1 <> TNat then raise @@ TypeError (None, "Int " ^ show_ttype_between_na tt1 TNat);
+    TInt, ToInt ((tt1, ee1))
+
+  | PEApply (PERef("isNat"), c) -> 
+    if List.length c <> 1 then raise @@ APIError (None, "isNat need only one argument");
+    let e1 = List.hd c in 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    if tt1 <> TInt then raise @@ TypeError (None, "isNat " ^ show_ttype_between_na tt1 TNat);
+    TBool, ToInt ((tt1, ee1))
+
   | PEApply (PERef("assert"), c) ->
-    if List.length c <> 1 then raise @@ APIError (None, "Assert need only one argument");
+    if List.length c <> 1 then raise @@ APIError (None, "assert need only one argument");
     let tt, ee = transform_expr (List.hd c) env' ic in
-    if tt <> TBool then raise @@ TypeError (None, "Assert need a bool expression, got: " ^ show_ttype tt);
+    if tt <> TBool then raise @@ TypeError (None, "assert need a bool expression, got: " ^ show_ttype tt);
     TUnit, Assert(tt, ee)
 
   | PEApply (PERef("fail"), c) ->
-    if List.length c <> 1 then raise @@ APIError (None, "Fail need only one argument");
+    if List.length c <> 1 then raise @@ APIError (None, "fail need only one argument");
     let tt, ee = transform_expr (List.hd c) env' ic in
-    if tt <> TString then raise @@ TypeError (None, "Fail need a string expression, got: " ^ show_ttype tt);
+    if tt <> TString then raise @@ TypeError (None, "fail need a string expression, got: " ^ show_ttype tt);
     TUnit, Fail(tt, ee)
 
   | PEApply (PERef("failif"), c) ->
