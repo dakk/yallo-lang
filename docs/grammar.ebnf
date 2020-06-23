@@ -1,0 +1,136 @@
+<program> ::= <dpragma>* <dimport>* <declaration>* EOF
+
+<parameter> ::= IDENT COLON <type_sig>
+
+<param_opt_typed> ::= IDENT COLON <type_sig>
+                    | IDENT
+
+<ident> ::= IDENT
+
+<signature> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
+
+<type_sig> ::= <ident>
+             | LPAR <type_sig> COMMA <type_sig> (COMMA <type_sig>)* RPAR
+             | <type_sig> LAMBDA <type_sig>
+             | <type_expr> CONT
+             | <type_expr> CONTRACT
+             | RECORD LBRACE <parameter> (COMMA <parameter>)* RBRACE
+             | ENUM LPAR [<ident> (PIPE <ident>)*] RPAR
+             | LPAR <type_sig> RPAR
+
+<type_expr> ::= <type_sig>
+
+<dpragma> ::= PRAGMA STRING SEMICOLON
+
+<dimport> ::= IMPORT STRING SEMICOLON
+
+<emap_element> ::= LBRACE <expr> COLON <expr> RBRACE
+
+<erec_element> ::= IDENT EQ <expr>
+
+<match_case> ::= PIPE <expr> LAMBDA <expr>
+               | PIPE UNDERSCORE LAMBDA <expr>
+
+<left> ::= <left> DOT IDENT
+         | IDENT
+         | TEZOS DOT IDENT
+         | THIS DOT IDENT
+         | CRYPTO DOT IDENT
+
+<expr> ::= UNIT
+         | NONE
+         | TRUE
+         | FALSE
+         | CHAIN_ID
+         | STRING
+         | SIGNATURE
+         | BYTES
+         | KEY
+         | KEY_HASH
+         | ADDRESS
+         | INT
+         | MTZ
+         | NAT
+         | SOME LPAR <expr> RPAR
+         | LBRACE <erec_element> (COMMA <erec_element>)* RBRACE
+         | LSQUARE [<expr> (COMMA <expr>)*] RSQUARE
+         | LPAR <expr> COMMA <expr> (COMMA <expr>)* RPAR
+         | LSQUARE <emap_element> (COMMA <emap_element>)* RSQUARE
+         | LPAR <parameter> (COMMA <parameter>)* RPAR LAMBDAB LPAR <expr>
+           RPAR
+         | LET IDENT COLON <type_sig> EQ <expr> IN <expr>
+         | LET IDENT COLON <type_sig> EQ <expr>
+         | LET IDENT EQ <expr> IN <expr>
+         | LET IDENT EQ <expr>
+         | LET LPAR <param_opt_typed> (COMMA <param_opt_typed>)* RPAR EQ
+           <expr> IN <expr>
+         | LET LPAR <param_opt_typed> (COMMA <param_opt_typed>)* RPAR EQ
+           <expr>
+         | <left> EQ <expr>
+         | <expr> ADD <expr>
+         | <expr> SUB <expr>
+         | <expr> DIV <expr>
+         | <expr> MUL <expr>
+         | <expr> MOD <expr>
+         | <expr> AND <expr>
+         | <expr> OR <expr>
+         | NOT <expr>
+         | <expr> LT <expr>
+         | <expr> LTE <expr>
+         | <expr> GT <expr>
+         | <expr> GTE <expr>
+         | <expr> EQEQ <expr>
+         | <expr> NEQ <expr>
+         | IF <expr> THEN <expr> ELSE <expr>
+         | MATCH <expr> WITH <match_case>+
+         | IDENT
+         | <left> DOT IDENT
+         | <expr> DOT IDENT
+         | THIS DOT IDENT
+         | IDENT HT IDENT
+         | <left> LPAR [<expr> (COMMA <expr>)*] RPAR
+         | <expr> LPAR [<expr> (COMMA <expr>)*] RPAR
+         | LPAR <expr> RPAR
+         | LPAR <expr> COLON <type_sig> RPAR
+         | LPAR <expr> SEMICOLON <fun_body> RPAR
+
+<fun_body> ::= <expr> (SEMICOLON <expr>)*
+
+<dfunction> ::= FUNCTION IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
+                COLON <type_sig> LBRACE <fun_body> RBRACE
+
+<dinterface> ::= INTERFACE IDENT LBRACE (<signature> SEMICOLON)* RBRACE
+               | INTERFACE IDENT EXTENDS IDENT LBRACE (<signature>
+                 SEMICOLON)* RBRACE
+
+<dcontract_field> ::= FIELD IDENT COLON <type_sig>
+
+<dcontract_entry> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*]
+                      RPAR LBRACE <fun_body> RBRACE
+
+<dcontract_constructor_assign> ::= THIS DOT IDENT EQ <expr> SEMICOLON
+
+<dcontract_constructor> ::= CONSTRUCTOR LPAR [<parameter> (COMMA
+                            <parameter>)*] RPAR LBRACE
+                            <dcontract_constructor_assign>* RBRACE
+
+<dcontract_body> ::= (<dcontract_field> SEMICOLON)* <dcontract_constructor>
+                     <dcontract_entry>*
+                   | (<dcontract_field> SEMICOLON)* <dcontract_entry>*
+
+<dcontract> ::= CONTRACT IDENT IMPLEMENTS IDENT LBRACE <dcontract_body>
+                RBRACE
+              | CONTRACT IDENT LBRACE <dcontract_body> RBRACE
+
+<dtype> ::= TYPE IDENT EQ <type_sig> SEMICOLON
+
+<dconst> ::= CONST IDENT COLON <type_expr> EQ <expr> SEMICOLON
+           | CONST IDENT EQ <expr> SEMICOLON
+
+<declaration> ::= <dinterface>
+                | <dcontract>
+                | <dfunction>
+                | <dtype>
+                | <dconst>
+
+

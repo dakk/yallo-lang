@@ -7,6 +7,7 @@ type options = {
   print_pt: bool;
   print_ast: bool;
   verbose: bool;
+  no_remove_unused: bool;
 }
 
 let default_options = {
@@ -15,6 +16,7 @@ let default_options = {
   print_pt = true;
   print_ast = true;
   verbose = true;
+  no_remove_unused = false;
 }
 
 (* dump the parse tree, debug only *)
@@ -71,7 +73,7 @@ let compile (filename: string) opt =
   build_ast filename opt
     (* remove unused *)
     |> app opt.verbose @@ print_str "===> Dropping unused code" 
-    |> Passes.Ast_remove_unused.remove_unused opt.contract
+    |> ap (not opt.no_remove_unused) @@ Passes.Ast_remove_unused.remove_unused opt.contract
     |> app opt.print_ast print_ast 
 
     (* output to a final language *)

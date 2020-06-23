@@ -13,7 +13,7 @@
   ast_to_interface 
   ast_to_coq
  )
- (modules intermediate passes compiler))
+ (modules intermediate passes compiler interface_of_michelson))
 
 
 (env

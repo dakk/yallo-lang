@@ -1,10 +1,10 @@
 (* polymorphic ast traversal *)
 open Expr
 
-type 'a traversal_ovverride = texpr -> 'a
-type 'a traversal_join = 'a -> 'a -> 'a
+type 'a t_ovverride = texpr -> 'a
+type 'a t_join = 'a -> 'a -> 'a
 
-let traverse ((t, e): texpr) (tf: 'a traversal_ovverride) (jf: 'a traversal_join) (empty: 'a) = 
+let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) = 
   let rec traverse' (t, e) =
     try 
       tf (t, e)
@@ -133,7 +133,6 @@ let traverse ((t, e): texpr) (tf: 'a traversal_ovverride) (jf: 'a traversal_join
   | LetTupleIn(_, a, b)
   | Seq (a, b) -> jf (traverse' a) (traverse' b)
 
-
   | TezosTransfer (a, b, c)
   | TezosCreateContract (a, b, c)
   | CryptoCheckSignature (a, b, c)
@@ -146,6 +145,6 @@ let traverse ((t, e): texpr) (tf: 'a traversal_ovverride) (jf: 'a traversal_join
   | MapUpdate (a, b, c) 
   | MapGet (a, b, c)
   | IfThenElse (a, b, c) -> jf (jf (traverse' a) (traverse' b)) (traverse' c)
-  in traverse' (t, e)
+  in traverse' te
 
 

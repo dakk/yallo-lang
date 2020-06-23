@@ -7,6 +7,7 @@ let opt = Compiler.{
   print_pt = false;
   print_ast = false;
   verbose = false;
+  no_remove_unused = true;
 }
 
 let compile exc path cname _ = 
