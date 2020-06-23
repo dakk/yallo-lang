@@ -451,7 +451,13 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
 
     (* Apply on contract, it is a transfer without mutez *)
     | TContract (ttl) ->
-      let (ptt, pee) = transform_expr (List.hd el) env' ic in 
+      let (ptt, pee) = match List.length el with 
+      | 0 -> TUnit, Unit
+      | 1 -> transform_expr (List.hd el) env' ic 
+      | _ -> let pp = List.map (fun x -> transform_expr x env' ic) el in
+        (TTuple(fst @@ List.split pp), Tuple (pp))
+      in
+      (* let (ptt, pee) = transform_expr (List.hd el) env' ic in  *)
       if ptt <> ttl then raise @@ InvalidExpression (None, "Invalid arguments for callback");
       TOperation, TezosTransfer((tt, ee), (ptt, pee), (TMutez, Mutez (0)))
 

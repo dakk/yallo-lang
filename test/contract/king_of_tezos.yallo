@@ -1,0 +1,10 @@
+contract KingOfTezos {
+	field theKing: address;
+
+	entry beTheKing() {
+		assert (Tezos.balance() * 2n <= Tezos.amount());
+		let op = Tezos.transfer (this.theKing, Tezos.amount ());
+		this.theKing = Tezos.sender();
+		[ op ]
+	}
+}
