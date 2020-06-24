@@ -33,6 +33,7 @@ let () =
   Alcotest.run "yallo" [
     "compiler", [
       "pragma", `Quick, compile opt None "test/compiler/pragma.yallo" None;
+      "comments", `Quick, compile opt None "test/compiler/comments.yallo" None;
     ];
     "type", [
       "types", `Quick, compile opt None "test/type/types.yallo" None;

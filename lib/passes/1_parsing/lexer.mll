@@ -148,6 +148,7 @@ rule token = parse
   | "false"				  { FALSE }
 
   | "//"            { comment_line lexbuf; token lexbuf }
+  | "(*"            { comment_multiline lexbuf; token lexbuf }
 
   | address as s    { ADDRESS (String.sub s 1 ((String.length s) - 1)) }
 	| chain_id as s		{ CHAIN_ID (int_of_string s) }
@@ -167,3 +168,9 @@ and comment_line = parse
   | "//"      			{ comment_line lexbuf }
   | newline   			{ () }
   | _         			{ comment_line lexbuf }
+
+and comment_multiline = parse
+  | "*)"   					{ () }
+  | eof    					{ failwith "unterminated comment" }
+  | newline					{ new_line lexbuf; comment_multiline lexbuf }
+  | _      					{ comment_multiline lexbuf }

@@ -104,7 +104,7 @@ let rec show_ttype (at: ttype) = match at with
 | TChainId -> "chain_id"
 | TOperation -> "operation"
 | TNat -> "nat"
-| TMutez -> "mutez"
+| TMutez -> "tez"
 | TTimestamp -> "timestamp"
 | TBool -> "bool"
 | TSignature -> "signature"
