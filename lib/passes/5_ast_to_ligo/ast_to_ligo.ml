@@ -235,7 +235,7 @@ let generate_ligo_code (ast: t) (contract: string) =
   (* generate the storage record *)
   let str = [
     if List.length flds = 0 then 
-      Str("type storage = unit;\n\n")
+      Str("type storage = unit\n\n")
     else 
       Str ("type storage = {\n" ^
       merge_list flds ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ show_ttype t) ^
