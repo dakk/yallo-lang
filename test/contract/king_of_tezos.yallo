@@ -1,10 +1,12 @@
 contract KingOfTezos {
 	field theKing: address;
+	field currentPrice: mutez;
 
 	entry beTheKing() {
-		assert (Tezos.balance() * 2n <= Tezos.amount());
-		let op = Tezos.transfer (this.theKing, Tezos.amount ());
+		assert (Tezos.amount() >= this.currentPrice);
+		let op = Tezos.transfer (this.theKing, this.currentPrice);
 		this.theKing = Tezos.sender();
+		this.currentPrice = Tezos.amount() * 2n;
 		[ op ]
 	}
 }

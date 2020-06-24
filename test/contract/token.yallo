@@ -16,7 +16,7 @@ contract Token implements IToken {
 		let a = this.balances.get(from, 0n);
 		let b: nat = this.balances.get(tto, 0n);
 		assert(a > vval);
-		this.balances.update(from, a - vval);
+		this.balances.update(from, abs(a - vval));
 		this.balances.update(tto, b + vval); 
 		[]
 	}
