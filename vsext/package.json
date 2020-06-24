@@ -1,0 +1,25 @@
+{
+    "name": "yallo-lang",
+    "displayName": "Yallo-lang",
+    "description": "Language support for yallo-lang",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.46.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "yallo",
+            "aliases": ["yallo-lang", "yallo"],
+            "extensions": [".yallo"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "yallo",
+            "scopeName": "source.yallo",
+            "path": "./syntaxes/yallo.tmLanguage.json"
+        }]
+    }
+}

@@ -15,6 +15,10 @@ grammar:
 local-install:
 	sudo cp ./_build/default/src/yallo.exe /usr/local/bin
 
+vscode-install:
+	rm -rf ~/.vscode-oss/extensions/dakk.yallo-lang*
+	cp -r ./vsext/ ~/.vscode-oss/extensions/dakk.yallo-lang-0.1
+
 # list-errors:
 #  menhir --list-errors lib/parser.mly > lib/parser.messages
 

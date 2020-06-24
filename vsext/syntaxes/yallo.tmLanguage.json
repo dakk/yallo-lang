@@ -1,0 +1,64 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "yallo-lang",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#lib"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#comment"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.yallo",
+				"match": "\\b(match|with|if|then|else|contract|interface|extends|implements|const|type)\\b"
+			}]
+		},
+		"types": {
+			"patterns": [{
+				"name": "keyword.other.yallo",
+				"match": "\\b(->|enum|record|unit|option|map|big_map|list|set|string|bytes|bool|int|nat|mutez|address|key|key_hash)\\b"
+			}]
+		},
+		"lib": {
+			"patterns": [{
+				"name": "keyword.operator.yallo",
+				"match": "\\b(Tezos|Crypto|Map|Set|BigMap|List)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.yallo",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.yallo",
+					"match": "\\\\."
+				}
+			]
+		},
+		"comment": {
+			"name": "comment.line.yallo",
+			"begin": "//",
+			"end": "\n",
+			"patterns": [
+				{
+					"name": "comment.line.yallo",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.yallo"
+}
