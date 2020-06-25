@@ -27,6 +27,9 @@ type expr =
 | CryptoSha256 of texpr
 | CryptoSha512 of texpr
 
+| Pack of texpr 
+| Unpack of ttype * texpr
+
 | LocalRef of iden 
 | StorageRef of iden
 | GlobalRef of iden

@@ -22,7 +22,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.yallo",
-				"match": "\\b(match|with|if|then|else|contract|interface|extends|implements|const|type)\\b"
+				"match": "\\b(pragma|=>|function|match|with|if|then|else|contract|interface|extends|implements|const|type)\\b"
 			}]
 		},
 		"types": {

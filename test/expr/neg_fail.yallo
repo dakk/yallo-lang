@@ -1,0 +1,3 @@
+const a: int = neg(1n);
+const b: int = neg(1);
+const c: int = neg(1, 1);

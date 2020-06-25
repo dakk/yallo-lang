@@ -5,6 +5,7 @@ open Ast_expr
 open Helpers.Errors
 open Parsing
 open Translate_ptype
+open Loc
 
 let show_ttype_got_expect t1 t2 = "got: '" ^ show_ttype t1 ^ "' expect '" ^ show_ttype t2 ^ "'"
 let show_ttype_between_na t1 t2 = "between '" ^ show_ttype t1 ^ "' and '" ^ show_ttype t2 ^ "' is not allowed"
@@ -27,15 +28,15 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
   let transform_itype_list pel = List.map (fun (i, p) -> i, transform_type p env') pel in
   let push_ic i ii ic = (i, ii)::(List.remove_assoc i ic) in
   let push_local_many rl ic = List.fold_left (fun ic (i,x) -> (i, Local(x))::(List.remove_assoc i ic)) ic rl in
+  let pel = Loc.eline pe in
   let fold_container_type debs l =
     List.fold_left (fun acc xt -> if acc <> xt then 
-      raise @@ TypeError (None, debs ^ " must have the same type: " ^ show_ttype acc ^ " <> " ^ show_ttype xt)
+      raise @@ TypeError (pel, debs ^ " must have the same type: " ^ show_ttype acc ^ " <> " ^ show_ttype xt)
     else 
       xt
     ) (List.hd l) l
   in
-  match pe with
-
+  let r = (match pe with
   (* Option *)
   | PENone -> TOption (TAny), None
   | PESome (e) -> 
@@ -85,7 +86,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     (match tt, tt', ee with 
     | TOption (TAny), TOption(t), None -> TOption(t), None
     | a, b, _ when a=b -> a, ee
-    | a, b, c -> raise @@ TypeError (None, "Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c))
+    | a, b, c -> raise @@ TypeError (pel, "Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c))
 
   | PELambda (argl, e) -> 
     let rl = argl |> transform_itype_list in
@@ -110,9 +111,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       if List.find_opt (fun x -> x=i) el <> None then
         TEnum(el), EnumValue(i)
       else 
-        raise @@ TypeError (None, "Enum value '" ^ i ^ "' not found in enum: " ^ show_ttype (TEnum(el)))
-    | None -> raise @@ TypeError (None, "Unknown enum type '" ^ ii ^ "'")
-    | _ -> raise @@ TypeError (None, "Accessor # is only usable on enum type"))
+        raise @@ TypeError (pel, "Enum value '" ^ i ^ "' not found in enum: " ^ show_ttype (TEnum(el)))
+    | None -> raise @@ TypeError (pel, "Unknown enum type '" ^ ii ^ "'")
+    | _ -> raise @@ TypeError (pel, "Accessor # is only usable on enum type"))
 
 
   (* PEApply(PETRef) tezos apis *)
@@ -148,7 +149,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
         TezosCreateContract((TAny, BuildContractCodeAndStorage(a, b)), (TOption (TKeyHash), None), (TMutez, v))
       | _, _ -> 
         List.iter (fun (t,e) -> (show_expr e ^ " : " ^ show_ttype t) |> print_endline) el';
-        raise @@ APIError (None, "Invalid call to Tezos." ^ i)
+        raise @@ APIError (pel, "Invalid call to Tezos." ^ i)
     )
 
   (* PEApply(PECRef) crypto apis *)
@@ -161,7 +162,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | "sha512", [(TBytes, e)] -> TBytes, CryptoSha512(TBytes, e)
       | "checkSignature", [(TKey, ek); (TSignature, es); (TBytes, ed)] ->
         TBool, CryptoCheckSignature ((TKey, ek), (TSignature, es), (TBytes, ed))
-      | _, _ -> raise @@ APIError (None, "Invalid call to Crypto." ^ i)
+      | _, _ -> raise @@ APIError (pel, "Invalid call to Crypto." ^ i)
     )
 
   (* PEDot on base *)
@@ -231,18 +232,18 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       (* contract instance call *)
       | TContractInstance(TInterface(sl)), i, tl -> 
         (match List.assoc_opt i sl with 
-        | None -> raise @@ ContractError (None, "Unknown contract entrypoint '" ^ i ^ "' on contract instance")
+        | None -> raise @@ ContractError (pel, "Unknown contract entrypoint '" ^ i ^ "' on contract instance")
         | Some(es) when es=(fst @@ List.split tl) -> TOperation, (
           match List.length tl with 
           | 0 -> Apply((TContract(TUnit), Entrypoint((te, ee), i)), (TUnit, Unit))
           | 1 -> Apply((TContract(List.hd es), Entrypoint((te, ee), i)), List.hd @@ tl)
           | _ -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), i)), (TTuple(fst @@ List.split tl), Tuple(tl)))
         )
-        | _ -> raise @@ TypeError (None, "Invalid types on contract instance apply over entrypoint '" ^ i ^ "'")
+        | _ -> raise @@ TypeError (pel, "Invalid types on contract instance apply over entrypoint '" ^ i ^ "'")
       )
 
       | _, i, _-> 
-        raise @@ TypeError (None, "Invalid apply of " ^ i ^ " over '" ^ show_ttype te ^ "'")
+        raise @@ TypeError (pel, "Invalid apply of " ^ i ^ " over '" ^ show_ttype te ^ "'")
     )
 
   (* PEDot *)
@@ -252,7 +253,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     (* PEDot entrypoint access *)
     | TContractInstance(TInterface(ct)) -> 
       (match List.assoc_opt i ct with 
-        | None -> raise @@ ContractError (None, "Unkown contract entrypoint '" ^ i ^ "'")
+        | None -> raise @@ ContractError (pel, "Unkown contract entrypoint '" ^ i ^ "'")
         | Some(tl) when List.length tl > 1 -> 
           TContract(TTuple(tl)), Entrypoint((te, ee), i)
         | Some(tl) when List.length tl = 1 -> 
@@ -263,9 +264,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     (* PEDot record access *)
     | TRecord(t) -> 
       (match List.assoc_opt i t with 
-        | None -> raise @@ TypeError (None, "Unkown record field '" ^ i ^ "'")
+        | None -> raise @@ TypeError (pel, "Unkown record field '" ^ i ^ "'")
         | Some(t) -> t, RecordAccess((te, ee), i))
-    | _ -> raise @@ InvalidExpression (None, "Unhandled dot access of '" ^ i ^ "' on expression '" ^ show_expr ee ^ "'")
+    | _ -> raise @@ InvalidExpression (pel, "Unhandled dot access of '" ^ i ^ "' on expression '" ^ show_expr ee ^ "'")
     )
 
 
@@ -283,7 +284,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | TInt, TTimestamp -> TTimestamp
       | TMutez, TMutez -> TMutez
       | TString, TString -> TString 
-      | _, _ -> raise @@ TypeError (None, "Add " ^ show_ttype_between_na tt1 tt2)
+      | _, _ -> raise @@ TypeError (pel, "Add " ^ show_ttype_between_na tt1 tt2)
     ) in
     if tt1 = TString then rt, StringConcat ((tt1, ee1), (tt2, ee2)) else rt, Add ((tt1, ee1), (tt2, ee2))
 
@@ -297,7 +298,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | TInt, TInt -> TInt
       | TMutez, TNat -> TMutez
       | TNat, TMutez -> TMutez
-      | _, _ -> raise @@ TypeError (None, "Mul " ^ show_ttype_between_na tt1 tt2)
+      | _, _ -> raise @@ TypeError (pel, "Mul " ^ show_ttype_between_na tt1 tt2)
     ) in
     rt, Mul ((tt1, ee1), (tt2, ee2))
 
@@ -311,7 +312,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | TInt, TInt -> TOption(TTuple([TInt; TNat])) 
       | TMutez, TNat -> TOption(TTuple([TMutez; TMutez])) 
       | TMutez, TMutez -> TOption(TTuple([TMutez; TNat])) 
-      | _, _ -> raise @@ TypeError (None, "EDiv " ^ show_ttype_between_na tt1 tt2)
+      | _, _ -> raise @@ TypeError (pel, "EDiv " ^ show_ttype_between_na tt1 tt2)
     ) in
     rt, Div ((tt1, ee1), (tt2, ee2))
 
@@ -326,7 +327,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | TTimestamp, TInt -> TTimestamp
       | TTimestamp, TTimestamp -> TInt
       | TMutez, TMutez -> TMutez
-      | _, _ -> raise @@ TypeError (None, "Sub " ^ show_ttype_between_na tt1 tt2)
+      | _, _ -> raise @@ TypeError (pel, "Sub " ^ show_ttype_between_na tt1 tt2)
     ) in
     rt, Sub ((tt1, ee1), (tt2, ee2))
 
@@ -335,21 +336,21 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
   | PENot (e1) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     if tt1 = TBool then TBool, Not (tt1, ee1) 
-    else raise @@ TypeError (None, "Not needs a boolean expression, got: '" ^ show_ttype tt1 ^ "'")
+    else raise @@ TypeError (pel, "Not needs a boolean expression, got: '" ^ show_ttype tt1 ^ "'")
 
   | PEOr (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     (match tt1, tt2 with 
     | TBool, TBool -> TBool, Or ((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (None, "Or branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'"))
+    | _, _ -> raise @@ TypeError (pel, "Or branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'"))
 
   | PEAnd (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     (match tt1, tt2 with 
     | TBool, TBool -> TBool, And ((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (None, "And branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'"))
+    | _, _ -> raise @@ TypeError (pel, "And branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'"))
   
   (* Compare *)
   | PEGt (e1, e2) -> 
@@ -357,102 +358,120 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Gt((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (None, show_ttype_not_cmp tt1 tt2))
+    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
 
   | PEGte (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Gte((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (None, show_ttype_not_cmp tt1 tt2))
+    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
     
   | PELt (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Lt((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (None, show_ttype_not_cmp tt1 tt2))
+    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
 
   | PELte (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Lte((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (None, show_ttype_not_cmp tt1 tt2))
+    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
 
     | PEEq (e1, e2) -> 
       let (tt1, ee1) = transform_expr e1 env' ic in 
       let (tt2, ee2) = transform_expr e2 env' ic in 
       (match (attributes tt1).cmp, (attributes tt2).cmp with 
       | true, true -> TBool, Eq((tt1, ee1), (tt2, ee2))
-      | _, _ -> raise @@ TypeError (None, show_ttype_not_cmp tt1 tt2))
+      | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
 
   | PENeq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Neq((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (None, show_ttype_not_cmp tt1 tt2))
+    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
       
 
   (* symbol reference *)
   | PESRef (i) ->
     (match List.assoc_opt i ic with 
-      | None -> raise @@ ContractError (None, "Unknow storage field: '" ^ i ^ "'")
+      | None -> raise @@ ContractError (pel, "Unknow storage field: '" ^ i ^ "'")
       | Some (Storage(t)) -> t, StorageRef (i)
       | Some (StorageEntry(tl)) when List.length tl = 0 -> TContract(TUnit), StorageEntry (i)
       | Some (StorageEntry(tl)) when List.length tl = 1 -> TContract(List.hd tl), StorageEntry (i)
       | Some (StorageEntry(tl)) when List.length tl > 1 -> TContract(TTuple(tl)), StorageEntry (i)
-      | _ -> raise @@ ContractError (None, "Symbol '" ^ i ^ "' is not a storage field")
+      | _ -> raise @@ ContractError (pel, "Symbol '" ^ i ^ "' is not a storage field")
       )
   
   | PERef (i) -> 
     (match List.assoc_opt i ic with 
     | None -> Ast_env.get_ref i env', GlobalRef (i)
     | Some (Local(t)) -> t, LocalRef (i)
-    | _ -> raise @@ SymbolNotFound (None, "Symbol '" ^ i ^ "' is not a valid ref")
+    | _ -> raise @@ SymbolNotFound (pel, "Symbol '" ^ i ^ "' is not a valid ref")
     )
 
   (* apply *)
+  | PEApply (PERef("pack"), c) -> 
+    if List.length c <> 1 then raise @@ APIError (pel, "pack needs only one argument");
+    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
+    (* TODO: check for pack attribute *)
+    TBytes, Pack((tt1, ee1))
+    
+  | PEApply (PERef("unpack"), c) -> 
+    if List.length c <> 2 then raise @@ APIError (pel, "unpack needs two arguments");
+    let (tt1, ee1) = transform_expr (List.nth c 0) env' ic in 
+    let (tt2, ee2) = transform_expr (List.nth c 1) env' ic in 
+    if tt2 <> TBytes then  raise @@ TypeError (pel, "unpack needs a bytes expression, got: " ^ show_ttype tt2);
+    (* TODO: first argument should be a type, but we don't have a type expr yet *)
+    TOption(tt1), Unpack(tt1, (tt2, ee2))
 
   | PEApply (PERef("abs"), c) -> 
-    if List.length c <> 1 then raise @@ APIError (None, "abs need only one argument");
-    let e1 = List.hd c in 
-    let (tt1, ee1) = transform_expr e1 env' ic in 
-    if tt1 <> TInt then raise @@ TypeError (None, "Abs " ^ show_ttype_between_na tt1 TInt);
+    if List.length c <> 1 then raise @@ APIError (pel, "abs needs only one argument");
+    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
+    if tt1 <> TInt then raise @@ TypeError (pel, "Abs " ^ show_ttype_between_na tt1 TInt);
     TNat, Abs ((tt1, ee1))
 
+  | PEApply (PERef("neg"), c) ->
+    if List.length c <> 1 then raise @@ APIError (pel, "neg needs only one argument");
+    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
+    (match tt1 with 
+    | TInt -> TInt, Neg((tt1,ee1))
+    | TNat -> TInt, Neg((tt1,ee1))
+    | _ -> raise @@ TypeError (pel, "neg needs an int or a nat, got: " ^ show_ttype tt1))
+
   | PEApply (PERef("int"), c) -> 
-    if List.length c <> 1 then raise @@ APIError (None, "int need only one argument");
-    let e1 = List.hd c in 
-    let (tt1, ee1) = transform_expr e1 env' ic in 
-    if tt1 <> TNat then raise @@ TypeError (None, "Int " ^ show_ttype_between_na tt1 TNat);
+    if List.length c <> 1 then raise @@ APIError (pel, "int needs only one argument");
+    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
+    if tt1 <> TNat then raise @@ TypeError (pel, "Int " ^ show_ttype_between_na tt1 TNat);
     TInt, ToInt ((tt1, ee1))
 
   | PEApply (PERef("isNat"), c) -> 
-    if List.length c <> 1 then raise @@ APIError (None, "isNat need only one argument");
-    let e1 = List.hd c in 
-    let (tt1, ee1) = transform_expr e1 env' ic in 
-    if tt1 <> TInt then raise @@ TypeError (None, "isNat " ^ show_ttype_between_na tt1 TNat);
+    if List.length c <> 1 then raise @@ APIError (pel, "isNat needs only one argument");
+    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
+    if tt1 <> TInt then raise @@ TypeError (pel, "isNat " ^ show_ttype_between_na tt1 TNat);
     TBool, ToInt ((tt1, ee1))
 
   | PEApply (PERef("assert"), c) ->
-    if List.length c <> 1 then raise @@ APIError (None, "assert need only one argument");
+    if List.length c <> 1 then raise @@ APIError (pel, "assert needs only one argument");
     let tt, ee = transform_expr (List.hd c) env' ic in
-    if tt <> TBool then raise @@ TypeError (None, "assert need a bool expression, got: " ^ show_ttype tt);
+    if tt <> TBool then raise @@ TypeError (pel, "assert needs a bool expression, got: " ^ show_ttype tt);
     TUnit, Assert(tt, ee)
 
   | PEApply (PERef("fail"), c) ->
-    if List.length c <> 1 then raise @@ APIError (None, "fail need only one argument");
+    if List.length c <> 1 then raise @@ APIError (pel, "fail need only one argument");
     let tt, ee = transform_expr (List.hd c) env' ic in
-    if tt <> TString then raise @@ TypeError (None, "fail need a string expression, got: " ^ show_ttype tt);
+    if tt <> TString then raise @@ TypeError (pel, "fail need a string expression, got: " ^ show_ttype tt);
     TUnit, Fail(tt, ee)
 
   | PEApply (PERef("failif"), c) ->
     ( match c |> transform_expr_list with 
     | [(TBool, co); (TString, m)] -> TUnit, FailIfMessage((TBool, co), (TString, m))
     | [(TBool, co)] -> TUnit, FailIf((TBool, co))
-    | _ -> raise @@ APIError (None, "Invalid arguments for failif");
+    | _ -> raise @@ APIError (pel, "Invalid arguments for failif");
     )
 
 
@@ -464,9 +483,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       let argl = argv_to_list arv in 
       let ap = el |> transform_expr_list in
       if List.length argl <> List.length ap then 
-        raise @@ InvalidExpression (None, "Invalid argument number for lambda apply");
+        raise @@ InvalidExpression (pel, "Invalid argument number for lambda apply");
       if not @@ Ast_ttype.compare_list argl (fst @@ List.split ap) then 
-        raise @@ TypeError (None, "Invalid argument types apply");
+        raise @@ TypeError (pel, "Invalid argument types apply");
       if List.length argl = 1 then 
         rettype, Apply((tt, ee), (TTuple(argl), Tuple(ap)))
       else 
@@ -481,16 +500,16 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
         (TTuple(fst @@ List.split pp), Tuple (pp))
       in
       (* let (ptt, pee) = transform_expr (List.hd el) env' ic in  *)
-      if ptt <> ttl then raise @@ InvalidExpression (None, "Invalid arguments for callback");
+      if ptt <> ttl then raise @@ InvalidExpression (pel, "Invalid arguments for callback");
       TOperation, TezosTransfer((tt, ee), (ptt, pee), (TMutez, Mutez (0)))
 
     (* Apply on contract name, it is a buildcontractcodeandstorage, which is the argument of create_contract *)
     | TContractCode -> 
       (* TODO: check constructor parameters *)
-      let cc = (match ee with | GlobalRef (c) -> c | _ -> raise @@ InvalidExpression (None, "Expected a globalref")) in
+      let cc = (match ee with | GlobalRef (c) -> c | _ -> raise @@ InvalidExpression (pel, "Expected a globalref")) in
       TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage (cc, el |> transform_expr_list)
       
-    | _ -> raise @@ TypeError (None, "Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el))))
+    | _ -> raise @@ TypeError (pel, "Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el))))
   )
   
 
@@ -503,8 +522,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       (if t <> TAny then TList(t) else TList(t')), IfThenElse ((tc, ec), (te1, ee1), (te2, ee2))
     | TBool, t, t' when t = t' -> t, IfThenElse ((tc, ec), (te1, ee1), (te2, ee2))
     | TBool, t, t' when t <> t' -> 
-      raise @@ TypeError (None, "If branches should have same type, got: '" ^ show_ttype t ^ "' and '" ^ show_ttype t' ^ "'")
-    | _, _, _ -> raise @@ TypeError (None, "If condition should be a boolean expression, got '" ^ show_ttype tc ^ "'"))
+      raise @@ TypeError (pel, "If branches should have same type, got: '" ^ show_ttype t ^ "' and '" ^ show_ttype t' ^ "'")
+    | _, _, _ -> raise @@ TypeError (pel, "If condition should be a boolean expression, got '" ^ show_ttype tc ^ "'"))
 
   | PEMatchWith (e, bl) -> 
     let (te, ee) = transform_expr e env' ic in 
@@ -512,13 +531,13 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       let (tt, ee) = transform_expr cv env' ic in
       let (tcex, ecex) = transform_expr cex env' ic in
       if (tt <> te) && (tt <> TAny) then
-        raise @@ TypeError (None, "Match case has an invalid value type; " ^ show_ttype_got_expect tt te)
+        raise @@ TypeError (pel, "Match case has an invalid value type; " ^ show_ttype_got_expect tt te)
       else ((tt, ee), tcex, (tcex, ecex)) 
     ) bl in
     (* assert that every branch as the same type *)
     let rett: ttype = List.fold_left (fun acc (_, tcex, _) -> 
       if acc <> tcex && tcex <> TUnit then  (* TODO: tany is only allowed for fail *)
-        raise @@ TypeError (None, "Match branches should have same type; " ^ show_ttype_got_expect tcex acc)
+        raise @@ TypeError (pel, "Match branches should have same type; " ^ show_ttype_got_expect tcex acc)
       else if tcex = TUnit then acc else tcex
     ) (let (_,b,_) = List.hd bl' in b) bl'
     in rett, MatchWith ((te, ee), List.map (fun (a,_,c) -> (a,c)) bl')
@@ -530,14 +549,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
   | PELetIn(i, Some(t), e, e1) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
-    if not @@ compare_type_lazy tt t' then raise @@ TypeError (None, "LetIn type mismatch; " ^ show_ttype_got_expect tt t');
+    if not @@ compare_type_lazy tt t' then raise @@ TypeError (pel, "LetIn type mismatch; " ^ show_ttype_got_expect tt t');
     let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
     tt, LetIn (i, t', (tt, ee), (tt1, ee1))
 
   | PESeq(PELet(i, Some(t), e), en) -> 
     let t' = transform_type t env' in
     let (tt, ee) = transform_expr e env' ic in 
-    if not @@ compare_type_lazy tt t' then raise @@ TypeError (None, "Let type mismatch; " ^ show_ttype_got_expect tt t'); 
+    if not @@ compare_type_lazy tt t' then raise @@ TypeError (pel, "Let type mismatch; " ^ show_ttype_got_expect tt t'); 
     let (tnt, ene) = transform_expr en env' @@ push_ic i (Local(t')) ic in
     tnt, Seq((TUnit, Let(i, t', (tt, ee))), (tnt, ene))
 
@@ -552,7 +571,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     let ti = fst @@ List.split tl in
     (match tt with 
       | TTuple(tl') -> tt, LetTuple(List.combine ti tl', (tt, ee))
-      | _ -> raise @@ TypeError (None, "Expected a tuple")
+      | _ -> raise @@ TypeError (pel, "Expected a tuple")
     )
 
   | PELetTupleIn(tl, e, e1) -> 
@@ -564,7 +583,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
         let tl' = List.combine ti tl' in 
         let (tt1, ee1) = transform_expr e1 env' @@ push_local_many tl' ic in 
         tt1, LetTupleIn(tl', (tt, ee), (tt1, ee1))
-      | _ -> raise @@ TypeError (None, "Expected a tuple")
+      | _ -> raise @@ TypeError (pel, "Expected a tuple")
     )
 
   | PESeq(PELetTuple(tl, e), en) -> 
@@ -576,7 +595,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
         let tl' = List.combine ti tl' in 
         let (tnt, ene) = transform_expr en env' @@ push_local_many tl' ic in
         tnt, Seq((TUnit, LetTuple(tl', (tt, ee))), (tnt, ene))
-      | _ -> raise @@ TypeError (None, "Expected a tuple")
+      | _ -> raise @@ TypeError (pel, "Expected a tuple")
     )
 
 
@@ -588,14 +607,14 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
   | PESeq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    if tt1 <> TUnit then raise @@ InvalidExpression (None, "Cannot ignore non unit expression in sequence");
+    if tt1 <> TUnit then raise @@ InvalidExpression (pel, "Cannot ignore non unit expression in sequence");
     (tt2, Seq((tt1, ee1), (tt2, ee2)))
 
   (* Storage assign *)
   | PEAssign (PESRef (x), e) -> 
     let (tte, eee) = transform_expr e env' ic in 
     let se = List.assoc x ic in 
-    if Storage(tte) <> se then raise @@ InvalidExpression (None, "Invalid assignment: " ^ show_iref (Storage(tte)) ^ " " ^ show_iref se);
+    if Storage(tte) <> se then raise @@ InvalidExpression (pel, "Invalid assignment: " ^ show_iref (Storage(tte)) ^ " " ^ show_iref se);
     TUnit, SAssign(x, (tte, eee))
 
   (* Storage record assign *)
@@ -604,8 +623,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     (match List.assoc x ic with 
     | Storage(TRecord (tl)) ->
       let recel = List.assoc i tl in 
-      if tte <> recel then raise @@ InvalidExpression (None, "Invalid assignment");
+      if tte <> recel then raise @@ InvalidExpression (pel, "Invalid assignment");
       TUnit, SRecAssign(x, i, (tte, eee))
-    | _ -> raise @@ InvalidExpression (None, "Invalid assignment"))
+    | _ -> raise @@ InvalidExpression (pel, "Invalid assignment"))
 
-  | ex -> raise @@ InvalidExpression (None, "Expression not handled yet: " ^ Parse_tree.show_pexpr ex)
+  | ex -> raise @@ InvalidExpression (pel, "Expression not handled yet: " ^ Parse_tree.show_pexpr ex)
+  ) in r
