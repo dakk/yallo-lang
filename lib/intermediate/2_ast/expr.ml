@@ -102,7 +102,10 @@ type expr =
 | StringSize of texpr
 
 (* bytes *)
+| BytesConcat of texpr * texpr 
+| BytesSlice of texpr * texpr * texpr
 | BytesPack of texpr 
+| BytesSize of texpr
 | BytesUnpack of texpr
 
 (* tuple *)

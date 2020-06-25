@@ -149,6 +149,9 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 (* bytes *)
 | BytesPack(a) -> "Bytes.pack (" ^ to_ligo_expr ast a ^ ")"
 | BytesUnpack(a) -> "Bytes.unpack (" ^ to_ligo_expr ast a ^ ")"
+(* | BytesSize(a)
+| BytesSlice(a,b,c) *)
+| BytesConcat (s1, s2) -> to_ligo_expr ast s1 ^ " ^ " ^ to_ligo_expr ast s2
 
 (*
 

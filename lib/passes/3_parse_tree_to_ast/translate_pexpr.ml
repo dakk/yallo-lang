@@ -232,8 +232,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
         TUnit, SetUpdate((te, ee), (kkt, ek), (TBool, ev))
 
       (* String *)
-      | TString, "slice", [(TInt, i1); (TInt, i2)] -> TString, StringSlice ((te, ee), (TInt, i1), (TInt, i2))
+      | TString, "slice", [(TInt, i1); (TInt, i2)] -> TString, StringSlice ((te, ee), (TNat, i1), (TNat, i2))
       | TString, "size", [] -> TNat, StringSize(te, ee)
+
+      (* Bytes *)
+      | TBytes, "slice", [(TInt, i1); (TInt, i2)] -> TBytes, BytesSlice ((te, ee), (TNat, i1), (TNat, i2))
+      | TBytes, "size", [] -> TNat, BytesSize(te, ee)
 
       (* Tuple *)
       | TTuple ([a; _]), "fst", [] -> a, TupleFst (te, ee)
@@ -297,9 +301,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | TInt, TTimestamp -> TTimestamp
       | TMutez, TMutez -> TMutez
       | TString, TString -> TString 
+      | TBytes, TBytes -> TBytes 
       | _, _ -> raise @@ TypeError (pel, "Add " ^ show_ttype_between_na tt1 tt2)
     ) in
-    if tt1 = TString then rt, StringConcat ((tt1, ee1), (tt2, ee2)) else rt, Add ((tt1, ee1), (tt2, ee2))
+    if tt1 = TString then rt, StringConcat ((tt1, ee1), (tt2, ee2)) else 
+    if tt1 = TBytes then rt, BytesConcat ((tt1, ee1), (tt2, ee2))
+    else rt, Add ((tt1, ee1), (tt2, ee2))
 
   | PEMul (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
