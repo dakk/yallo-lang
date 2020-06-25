@@ -1,4 +1,4 @@
-const a: bytes = pack (12n);
+const a: bytes = Bytes.pack (12n);
 
-const b: nat option = unpack (a);
-const c = (unpack (a) : nat option);
+const b: nat option = Bytes.unpack (a);
+const c = (Bytes.unpack (a) : nat option);

@@ -46,6 +46,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | CryptoSha256 (a) -> "Crypto.sha256 (" ^ to_ligo_expr ast a ^ ")"
 | CryptoSha512 (a) -> "Crypto.sha512 (" ^ to_ligo_expr ast a ^ ")"
 
+
 | LocalRef (id) -> id
 | StorageRef (id) -> "s." ^ id
 | GlobalRef (id) -> id
@@ -145,6 +146,10 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 *)
 | StringConcat (s1, s2) -> to_ligo_expr ast s1 ^ " ^ " ^ to_ligo_expr ast s2
 
+(* bytes *)
+| BytesPack(a) -> "Bytes.pack (" ^ to_ligo_expr ast a ^ ")"
+| BytesUnpack(a) -> "Bytes.unpack (" ^ to_ligo_expr ast a ^ ")"
+
 (*
 
 (* tuple *)
@@ -160,12 +165,9 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Abs(a) -> "abs(" ^ to_ligo_expr ast a ^ ")"
 | ToInt(a) -> "int(" ^ to_ligo_expr ast a ^ ")"
 | IsNat(a) -> "Michelson.is_nat(" ^ to_ligo_expr ast a ^ ")"
-(*
-| Mod of expr * expr
-| Ediv of expr * expr
-| Neg of expr
-| IsNat of expr
-*)
+| Neg(a) -> "- (" ^ to_ligo_expr ast a ^ ")"
+| Mod (a, b) -> "(" ^ to_ligo_expr ast a ^ ") mod (" ^ to_ligo_expr ast b ^ ")"
+
 
 (* bool *)
 | Not(a) -> "! (" ^ to_ligo_expr ast a ^ ")"

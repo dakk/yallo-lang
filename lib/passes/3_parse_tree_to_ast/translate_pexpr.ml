@@ -172,6 +172,18 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
   | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
   | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
 
+  | PEApply (PEDot (PERef("Bytes"), "pack"), c) -> 
+    if List.length c <> 1 then raise @@ APIError (pel, "pack needs only one argument");
+    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
+    (* TODO: check for pack attribute *)
+    TBytes, BytesPack((tt1, ee1))
+  | PEApply (PEDot (PERef("Bytes"), "unpack"), c) -> 
+    if List.length c <> 1 then raise @@ APIError (pel, "unpack needs only one arguments");
+    let (tt2, ee2) = transform_expr (List.hd c) env' ic in 
+    if tt2 <> TBytes then  raise @@ TypeError (pel, "unpack needs a bytes expression, got: " ^ show_ttype tt2);
+    TOption(TAny), BytesUnpack((tt2, ee2))
+
+
   (* PEApply(PEDot) base type apis *)
   | PEApply (PEDot(e,i), el) -> 
     let (te, ee) = transform_expr e env' ic in
@@ -303,7 +315,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     ) in
     rt, Mul ((tt1, ee1), (tt2, ee2))
 
-  | PEDiv (e1, e2) -> 
+  | PEEDiv (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     let rt = (match tt1, tt2 with 
@@ -315,7 +327,36 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
       | TMutez, TMutez -> TOption(TTuple([TMutez; TNat])) 
       | _, _ -> raise @@ TypeError (pel, "EDiv " ^ show_ttype_between_na tt1 tt2)
     ) in
+    rt, EDiv ((tt1, ee1), (tt2, ee2))
+
+  | PEMod (e1, e2) -> 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
+    let rt = (match tt1, tt2 with 
+      | TNat, TNat -> TOption(TTuple([TNat; TNat]))
+      | TNat, TInt -> TOption(TTuple([TInt; TNat])) 
+      | TInt, TNat -> TOption(TTuple([TInt; TNat])) 
+      | TInt, TInt -> TOption(TTuple([TInt; TNat])) 
+      | TMutez, TNat -> TOption(TTuple([TMutez; TMutez])) 
+      | TMutez, TMutez -> TOption(TTuple([TMutez; TNat])) 
+      | _, _ -> raise @@ TypeError (pel, "Div " ^ show_ttype_between_na tt1 tt2)
+    ) in
+    rt, Mod ((tt1, ee1), (tt2, ee2))
+
+  | PEEDiv (e1, e2) -> 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
+    let rt = (match tt1, tt2 with 
+      | TNat, TNat -> TInt
+      | TNat, TInt -> TInt
+      | TInt, TNat -> TInt
+      | TInt, TInt -> TInt
+      | TMutez, TNat -> TMutez
+      | TMutez, TMutez -> TMutez
+      | _, _ -> raise @@ TypeError (pel, "Div " ^ show_ttype_between_na tt1 tt2)
+    ) in
     rt, Div ((tt1, ee1), (tt2, ee2))
+
 
   | PESub (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
@@ -416,18 +457,6 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     )
 
   (* apply *)
-  | PEApply (PERef("pack"), c) -> 
-    if List.length c <> 1 then raise @@ APIError (pel, "pack needs only one argument");
-    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
-    (* TODO: check for pack attribute *)
-    TBytes, Pack((tt1, ee1))
-    
-  | PEApply (PERef("unpack"), c) -> 
-    if List.length c <> 1 then raise @@ APIError (pel, "unpack needs only one arguments");
-    let (tt2, ee2) = transform_expr (List.hd c) env' ic in 
-    if tt2 <> TBytes then  raise @@ TypeError (pel, "unpack needs a bytes expression, got: " ^ show_ttype tt2);
-    TOption(TAny), Unpack((tt2, ee2))
-
   | PEApply (PERef("abs"), c) -> 
     if List.length c <> 1 then raise @@ APIError (pel, "abs needs only one argument");
     let (tt1, ee1) = transform_expr (List.hd c) env' ic in 

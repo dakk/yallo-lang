@@ -27,9 +27,6 @@ type expr =
 | CryptoSha256 of texpr
 | CryptoSha512 of texpr
 
-| Pack of texpr 
-| Unpack of texpr
-
 | LocalRef of iden 
 | StorageRef of iden
 | GlobalRef of iden
@@ -104,6 +101,10 @@ type expr =
 | StringSlice of texpr * texpr * texpr
 | StringSize of texpr
 
+(* bytes *)
+| BytesPack of texpr 
+| BytesUnpack of texpr
+
 (* tuple *)
 | TupleFst of texpr
 | TupleSnd of texpr
@@ -116,7 +117,7 @@ type expr =
 | Mod of texpr * texpr
 | Abs of texpr
 | ToInt of texpr
-| Ediv of texpr * texpr
+| EDiv of texpr * texpr
 | Neg of texpr
 | IsNat of texpr
 

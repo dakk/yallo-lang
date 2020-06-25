@@ -46,6 +46,7 @@ and pexpr =
   | PESub of pexpr * pexpr
   | PEMul of pexpr * pexpr
   | PEDiv of pexpr * pexpr
+  | PEEDiv of pexpr * pexpr
   | PEMod of pexpr * pexpr
 
   (* bool *)
