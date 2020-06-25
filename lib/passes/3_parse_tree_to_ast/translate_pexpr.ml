@@ -85,6 +85,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     let tt' = transform_type et env' in
     (match tt, tt', ee with 
     | TOption (TAny), TOption(t), None -> TOption(t), None
+    | TOption (TAny), TOption(t), be -> TOption(t), be
     | a, b, _ when a=b -> a, ee
     | a, b, c -> raise @@ TypeError (pel, "Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c))
 
@@ -422,12 +423,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     TBytes, Pack((tt1, ee1))
     
   | PEApply (PERef("unpack"), c) -> 
-    if List.length c <> 2 then raise @@ APIError (pel, "unpack needs two arguments");
-    (* TODO: first argument should be a type, but we don't have a type expr yet *)
-    let (tt1, ee1) = transform_expr (List.nth c 0) env' ic in 
-    let (tt2, ee2) = transform_expr (List.nth c 1) env' ic in 
+    if List.length c <> 1 then raise @@ APIError (pel, "unpack needs only one arguments");
+    let (tt2, ee2) = transform_expr (List.hd c) env' ic in 
     if tt2 <> TBytes then  raise @@ TypeError (pel, "unpack needs a bytes expression, got: " ^ show_ttype tt2);
-    TOption(tt1), Unpack(tt1, (tt2, ee2))
+    TOption(TAny), Unpack((tt2, ee2))
 
   | PEApply (PERef("abs"), c) -> 
     if List.length c <> 1 then raise @@ APIError (pel, "abs needs only one argument");
