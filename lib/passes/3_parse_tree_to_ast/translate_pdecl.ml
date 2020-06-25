@@ -142,7 +142,7 @@ let rec transform (p: Parse_tree.t) (e: Ast_env.t): Ast_env.t =
       let entry_bind = List.map (fun (i,t) -> i, StorageEntry(t)) elsig in
       let tt, ee = transform_expr ex e (p_bind @ flds_bind @ entry_bind) in 
       if tt<>TList(TOperation) && tt<>TList(TAny) then 
-        raise @@ DeclarationError(Loc.dline p, "Entry '" ^ i ^ "' of contract '" ^ dc.id ^ "' does not evalute to an operation list");
+        raise @@ DeclarationError(Loc.dline p, "Entry '" ^ i ^ "' of contract '" ^ dc.id ^ "' does not evalute to an operation list; got: '" ^ show_ttype tt ^ "'");
       (i, (par', (tt, ee)))
     ) dc.entries in
 

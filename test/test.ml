@@ -19,6 +19,7 @@ let compile opt exc path cname _ =
   (match compile_failure, exc with 
   | None, None -> ()
   | Some(SyntaxError(_,_)), Some(SyntaxError(_,_)) -> ()
+  | Some(APIError(_,_)), Some(APIError(_,_)) -> ()
   | Some(TypeError(_,_)), Some(TypeError(_,_)) -> ()
   | Some(DuplicateSymbolError(_,_)), Some(DuplicateSymbolError(_,_)) -> ()
   | Some(DeclarationError(_,_)), Some(DeclarationError(_,_)) -> ()
@@ -41,6 +42,8 @@ let () =
       "option_methods", `Quick, compile opt None "test/type/option_methods.yallo" None;
     ];
     "expression", [
+      "pack_unpack", `Quick, compile opt None "test/expr/pack_unpack.yallo" None;
+      "neg_fail", `Quick, compile opt (Some(APIError(None, ""))) "test/expr/neg_fail.yallo" None;
       "record", `Quick, compile opt None "test/expr/record.yallo" None;
       "literal", `Quick, compile opt None "test/expr/literal.yallo" None;
       "literal_untyped", `Quick, compile opt None "test/expr/literal_untyped.yallo" None;

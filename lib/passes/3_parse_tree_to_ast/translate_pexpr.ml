@@ -423,10 +423,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     
   | PEApply (PERef("unpack"), c) -> 
     if List.length c <> 2 then raise @@ APIError (pel, "unpack needs two arguments");
+    (* TODO: first argument should be a type, but we don't have a type expr yet *)
     let (tt1, ee1) = transform_expr (List.nth c 0) env' ic in 
     let (tt2, ee2) = transform_expr (List.nth c 1) env' ic in 
     if tt2 <> TBytes then  raise @@ TypeError (pel, "unpack needs a bytes expression, got: " ^ show_ttype tt2);
-    (* TODO: first argument should be a type, but we don't have a type expr yet *)
     TOption(tt1), Unpack(tt1, (tt2, ee2))
 
   | PEApply (PERef("abs"), c) -> 
@@ -551,7 +551,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     let (tt, ee) = transform_expr e env' ic in 
     if not @@ compare_type_lazy tt t' then raise @@ TypeError (pel, "LetIn type mismatch; " ^ show_ttype_got_expect tt t');
     let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
-    tt, LetIn (i, t', (tt, ee), (tt1, ee1))
+    tt1, LetIn (i, t', (tt, ee), (tt1, ee1))
 
   | PESeq(PELet(i, Some(t), e), en) -> 
     let t' = transform_type t env' in
@@ -563,7 +563,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
   | PELetIn(i, None, e, e1) -> 
     let (tt, ee) = transform_expr e env' ic in 
     let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(tt)) ic in 
-    tt, LetIn (i, tt, (tt, ee), (tt1, ee1))
+    tt1, LetIn (i, tt, (tt, ee), (tt1, ee1))
 
   | PELetTuple(tl, e) -> 
     let (tt, ee) = transform_expr e env' ic in 
