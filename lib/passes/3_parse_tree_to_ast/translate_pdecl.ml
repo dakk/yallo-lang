@@ -166,7 +166,7 @@ let rec transform (p: Parse_tree.t) (e: Ast_env.t): Ast_env.t =
 
     transform p' { e with 
       symbols=(dc.id, Contract)::e.symbols;
-      contracts=(dc.id, (flds, ctor, el))::e.contracts;
+      contracts=(dc.id, {fields=flds; constructor=ctor; entries=el})::e.contracts;
     }
 
   | _ :: p' -> transform p' e

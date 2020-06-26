@@ -7,10 +7,6 @@ module Ast_env = Env
 module Ast_expr = Expr
 module Ast_expr_traversal = Expr_traversal
 
-type t2 = 
-  | Const of { id: iden; expr: texpr }
-  | Contract of { id: iden; }
-  | Interface of { id: iden; }
 
 type t = {
   consts:      (iden * texpr) list;

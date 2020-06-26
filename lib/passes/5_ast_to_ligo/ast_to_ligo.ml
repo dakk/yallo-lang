@@ -230,7 +230,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 let generate_ligo_code (ast: t) (contract: string) = 
   if List.assoc_opt contract ast.contracts = None then 
     raise @@ CompilerError ("Unknown contract '" ^ contract ^ "'");
-  let (flds, ctor, entries) = List.assoc contract ast.contracts in
+  let ce = List.assoc contract ast.contracts in
 
   (* dump const *)
   let consts = (List.map (fun (i, (t,e)) -> 
@@ -239,11 +239,11 @@ let generate_ligo_code (ast: t) (contract: string) =
 
   (* generate the storage record *)
   let str = [
-    if List.length flds = 0 then 
+    if List.length ce.fields = 0 then 
       Str("type storage = unit\n\n")
     else 
       Str ("type storage = {\n" ^
-      merge_list flds ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ show_ttype t) ^
+      merge_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ show_ttype t) ^
       ";\n}");
     Empty; Empty
   ] in 
@@ -255,7 +255,7 @@ let generate_ligo_code (ast: t) (contract: string) =
       Str("| " ^ String.capitalize_ascii i ^ 
         if List.length il > 0 then " of " ^ merge_list il " * " (fun (ii, it) -> show_ttype it)
         else " of unit")
-      ) entries
+      ) ce.entries
     ); Empty; Empty
    ] in 
 
@@ -266,7 +266,7 @@ let generate_ligo_code (ast: t) (contract: string) =
       "s: " ^ merge_list2 il " * " (fun (ii, it) -> show_ttype it) ^
       "storage) = \n" ^ to_ligo_expr ast el ^ "\n\n"
     )
-  ) entries in
+  ) ce.entries in
 
   (* write the main *)
   let main = [
@@ -280,7 +280,7 @@ let generate_ligo_code (ast: t) (contract: string) =
             ^ ") = arg in " ^ i ^ "(" ^ merge_list2 il ", " (fun (ii, it) -> ii) ^ "s)"
           else 
             i ^ "(s)")
-      ) entries)
+      ) ce.entries)
     ])
   ] in
   Level (consts@str@act@entrs@main)
