@@ -16,7 +16,7 @@ let rec used_globalref_in_expr (t, e) =
 let rec used_globalref_in_contract ce = 
   SymbolSet.union
     (List.fold_left (fun acc (_, _, e) -> SymbolSet.union acc @@ used_globalref_in_expr e) SymbolSet.empty ce.entries)
-    (List.fold_left (fun acc (_, e) -> SymbolSet.union acc @@ used_globalref_in_expr e) SymbolSet.empty @@ snd ce.constructor)
+    (List.fold_left (fun acc (_, e) -> SymbolSet.union acc @@ used_globalref_in_expr e) SymbolSet.empty @@ ce.constructor.exprs)
 
 let remove_unused ctr (ast: Ast.t) = 
   let used = SymbolSet.union 

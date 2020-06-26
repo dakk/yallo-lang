@@ -111,18 +111,20 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
     ) in 
 
     (* handle constructor *)
-    let ctor = (match dc.constructor with | None -> [], []
+    let ctor: Ast.ctor = (match dc.constructor with | None -> { arg=[]; exprs=[] }
       | Some (ct) -> 
         let par' = List.map (fun (i, a) -> i, transform_type a e) ct.arg in
-        par',
-        List.map (fun (i, a) -> 
-          if not (List.mem i (fst @@ List.split flds)) then 
-            raise @@ SymbolNotFound (Pt_loc.dline p, "Field '" ^ i ^ "' not present in contract '" ^ dc.id ^ "'")
-          else
-            i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ct.exprs
+        { 
+          arg=par';
+          exprs= List.map (fun (i, a) -> 
+            if not (List.mem i (fst @@ List.split flds)) then 
+              raise @@ SymbolNotFound (Pt_loc.dline p, "Field '" ^ i ^ "' not present in contract '" ^ dc.id ^ "'")
+            else
+              i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ct.exprs
+        }
     ) in
-    if (snd ctor) <> [] then (
-      let (a, b) = fst @@ List.split @@ snd ctor, fst @@ List.split @@ flds in
+    if ctor.exprs <> [] then (
+      let (a, b) = fst @@ List.split @@ ctor.exprs, fst @@ List.split @@ flds in
       let left_empty = List.fold_left (fun acc (x,xx) ->  
         if List.mem x a then acc else x ^ " " ^ acc
       ) "" flds in 
