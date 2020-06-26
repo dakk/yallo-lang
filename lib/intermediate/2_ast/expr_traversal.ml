@@ -103,6 +103,7 @@ let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) =
   | LetTuple (_, a)
   | SAssign (_, a)
   | Not (a)
+  | ToInt (a)
   | SRecAssign (_, _, a) -> traverse' a
 
   | MapGetOpt (a, b)

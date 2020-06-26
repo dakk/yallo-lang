@@ -176,12 +176,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     let hm = transform_expr (List.nth c 0) env' ic in 
     let un = transform_expr (List.nth c 1) env' ic in 
     (match hm, un with 
-    | (TNat, v), (TString, String("seconds")) -> TNat, v
-    | (TNat, v), (TString, String("minutes")) -> TNat, Mul ((TNat, v), (TNat, Nat (60)))
-    | (TNat, v), (TString, String("hours")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60)))
-    | (TNat, v), (TString, String("days")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24)))
-    | (TNat, v), (TString, String("weeks")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 7)))
-    | (TNat, v), (TString, String("years")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 365)))
+    | (TNat, v), (TString, String("seconds")) -> TInt, v
+    | (TNat, v), (TString, String("minutes")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60))))
+    | (TNat, v), (TString, String("hours")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60))))
+    | (TNat, v), (TString, String("days")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24))))
+    | (TNat, v), (TString, String("weeks")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 7))))
+    | (TNat, v), (TString, String("years")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 365))))
     | _, _ -> raise @@ APIError (pel, "Timestamp.of needs a nat and an unit (a string between seconds, minutes, hours, days, weeks or years)"))
     
 
