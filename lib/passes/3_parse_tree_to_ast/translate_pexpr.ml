@@ -244,6 +244,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
 
       (* Interface to contract instance *)
       | TInterface(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta)
+      (* | TContractCode(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta) *)
 
       (* contract instance call *)
       | TContractInstance(TInterface(sl)), i, tl -> 
