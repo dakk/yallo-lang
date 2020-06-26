@@ -11,7 +11,8 @@ type ptype =
 
 type signature = {
   id: iden;
-  arg: (iden * ptype) list
+  arg: (iden * ptype) list;
+  ret: ptype option
 } [@@deriving show {with_path = false}]
 
 and pexpr =
@@ -90,9 +91,9 @@ and pexpr =
 (* contract field: iden * type * initial value *)
 type contract_field = iden * ptype [@@deriving show {with_path = false}]
 
-(* contract entry: iden * params * commands *)
 type contract_entry = {
   id: iden;
+  ret: ptype option;
   arg: (iden * ptype) list;
   pexpr: pexpr
 } [@@deriving show {with_path = false}]

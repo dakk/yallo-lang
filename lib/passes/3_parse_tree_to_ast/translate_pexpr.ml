@@ -1,6 +1,5 @@
 open Ast
 open Ast_ttype
-open Ast_env
 open Ast_expr
 open Helpers.Errors
 open Parsing

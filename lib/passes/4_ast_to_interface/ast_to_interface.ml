@@ -1,6 +1,5 @@
 open Ast
 open Ast_ttype
-open Ast_env
 open Helpers.Errors
 open Helpers.Gen_utils
 

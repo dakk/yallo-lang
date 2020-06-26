@@ -1,0 +1,28 @@
+interface IV {
+	view testView(): nat;
+	view testView2(): nat;
+}
+
+contract V implements IV {
+	view testView(): nat {
+		0n
+	}
+
+	entry testView2(cb: nat contract) {
+		[ cb(0n) ]
+	}
+}
+
+contract Z {
+	entry a() {
+		[ IV.of(@123).testView(this.handle) ]
+	}
+
+	entry b() {
+		[ IV.of(@123).testView(this.handle) ]
+	}
+
+	entry handle(zz: nat) {
+		[]
+	}
+}
