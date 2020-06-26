@@ -36,7 +36,7 @@ Yallo-lang compiler
 ```
 
 
-## OOlike abstraction example
+## An example
 
 We first define an interface describing the signature of a token contract, and another interface extending IToken with a getTotalSupply. (Views are entrypoint which receives as last argument 'a contract)
 

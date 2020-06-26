@@ -171,13 +171,27 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
   | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
 
+  | PEApply (PEDot (PERef("Timestamp"), "of"), c) ->
+    if List.length c <> 2 then raise @@ APIError (pel, "Timestamp.of needs two argument");
+    let hm = transform_expr (List.nth c 0) env' ic in 
+    let un = transform_expr (List.nth c 1) env' ic in 
+    (match hm, un with 
+    | (TNat, v), (TString, String("seconds")) -> TNat, v
+    | (TNat, v), (TString, String("minutes")) -> TNat, Mul ((TNat, v), (TNat, Nat (60)))
+    | (TNat, v), (TString, String("hours")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60)))
+    | (TNat, v), (TString, String("days")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24)))
+    | (TNat, v), (TString, String("weeks")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 7)))
+    | (TNat, v), (TString, String("years")) -> TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 365)))
+    | _, _ -> raise @@ APIError (pel, "Timestamp.of needs a nat and an unit (a string between seconds, minutes, hours, days, weeks or years)"))
+    
+
   | PEApply (PEDot (PERef("Bytes"), "pack"), c) -> 
-    if List.length c <> 1 then raise @@ APIError (pel, "pack needs only one argument");
+    if List.length c <> 1 then raise @@ APIError (pel, "Bytes.pack needs only one argument");
     let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
     (* TODO: check for pack attribute *)
     TBytes, BytesPack((tt1, ee1))
   | PEApply (PEDot (PERef("Bytes"), "unpack"), c) -> 
-    if List.length c <> 1 then raise @@ APIError (pel, "unpack needs only one arguments");
+    if List.length c <> 1 then raise @@ APIError (pel, "Bytes.unpack needs only one arguments");
     let (tt2, ee2) = transform_expr (List.hd c) env' ic in 
     if tt2 <> TBytes then  raise @@ TypeError (pel, "unpack needs a bytes expression, got: " ^ show_ttype tt2);
     TOption(TAny), BytesUnpack((tt2, ee2))
