@@ -173,16 +173,18 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
 
   | PEApply (PEDot (PERef("Timestamp"), "of"), c) ->
     if List.length c <> 2 then raise @@ APIError (pel, "Timestamp.of needs two argument");
-    let hm = transform_expr (List.nth c 0) env' ic in 
-    let un = transform_expr (List.nth c 1) env' ic in 
-    (match hm, un with 
-    | (TNat, v), (TString, String("seconds")) -> TInt, v
-    | (TNat, v), (TString, String("minutes")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60))))
-    | (TNat, v), (TString, String("hours")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60))))
-    | (TNat, v), (TString, String("days")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24))))
-    | (TNat, v), (TString, String("weeks")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 7))))
-    | (TNat, v), (TString, String("years")) -> TInt, ToInt (TNat, Mul ((TNat, v), (TNat, Nat (60 * 60 * 24 * 365))))
-    | _, _ -> raise @@ APIError (pel, "Timestamp.of needs a nat and an unit (a string between seconds, minutes, hours, days, weeks or years)"))
+    let (ht,hm) = transform_expr (List.nth c 0) env' ic in 
+    let un = (match transform_expr (List.nth c 1) env' ic with 
+    | (TString, String("seconds")) -> Nat 1
+    | (TString, String("minutes")) -> Nat (60)
+    | (TString, String("hours")) -> Nat (60 * 60)
+    | (TString, String("days")) -> Nat (60 * 60 * 24)
+    | (TString, String("weeks")) -> Nat (60 * 60 * 24 * 7)
+    | (TString, String("years")) -> Nat (60 * 60 * 24 * 365)
+    | (TString, String(a)) -> raise @@ APIError (pel, "Timestamp.of invalid unit: " ^ a))
+    in
+    if ht <> TNat then raise @@ APIError (pel, "Timestamp.of invalid amount" ^ show_ttype_got_expect TNat ht);
+    TInt, ToInt (TNat, Mul ((ht, hm), (TNat, un)))
     
 
   | PEApply (PEDot (PERef("Bytes"), "pack"), c) -> 
