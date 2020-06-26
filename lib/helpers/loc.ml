@@ -1,4 +1,4 @@
-type l = (string * int * int )
+type l = (Lexing.position * string * int * int )
 
 module type Emp_t = sig type t end
 

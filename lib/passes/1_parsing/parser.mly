@@ -1,6 +1,6 @@
 %{
 	open Parse_tree
-	open Loc 
+	open Pt_loc 
 
   (* (a,b,c) destructing *)
   let t3trd (a,b,c) = c

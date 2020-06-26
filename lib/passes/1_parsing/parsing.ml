@@ -3,7 +3,7 @@ open Lexer
 open Parse_tree
 open Helpers.Errors
 
-module Loc = Loc
+module Pt_loc = Pt_loc
 module I = Parser.MenhirInterpreter
 
 exception SyntaxErrorLoced of (int * int) option * string 
@@ -42,13 +42,13 @@ let rec parse_inc lexbuf (checkpoint : Parse_tree.t I.checkpoint) =
 let parse filename s = 
   let lexbuf = Lexing.from_string s in 
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  Loc.filename := filename;
+  Pt_loc.filename := filename;
 
   try parse_inc lexbuf (Parser.Incremental.program lexbuf.lex_curr_p)
   with SyntaxErrorLoced (pos, err) ->
     match pos with
-    | Some (line, pos) -> raise @@ SyntaxError (Some (filename, line, pos), err)
-    | None -> raise @@ SyntaxError (Some(filename, -1, 0), err)
+    | Some (line, pos) -> raise @@ SyntaxError (Some (lexbuf.lex_curr_p, filename, line, pos), err)
+    | None -> raise @@ SyntaxError (Some(lexbuf.lex_curr_p, filename, -1, 0), err)
 
 let parse_file filename = 
   let rec readfile ic = 

@@ -13,10 +13,11 @@ exception CompilerError of string
 let red s = Printf.sprintf "\x1b[31m%s\x1b[0m" s
 let yellow s = Printf.sprintf "\x1b[33m%s\x1b[0m" s
 
-let rec pp_message p cc m err = match p with 
-| Some (fn, l, c) -> Printf.sprintf "File %s, line %d, character %d: %s\n%s %s\n" 
+let pp_message p cc m err = match p with 
+| Some (_, fn, l, c) -> Printf.sprintf "File %s, line %d, character %d: %s\n%s %s\n" 
   fn l c cc (if err then red "Error:" else yellow "Warning:") m
-| None -> pp_message (Some ("?", -1, 0)) cc m err
+| None -> Printf.sprintf "File ?, line -1, character 0: %s\n%s %s\n" 
+  cc (if err then red "Error:" else yellow "Warning:") m
 
 
 let emit_warning p cc m = pp_message p cc m false |> print_endline

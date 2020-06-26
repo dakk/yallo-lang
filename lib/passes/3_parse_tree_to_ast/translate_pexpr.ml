@@ -5,7 +5,7 @@ open Ast_expr
 open Helpers.Errors
 open Parsing
 open Translate_ptype
-open Loc
+open Pt_loc
 
 let show_ttype_got_expect t1 t2 = "got: '" ^ show_ttype t1 ^ "' expect '" ^ show_ttype t2 ^ "'"
 let show_ttype_between_na t1 t2 = "between '" ^ show_ttype t1 ^ "' and '" ^ show_ttype t2 ^ "' is not allowed"
@@ -28,7 +28,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
   let transform_itype_list pel = List.map (fun (i, p) -> i, transform_type p env') pel in
   let push_ic i ii ic = (i, ii)::(List.remove_assoc i ic) in
   let push_local_many rl ic = List.fold_left (fun ic (i,x) -> (i, Local(x))::(List.remove_assoc i ic)) ic rl in
-  let pel = Loc.eline pe in
+  let pel = Pt_loc.eline pe in
   let fold_container_type debs l =
     List.fold_left (fun acc xt -> if acc <> xt then 
       raise @@ TypeError (pel, debs ^ " must have the same type: " ^ show_ttype acc ^ " <> " ^ show_ttype xt)
@@ -663,4 +663,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Ast_env.t) (ic: bindings) :
     | _ -> raise @@ InvalidExpression (pel, "Invalid assignment"))
 
   | ex -> raise @@ InvalidExpression (pel, "Expression not handled yet: " ^ Parse_tree.show_pexpr ex)
-  ) in r
+  ) in 
+match pel with 
+| Some(p, _, _, _) -> Ast_loc.loce p r
+| None -> r
