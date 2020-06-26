@@ -10,6 +10,11 @@ module Env = struct
   type entry = iden * (iden * ttype) list * texpr [@@deriving show {with_path = false}]
   type contract = ((iden * ttype) list * ctor * entry list) [@@deriving show {with_path = false}]
 
+  (* type contract2 = {
+    fields: (iden * ttype) list;
+    constructor: { arg: (iden * ttype) list; exprs: (iden * texpr) list }
+  } *)
+
   type t = {
     types:       (iden * ttype) list;
     consts:      (iden * texpr) list;

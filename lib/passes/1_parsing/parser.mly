@@ -56,7 +56,7 @@
   signature: 
 		// ml=list(MODIFIER)
     | ENTRY n=IDENT LPAR pl=separated_list(COMMA, parameter) RPAR 
-      { (n, pl) }
+      { { id=n; arg=pl } }
 
   type_sig:
     | t=ident                                       { Parse_tree.PTBuiltin (t) }
@@ -192,7 +192,7 @@
 
   dcontract_entry:
     | ENTRY x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE b=fun_body RBRACE
-      { (x, tl, b) }
+      { { id=x; arg=tl; expr=b } }
 
   dcontract_constructor_assign:
     | THIS DOT x=IDENT EQ v=expr SEMICOLON
@@ -200,7 +200,7 @@
 
   dcontract_constructor:
     | CONSTRUCTOR LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE el=list(dcontract_constructor_assign) RBRACE
-      { tl, el }
+      { { arg=tl; exprs=el } }
 
   dcontract_body:
     | fl=list(terminated(dcontract_field, SEMICOLON)) c=dcontract_constructor el=list(dcontract_entry)
