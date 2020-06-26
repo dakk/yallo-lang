@@ -76,10 +76,8 @@ contract Token implements IToken {
 		[]
 	}
 
-	entry getBalance(ad: address, cb: nat contract) {
-		let balance: nat = this.balances.get(ad, 0n);
-		let op: operation = cb(balance);
-		[op]
+	view getBalance(ad: address): nat {
+		this.balances.get(ad, 0n)
 	}
 }
 ```
