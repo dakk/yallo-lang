@@ -8,7 +8,7 @@ let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
 let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)
 
 let generate_interface (ast: Ast.t) (contract: string) = 
-  let interface_of_contract ce = List.map (fun (a, b, c) -> (a, b)) ce.entries in
+  let interface_of_contract ce = List.map (fun e -> (e.id, e.arg)) ce.entries in
   let extract ci = Level ([
     Str ("interface " ^ contract ^ " {");
     Level (List.map (fun (i, tl) -> 

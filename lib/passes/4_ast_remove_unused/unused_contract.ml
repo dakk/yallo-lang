@@ -14,7 +14,7 @@ let rec used_contract_in_expr (t, e) =
   ) SymbolSet.union SymbolSet.empty
   
 let rec used_contract_in_contract ce = 
-  (List.fold_left (fun acc (_, _, e) -> SymbolSet.union acc @@ used_contract_in_expr e) SymbolSet.empty ce.entries)
+  (List.fold_left (fun acc e -> SymbolSet.union acc @@ used_contract_in_expr e.expr) SymbolSet.empty ce.entries)
 
 let remove_unused (ctr: string option) (ast: Ast.t) = 
   let ctr = match ctr with 

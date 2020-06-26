@@ -94,13 +94,13 @@ type contract_field = iden * ptype [@@deriving show {with_path = false}]
 type contract_entry = {
   id: iden;
   arg: (iden * ptype) list;
-  expr: pexpr
+  pexpr: pexpr
 } [@@deriving show {with_path = false}]
 
 
 type contract_constructor = {
   arg: (iden * ptype) list;
-  exprs: (iden * pexpr) list
+  pexprs: (iden * pexpr) list
 } [@@deriving show {with_path = false}]
 
 (* a declaration could be a type alias, a modifier, an interface or a contract *)

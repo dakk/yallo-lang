@@ -120,7 +120,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
             if not (List.mem i (fst @@ List.split flds)) then 
               raise @@ SymbolNotFound (Pt_loc.dline p, "Field '" ^ i ^ "' not present in contract '" ^ dc.id ^ "'")
             else
-              i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ct.exprs
+              i, transform_expr a e @@ List.map (fun (i,t) -> i, Local(t)) par') ct.pexprs
         }
     ) in
     if ctor.exprs <> [] then (
@@ -143,7 +143,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       let flds_bind = List.map (fun (i,t) -> i, Storage(t)) flds in
       let p_bind = List.map (fun (i,t) -> i, Local(t)) par' in
       let entry_bind = List.map (fun (i,t) -> i, StorageEntry(t)) elsig in
-      let tt, ee = transform_expr en.expr e (p_bind @ flds_bind @ entry_bind) in 
+      let tt, ee = transform_expr en.pexpr e (p_bind @ flds_bind @ entry_bind) in 
       if tt<>TList(TOperation) && tt<>TList(TAny) then 
         raise @@ DeclarationError(Pt_loc.dline p, "Entry '" ^ en.id ^ "' of contract '" ^ dc.id ^ "' does not evalute to an operation list; got: '" ^ show_ttype tt ^ "'");
       (en.id, (par', (tt, ee)))
@@ -164,7 +164,7 @@ let rec transform (p: Parse_tree.t) (e: Env.t): Env.t =
       ()
     ) to_implement;
 
-    let el = List.map (fun (x, (a,b)) -> x,a,b) el in
+    let el = List.map (fun (x, (a, b)) -> { id=x; arg=a; expr=b }) el in
 
     transform p' { e with 
       symbols=(dc.id, Contract)::e.symbols;

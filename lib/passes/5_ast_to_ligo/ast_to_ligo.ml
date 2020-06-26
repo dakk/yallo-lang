@@ -251,20 +251,20 @@ let generate_ligo_code (ast: t) (contract: string) =
   (* generate the action variant *)
   let act = [ 
     Str("type action = "); 
-    Level(List.map (fun (i, il, el) -> 
-      Str("| " ^ String.capitalize_ascii i ^ 
-        if List.length il > 0 then " of " ^ merge_list il " * " (fun (ii, it) -> show_ttype it)
+    Level(List.map (fun e -> 
+      Str("| " ^ String.capitalize_ascii e.id ^ 
+        if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> show_ttype it)
         else " of unit")
       ) ce.entries
     ); Empty; Empty
    ] in 
 
   (* write entries *)
-  let entrs = List.map (fun (i, il, el) -> 
-    Str("let " ^ i ^ " (" ^
-      list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") il) ^
-      "s: " ^ merge_list2 il " * " (fun (ii, it) -> show_ttype it) ^
-      "storage) = \n" ^ to_ligo_expr ast el ^ "\n\n"
+  let entrs = List.map (fun e -> 
+    Str("let " ^ e.id ^ " (" ^
+      list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
+      "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> show_ttype it) ^
+      "storage) = \n" ^ to_ligo_expr ast e.expr ^ "\n\n"
     )
   ) ce.entries in
 
@@ -273,13 +273,13 @@ let generate_ligo_code (ast: t) (contract: string) =
     Str ("let main(a, s: action * storage): (operation list * storage) = ");
     Level([
       Str ("match a with");
-      Level (List.map (fun (i, il, el) -> 
-          Str ("| " ^ String.capitalize_ascii i ^ " (arg) -> " ^ 
-          if List.length il > 0 then 
-            "let (" ^ merge_list il ", " (fun (ii, it) -> ii)
-            ^ ") = arg in " ^ i ^ "(" ^ merge_list2 il ", " (fun (ii, it) -> ii) ^ "s)"
+      Level (List.map (fun e -> 
+          Str ("| " ^ String.capitalize_ascii e.id ^ " (arg) -> " ^ 
+          if List.length e.arg > 0 then 
+            "let (" ^ merge_list e.arg ", " (fun (ii, it) -> ii)
+            ^ ") = arg in " ^ e.id ^ "(" ^ merge_list2 e.arg ", " (fun (ii, it) -> ii) ^ "s)"
           else 
-            i ^ "(s)")
+            e.id ^ "(s)")
       ) ce.entries)
     ])
   ] in

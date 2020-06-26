@@ -17,7 +17,7 @@ let rec used_field_in_expr (t, e) =
   ) SymbolSet.union SymbolSet.empty
   
 let rec used_field_in_contract cname ce = 
-  let l = (List.fold_left (fun acc (_, _, e) -> SymbolSet.union acc @@ used_field_in_expr e) SymbolSet.empty ce.entries) in 
+  let l = (List.fold_left (fun acc e -> SymbolSet.union acc @@ used_field_in_expr e.expr) SymbolSet.empty ce.entries) in 
   let fl' = List.filter (fun (i, f) -> 
     if SymbolSet.mem i l then true else (
       Errors.emit_warning None "Unused field" @@ "The field '" ^ i ^ "' of contract '" ^ cname ^ "' is defined but never used, dropping from ast";

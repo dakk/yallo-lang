@@ -192,7 +192,7 @@
 
   dcontract_entry:
     | ENTRY x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE b=fun_body RBRACE
-      { { id=x; arg=tl; expr=b } }
+      { { id=x; arg=tl; pexpr=b } }
 
   dcontract_constructor_assign:
     | THIS DOT x=IDENT EQ v=expr SEMICOLON
@@ -200,7 +200,7 @@
 
   dcontract_constructor:
     | CONSTRUCTOR LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE el=list(dcontract_constructor_assign) RBRACE
-      { { arg=tl; exprs=el } }
+      { { arg=tl; pexprs=el } }
 
   dcontract_body:
     | fl=list(terminated(dcontract_field, SEMICOLON)) c=dcontract_constructor el=list(dcontract_entry)
