@@ -1,6 +1,7 @@
 open Ast
 open Ast_expr
 open Ast_expr_traversal
+open Ast_env
 open Helpers
 
 (* remove unused consts *)
@@ -12,12 +13,12 @@ let rec used_globalref_in_expr (t, e) =
     match e with | GlobalRef (i) -> SymbolSet.singleton i
   ) SymbolSet.union SymbolSet.empty
   
-let rec used_globalref_in_contract (_, (ct1, ct2), elist) = 
+let rec used_globalref_in_contract ce = 
   SymbolSet.union
-    (List.fold_left (fun acc (_, _, e) -> SymbolSet.union acc @@ used_globalref_in_expr e) SymbolSet.empty elist)
-    (List.fold_left (fun acc (_, e) -> SymbolSet.union acc @@ used_globalref_in_expr e) SymbolSet.empty ct2)
+    (List.fold_left (fun acc e -> SymbolSet.union acc @@ used_globalref_in_expr e.expr) SymbolSet.empty ce.entries)
+    (List.fold_left (fun acc (_, e) -> SymbolSet.union acc @@ used_globalref_in_expr e) SymbolSet.empty @@ ce.constructor.exprs)
 
-let remove_unused ctr ast = 
+let remove_unused ctr (ast: Ast.t) = 
   let used = SymbolSet.union 
     (List.fold_left (fun acc (i,ce) -> SymbolSet.union acc (used_globalref_in_expr ce)) SymbolSet.empty ast.consts)
     (List.fold_left (fun acc (i, ce) -> SymbolSet.union acc (used_globalref_in_contract ce)) SymbolSet.empty ast.contracts) 

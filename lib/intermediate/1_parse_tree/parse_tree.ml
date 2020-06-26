@@ -9,9 +9,10 @@ type ptype =
   | PTLambda of ptype * ptype
   [@@deriving show {with_path = false}]
 
-(* identifier * (iden * type) list of parameters *)
-type signature = iden * (iden * ptype) list [@@deriving show {with_path = false}]
-
+type signature = {
+  id: iden;
+  arg: (iden * ptype) list
+} [@@deriving show {with_path = false}]
 
 and pexpr =
   | PEUnit
@@ -90,9 +91,17 @@ and pexpr =
 type contract_field = iden * ptype [@@deriving show {with_path = false}]
 
 (* contract entry: iden * params * commands *)
-type contract_entry = iden * (iden * ptype) list * pexpr [@@deriving show {with_path = false}]
+type contract_entry = {
+  id: iden;
+  arg: (iden * ptype) list;
+  pexpr: pexpr
+} [@@deriving show {with_path = false}]
 
-type contract_constructor = (iden * ptype) list * (iden * pexpr) list [@@deriving show {with_path = false}]
+
+type contract_constructor = {
+  arg: (iden * ptype) list;
+  pexprs: (iden * pexpr) list
+} [@@deriving show {with_path = false}]
 
 (* a declaration could be a type alias, a modifier, an interface or a contract *)
 type declaration = 
