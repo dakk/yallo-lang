@@ -1,17 +1,12 @@
 %{
 	open Parse_tree
 	open Pt_loc 
-
-  (* (a,b,c) destructing *)
-  let t3trd (a,b,c) = c
-  let t3fst (a,b,c) = a
-  let t3snd (a,b,c) = b
 %}
 
 %token EOF
 // QUOTE SIZE HT ASTERISK AT GET HAS QUESTION ASSERT
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, LSQUARE, RSQUARE
-%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, FUNCTION, FIELD
+%token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, FUNCTION, FIELD, VIEW
 %token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
 %token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, WITH, MATCH
 %token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT, LET, IN
@@ -56,7 +51,9 @@
   signature: 
 		// ml=list(MODIFIER)
     | ENTRY n=IDENT LPAR pl=separated_list(COMMA, parameter) RPAR 
-      { { id=n; arg=pl } }
+      { { id=n; arg=pl; ret=None } }
+    | VIEW n=IDENT LPAR pl=separated_list(COMMA, parameter) RPAR COLON t=type_sig
+      { { id=n; arg=pl; ret=Some(t) } }
 
   type_sig:
     | t=ident                                       { Parse_tree.PTBuiltin (t) }
@@ -192,7 +189,9 @@
 
   dcontract_entry:
     | ENTRY x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR LBRACE b=fun_body RBRACE
-      { { id=x; arg=tl; pexpr=b } }
+      { { id=x; arg=tl; pexpr=b; ret=None } }
+    | VIEW x=IDENT LPAR tl=separated_list(COMMA, parameter) RPAR COLON t=type_sig LBRACE b=fun_body RBRACE
+      { { id=x; arg=tl; pexpr=b; ret=Some(t) } }
 
   dcontract_constructor_assign:
     | THIS DOT x=IDENT EQ v=expr SEMICOLON
@@ -209,10 +208,20 @@
       { (fl, el, None) }
 
   dcontract:
-    | CONTRACT x=IDENT IMPLEMENTS i=IDENT LBRACE b=dcontract_body RBRACE
-      { Parse_tree.DContract ({ id=x; implements=Some(i); fields=t3fst b; entries=t3snd b; constructor=t3trd b }) }
-    | CONTRACT x=IDENT LBRACE b=dcontract_body RBRACE
-      { Parse_tree.DContract ({ id=x; implements=None; fields=t3fst b; entries=t3snd b; constructor=t3trd b }) }
+    | CONTRACT x=IDENT IMPLEMENTS i=IDENT LBRACE bb=dcontract_body RBRACE
+      { 
+				let (a,b,c) = bb in 
+				Parse_tree.DContract (				
+					{ id=x; implements=Some(i); fields=a; entries=b; constructor=c }
+				) 
+			}
+    | CONTRACT x=IDENT LBRACE bb=dcontract_body RBRACE
+      { 
+				let (a,b,c) = bb in 
+				Parse_tree.DContract (
+					{ id=x; implements=None; fields=a; entries=b; constructor=c }
+				) 
+			}
 
   dtype:
     | TYPE x=IDENT EQ tl=type_sig SEMICOLON

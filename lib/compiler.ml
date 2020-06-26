@@ -53,9 +53,16 @@ let build_ast (filename: string) opt =
   (* TODO: handle pragma rules *)
 
   (* parse and inject imports *)
-  if opt.verbose then printf "===> Injecting imports\n\n%!";
   pt
+  |> app opt.verbose @@ print_str "===> Injecting imports";
   |> Passes.Parse_tree_postprocess.inject_import
+
+  (* print pt *)
+  |> app opt.print_pt print_pt
+  
+  (* translate view to entry *)
+  |> app opt.verbose @@ print_str "===> Transforming views to entries"
+  |> Passes.Parse_tree_postprocess.contract_view_to_entry
 
   (* print pt *)
   |> app opt.print_pt print_pt

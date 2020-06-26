@@ -73,6 +73,7 @@ let () =
     ];
     "interface", [
       "i1", `Quick, compile opt None "test/interface/i1.yallo" None;
+      "view", `Quick, compile opt None "test/interface/view.yallo" None;
       "extend", `Quick, compile opt None "test/interface/extend.yallo" None;
       "empty", `Quick, compile opt None "test/interface/empty.yallo" None;
       "duplicate_fail", `Quick, compile opt (Some(DuplicateSymbolError(None, ""))) "test/interface/duplicate_fail.yallo" None;
@@ -83,10 +84,12 @@ let () =
       "base_fun", `Quick, compile opt None "test/function/base_fun.yallo" None;
     ];
     "contract", [
+      "view", `Quick, compile opt None "test/contract/view.yallo" None;
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
       "king_of_tezos", `Quick, compile opt None "test/contract/king_of_tezos.yallo" None;
       "loan", `Quick, compile optc None "test/contract/loan.yallo" None;
       "token", `Quick, compile optc None "test/contract/token.yallo" None;
+      "token_with_view", `Quick, compile optc None "test/contract/token_with_view.yallo" None;
       "token_create", `Quick, compile optc None "test/contract/token_create.yallo" None;
       "token_using", `Quick, compile optc None "test/contract/token_using.yallo" None;
       "crec", `Quick, compile optc None "test/contract/crec.yallo" None;

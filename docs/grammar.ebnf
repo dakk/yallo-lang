@@ -8,6 +8,8 @@
 <ident> ::= IDENT
 
 <signature> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
+              | VIEW IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR COLON
+                <type_sig>
 
 <type_sig> ::= <ident>
              | LPAR <type_sig> COMMA <type_sig> (COMMA <type_sig>)* RPAR
@@ -107,6 +109,8 @@
 
 <dcontract_entry> ::= ENTRY IDENT LPAR [<parameter> (COMMA <parameter>)*]
                       RPAR LBRACE <fun_body> RBRACE
+                    | VIEW IDENT LPAR [<parameter> (COMMA <parameter>)*] RPAR
+                      COLON <type_sig> LBRACE <fun_body> RBRACE
 
 <dcontract_constructor_assign> ::= THIS DOT IDENT EQ <expr> SEMICOLON
 

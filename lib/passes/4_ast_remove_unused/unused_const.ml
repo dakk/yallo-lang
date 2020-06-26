@@ -1,7 +1,6 @@
 open Ast
 open Ast_expr
 open Ast_expr_traversal
-open Ast_env
 open Helpers
 
 (* remove unused consts *)

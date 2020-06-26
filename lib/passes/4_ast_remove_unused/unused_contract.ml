@@ -1,6 +1,5 @@
 open Ast
 open Ast_expr
-open Ast_env
 open Ast_expr_traversal
 open Helpers
 

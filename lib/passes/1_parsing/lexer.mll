@@ -79,6 +79,7 @@ rule token = parse
   | "interface"     { INTERFACE }
   | "contract"      { CONTRACT }
   | "entry"         { ENTRY }
+	| "view"					{ VIEW }
   | "extends"       { EXTENDS }
   | "implements"    { IMPLEMENTS }
   | "import"        { IMPORT }

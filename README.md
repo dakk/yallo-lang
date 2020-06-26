@@ -44,11 +44,11 @@ IToken with a getTotalSupply.
 ```java
 interface IToken {
 	entry transfer(from: address, to: address, val: nat);
-	entry getBalance(ad: address, cb: nat contract);
+	view getBalance(ad: address): nat;
 }
 
 interface ITokenWithGetTotalSupply extends IToken {
-	entry getTotalSupply (cb: nat contract);
+	view getTotalSupply (): nat;
 }
 ```
 
