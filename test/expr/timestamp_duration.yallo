@@ -1,0 +1,15 @@
+const a: int = Timestamp.duration (45, "seconds");
+const b: int = Timestamp.duration (45, "minutes");
+const c: int = Timestamp.duration (45, "hours");
+const d: int = Timestamp.duration (45, "days");
+const e: int = Timestamp.duration (45, "weeks");
+const f: int = Timestamp.duration (45, "years");
+
+contract T {
+	field aTime: timestamp;
+
+	entry bb (parg: int) {
+		this.aTime = Tezos.now () + Timestamp.duration (parg, "hours");
+		[]
+	}
+}

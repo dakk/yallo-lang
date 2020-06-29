@@ -175,16 +175,16 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     if List.length c <> 2 then raise @@ APIError (pel, "Timestamp.duration needs two argument");
     let (ht,hm) = transform_expr (List.nth c 0) env' ic in 
     let un = (match transform_expr (List.nth c 1) env' ic with 
-    | (TString, String("seconds")) -> Nat 1
-    | (TString, String("minutes")) -> Nat (60)
-    | (TString, String("hours")) -> Nat (60 * 60)
-    | (TString, String("days")) -> Nat (60 * 60 * 24)
-    | (TString, String("weeks")) -> Nat (60 * 60 * 24 * 7)
-    | (TString, String("years")) -> Nat (60 * 60 * 24 * 365)
+    | (TString, String("seconds")) -> Int (1)
+    | (TString, String("minutes")) -> Int (60)
+    | (TString, String("hours")) -> Int (60 * 60)
+    | (TString, String("days")) -> Int (60 * 60 * 24)
+    | (TString, String("weeks")) -> Int (60 * 60 * 24 * 7)
+    | (TString, String("years")) -> Int (60 * 60 * 24 * 365)
     | (TString, String(a)) -> raise @@ APIError (pel, "Timestamp.duration invalid unit: " ^ a))
     in
-    if ht <> TNat then raise @@ APIError (pel, "Timestamp.duration invalid amount" ^ show_ttype_got_expect TNat ht);
-    TInt, ToInt (TNat, Mul ((ht, hm), (TNat, un)))
+    if ht <> TInt then raise @@ APIError (pel, "Timestamp.duration invalid amount " ^ show_ttype_got_expect TInt ht);
+    TInt, Mul ((ht, hm), (TInt, un))
     
 
   | PEApply (PEDot (PERef("Bytes"), "pack"), c) -> 
