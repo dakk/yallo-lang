@@ -1,15 +1,15 @@
-const a: int = Timestamp.of (45n, "seconds");
-const b: int = Timestamp.of (45n, "minutes");
-const c: int = Timestamp.of (45n, "hours");
-const d: int = Timestamp.of (45n, "days");
-const e: int = Timestamp.of (45n, "weeks");
-const f: int = Timestamp.of (45n, "years");
+const a: int = Timestamp.duration (45n, "seconds");
+const b: int = Timestamp.duration (45n, "minutes");
+const c: int = Timestamp.duration (45n, "hours");
+const d: int = Timestamp.duration (45n, "days");
+const e: int = Timestamp.duration (45n, "weeks");
+const f: int = Timestamp.duration (45n, "years");
 
 // contract T {
 // 	field aTime: timestamp;
 
 // 	entry bb (parg: nat) {
-// 		this.aTime = Tezos.now () + Timestamp.of (parg, "hours");
+// 		this.aTime = Tezos.now () + Timestamp.duration (parg, "hours");
 // 		[]
 // 	}
 // }

@@ -171,8 +171,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
   | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
 
-  | PEApply (PEDot (PERef("Timestamp"), "of"), c) ->
-    if List.length c <> 2 then raise @@ APIError (pel, "Timestamp.of needs two argument");
+  | PEApply (PEDot (PERef("Timestamp"), "duration"), c) ->
+    if List.length c <> 2 then raise @@ APIError (pel, "Timestamp.duration needs two argument");
     let (ht,hm) = transform_expr (List.nth c 0) env' ic in 
     let un = (match transform_expr (List.nth c 1) env' ic with 
     | (TString, String("seconds")) -> Nat 1
@@ -181,9 +181,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     | (TString, String("days")) -> Nat (60 * 60 * 24)
     | (TString, String("weeks")) -> Nat (60 * 60 * 24 * 7)
     | (TString, String("years")) -> Nat (60 * 60 * 24 * 365)
-    | (TString, String(a)) -> raise @@ APIError (pel, "Timestamp.of invalid unit: " ^ a))
+    | (TString, String(a)) -> raise @@ APIError (pel, "Timestamp.duration invalid unit: " ^ a))
     in
-    if ht <> TNat then raise @@ APIError (pel, "Timestamp.of invalid amount" ^ show_ttype_got_expect TNat ht);
+    if ht <> TNat then raise @@ APIError (pel, "Timestamp.duration invalid amount" ^ show_ttype_got_expect TNat ht);
     TInt, ToInt (TNat, Mul ((ht, hm), (TNat, un)))
     
 
