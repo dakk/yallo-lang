@@ -29,7 +29,7 @@ type ttype =
   | TContract of ttype 
 
   (* custom abstract types *)
-  | TContractCode
+  | TContractCode of (iden * ttype list) list
   | TContractStorage
   | TInterface of (iden * ttype list) list
   | TContractInstance of ttype
@@ -87,7 +87,7 @@ let attributes (t: ttype) = match t with
 
   (* internal types *)
   | TAny ->           { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
-  | TContractCode ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TContractCode (_) ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TContractStorage ->  
                       { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TInterface (_) ->     
@@ -123,7 +123,7 @@ let rec show_ttype (at: ttype) = match at with
 | TTuple (tl) -> "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ show_ttype x) "" tl ^ ")"
 | TContract (t) -> show_ttype t ^ " contract"
 
-| TContractCode -> "code"
+| TContractCode (_) -> "code"
 | TContractStorage -> "storage"
 | TInterface (_) -> "interface"
 | TContractInstance (_) -> "instance"

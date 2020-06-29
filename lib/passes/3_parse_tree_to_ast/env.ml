@@ -66,7 +66,10 @@ let get_ref sn (e: t) =
   match List.assoc_opt sn e.symbols with 
   | None -> raise @@ SymbolNotFound(None, "Unknown reference to symbol '" ^ sn ^ "'")
   | Some (Const) -> let (tt, _) = List.assoc sn e.consts in tt     
-  | Some (Contract) -> TContractCode  
+  | Some (Contract) -> 
+    let esl = List.assoc sn e.contracts in 
+    let esl' = List.map (fun e -> e.id, List.map (fun (_, pt) -> pt) e.arg) esl.entries in     
+    TContractCode (esl')
   | Some (Interface) -> 
     let esl = List.assoc sn e.ifaces in 
     let esl' = List.map (fun (i, pl) -> i, List.map (fun (_, pt) -> pt) pl) esl in 

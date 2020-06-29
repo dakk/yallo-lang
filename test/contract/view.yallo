@@ -18,9 +18,9 @@ contract Z {
 		[ IV.of(@123).testView(this.handle) ]
 	}
 
-	// entry c() {
-	// 	[ V.of(@123).testView(this.handle) ]
-	// }
+	entry c() {
+		[ V.of(@123).testView(this.handle) ]
+	}
 
 	entry b() {
 		[ IV.of(@123).testView(this.handle) ]

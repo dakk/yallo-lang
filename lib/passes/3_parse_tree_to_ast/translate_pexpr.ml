@@ -141,10 +141,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         )
       | "transfer", [(TContract(ct), c); (ct', cv); (TMutez, am)] when ct'=ct -> 
         TOperation, TezosTransfer ((TContract(ct), c), (ct', cv), (TMutez, am))
-      | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TKeyHash), kho); (TMutez, v)] -> 
+      | "createContract", [(TTuple([TContractCode(_); TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TKeyHash), kho); (TMutez, v)] -> 
         TTuple([TOperation; TAddress]), 
         TezosCreateContract((TAny, BuildContractCodeAndStorage(a, b)), (TOption (TKeyHash), kho), (TMutez, v))
-      | "createContract", [(TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TAny), None); (TMutez, v)] -> 
+      | "createContract", [(TTuple([TContractCode(_); TContractStorage]), BuildContractCodeAndStorage(a,b)); (TOption (TAny), None); (TMutez, v)] -> 
         TTuple([TOperation; TAddress]), 
         TezosCreateContract((TAny, BuildContractCodeAndStorage(a, b)), (TOption (TKeyHash), None), (TMutez, v))
       | _, _ -> 
@@ -260,7 +260,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
 
       (* Interface to contract instance *)
       | TInterface(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta)
-      (* | TContractCode(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta) *)
+      | TContractCode(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta)
 
       (* contract instance call *)
       | TContractInstance(TInterface(sl)), i, tl -> 
@@ -555,10 +555,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       TOperation, TezosTransfer((tt, ee), (ptt, pee), (TMutez, Mutez (0)))
 
     (* Apply on contract name, it is a buildcontractcodeandstorage, which is the argument of create_contract *)
-    | TContractCode -> 
+    | TContractCode (tl) -> 
       (* TODO: check constructor parameters *)
       let cc = (match ee with | GlobalRef (c) -> c | _ -> raise @@ InvalidExpression (pel, "Expected a globalref")) in
-      TTuple([TContractCode; TContractStorage]), BuildContractCodeAndStorage (cc, el |> transform_expr_list)
+      TTuple([TContractCode (tl); TContractStorage]), BuildContractCodeAndStorage (cc, el |> transform_expr_list)
       
     | _ -> raise @@ TypeError (pel, "Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el))))
   )
