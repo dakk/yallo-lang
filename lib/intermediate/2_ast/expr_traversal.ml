@@ -118,6 +118,8 @@ let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) =
   | ListMapWith (a, b)
   | StringConcat (a, b) 
   | BytesConcat (a, b)
+  | ListFilter (a, b)
+  | MapFilter (a, b)
   | Add (a, b)
   | Sub (a, b)
   | Mul (a, b)

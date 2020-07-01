@@ -13,11 +13,17 @@ contract AMap {
 
 	entry double() {
 		this.zf = this.zf.mapWith(l);
+		this.zf = this.zf.mapWith(l);
 		this.zf = this.zf.prepend(int (this.zf.size()));
 		[]
 	}
 
 	view foldList(): int {
 		this.zf.fold ((acc: int, e: int) => (acc+e), 0)
+	}
+
+	entry filterList() {
+		this.zf = this.zf.filter ((a: int) => (a < 12));
+		[]
 	}
 }

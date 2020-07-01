@@ -221,11 +221,19 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       | _, TList (l), "head", [] -> l, ListHead (te, ee)
       | _, TList (l), "tail", [] -> TList (l), ListTail (te, ee)
       | _, TList (l), "prepend", [(ll, e)] when ll = l -> TList (l), ListPrepend ((te, ee), (ll, e))
-      | _, TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame))
       | _, TList (l), "fold", [(TLambda (TTuple([ll; rt']), rt), lame); (ft, ff)] when l=ll && rt=rt' && rt=ft -> 
         ft, ListFold((te, ee), (TLambda (TTuple([ll; rt']), rt), lame), (ft, ff))
-      | _, TList (l), "filter", [(TLambda (TTuple([ll; rt']), TBool), lame)] when l=ll && l=rt'-> 
-        TList (l), ListFilter((te, ee), (TLambda (TTuple([ll; rt']), TBool), lame))
+
+
+      (* | StorageRef(sr), TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> 
+        TUnit, SAssign(sr, (TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame)))) *)
+      | _, TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> 
+        TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame))
+
+      (* | StorageRef(sr), TList (l), "filter", [(TLambda (ll, TBool), lame)] when l=ll -> 
+        TUnit, SAssign(sr, (TList(l), ListFilter((te, ee), (TLambda (ll, TBool), lame)))) *)
+      | _, TList (l), "filter", [(TLambda (ll, TBool), lame)] when l=ll -> 
+        TList (l), ListFilter((te, ee), (TLambda (ll, TBool), lame))
 
       (* Map *)
       | _, TMap (_, _), "size", [] -> TNat, MapSize (te, ee)

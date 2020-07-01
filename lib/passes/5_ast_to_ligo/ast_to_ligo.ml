@@ -192,6 +192,8 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   "List.size (" ^ to_ligo_expr ast le ^ ")"
 | ListFold (le, ll, initial) -> 
   "List.fold (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ") (" ^ to_ligo_expr ast initial ^ ")"
+| ListFilter (le, ll) ->
+  "List.fold (fun acc e -> if (" ^ to_ligo_expr ast ll ^ ") then e::acc else acc) (" ^ to_ligo_expr ast le ^ ") []"
 (*
 | ListHead of expr
 | ListTail of expr
