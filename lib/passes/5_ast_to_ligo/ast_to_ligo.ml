@@ -239,6 +239,8 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | LetIn (id, tt, e, e2) -> 
   "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in" ^ to_ligo_expr ast e2
 | SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in"
+| LetTuple (il, e) -> "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ to_ligo_expr ast e ^ " in"
+
 (*
 | LetTuple of (iden * ttype) list * expr 
 | LetTupleIn of (iden * ttype) list * expr * expr

@@ -538,7 +538,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         raise @@ InvalidExpression (pel, "Invalid argument number for lambda apply");
       if not @@ Ast_ttype.compare_list argl (fst @@ List.split ap) then 
         raise @@ TypeError (pel, "Invalid argument types apply");
-      if List.length argl = 1 then 
+      if List.length argl = 1 && List.hd argl = TUnit then 
+        rettype, Apply ((tt,ee), (TUnit, Unit))
+      else if List.length argl > 1 then 
         rettype, Apply((tt, ee), (TTuple(argl), Tuple(ap)))
       else 
         rettype, Apply((tt, ee), List.hd ap)
