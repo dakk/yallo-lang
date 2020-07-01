@@ -10,6 +10,7 @@ let show_ttype_got_expect t1 t2 = "got: '" ^ show_ttype t1 ^ "' expect '" ^ show
 let show_ttype_between_na t1 t2 = "between '" ^ show_ttype t1 ^ "' and '" ^ show_ttype t2 ^ "' is not allowed"
 let show_ttype_not_cmp t1 t2 = "Types '" ^ show_ttype t1 ^ "' and '" ^ show_ttype t2 ^ "' are not comparable"
 
+
 type iref = 
 | Storage of ttype
 | StorageEntry of ttype list
@@ -28,6 +29,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   let push_ic i ii ic = (i, ii)::(List.remove_assoc i ic) in
   let push_local_many rl ic = List.fold_left (fun ic (i,x) -> (i, Local(x))::(List.remove_assoc i ic)) ic rl in
   let pel = Pt_loc.eline pe in
+  let assert_comparable tt1 tt2 = 
+    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
+    (match (attributes tt1).cmp, (attributes tt2).cmp with 
+    | true, true -> ()
+    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
+  in
   let fold_container_type debs l =
     List.fold_left (fun acc xt -> if acc <> xt then 
       raise @@ TypeError (pel, debs ^ " must have the same type: " ^ show_ttype acc ^ " <> " ^ show_ttype xt)
@@ -422,50 +429,39 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEGt (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
-    (match (attributes tt1).cmp, (attributes tt2).cmp with 
-    | true, true -> TBool, Gt((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
+    assert_comparable tt1 tt2;
+    TBool, Gt((tt1, ee1), (tt2, ee2))
 
   | PEGte (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
-    (match (attributes tt1).cmp, (attributes tt2).cmp with 
-    | true, true -> TBool, Gte((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
+    assert_comparable tt1 tt2;
+    TBool, Gte((tt1, ee1), (tt2, ee2))
     
   | PELt (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
-    (match (attributes tt1).cmp, (attributes tt2).cmp with 
-    | true, true -> TBool, Lt((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
+    assert_comparable tt1 tt2;
+    TBool, Lt((tt1, ee1), (tt2, ee2))
 
   | PELte (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
-    (match (attributes tt1).cmp, (attributes tt2).cmp with 
-    | true, true -> TBool, Lte((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
+    assert_comparable tt1 tt2;
+    TBool, Lte((tt1, ee1), (tt2, ee2))
 
   | PEEq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
-    (match (attributes tt1).cmp, (attributes tt2).cmp with 
-    | true, true -> TBool, Eq((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
+    assert_comparable tt1 tt2;
+    TBool, Eq((tt1, ee1), (tt2, ee2))
 
   | PENeq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    (match (attributes tt1).cmp, (attributes tt2).cmp with 
-    | true, true -> TBool, Neq((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
-      
+    assert_comparable tt1 tt2;
+    TBool, Neq((tt1, ee1), (tt2, ee2))
+    
 
   (* symbol reference *)
   | PESRef (i) ->
