@@ -12,7 +12,7 @@ contract Token implements IToken {
 	}
 
 	entry transfer(from: address, tto: address, vval: nat) {
-		assert (vval > 0);
+		assert (vval > 0n);
 		let a = this.balances.get(from, 0n);
 		let b: nat = this.balances.get(tto, 0n);
 		assert(a > vval);

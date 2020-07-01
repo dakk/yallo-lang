@@ -422,6 +422,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEGt (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
+    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Gt((tt1, ee1), (tt2, ee2))
     | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
@@ -429,6 +430,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEGte (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
+    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Gte((tt1, ee1), (tt2, ee2))
     | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
@@ -436,6 +438,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PELt (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
+    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Lt((tt1, ee1), (tt2, ee2))
     | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
@@ -443,16 +446,18 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PELte (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
+    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
     (match (attributes tt1).cmp, (attributes tt2).cmp with 
     | true, true -> TBool, Lte((tt1, ee1), (tt2, ee2))
     | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
 
-    | PEEq (e1, e2) -> 
-      let (tt1, ee1) = transform_expr e1 env' ic in 
-      let (tt2, ee2) = transform_expr e2 env' ic in 
-      (match (attributes tt1).cmp, (attributes tt2).cmp with 
-      | true, true -> TBool, Eq((tt1, ee1), (tt2, ee2))
-      | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
+  | PEEq (e1, e2) -> 
+    let (tt1, ee1) = transform_expr e1 env' ic in 
+    let (tt2, ee2) = transform_expr e2 env' ic in 
+    if tt1 <> tt2 then raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2);
+    (match (attributes tt1).cmp, (attributes tt2).cmp with 
+    | true, true -> TBool, Eq((tt1, ee1), (tt2, ee2))
+    | _, _ -> raise @@ TypeError (pel, show_ttype_not_cmp tt1 tt2))
 
   | PENeq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 

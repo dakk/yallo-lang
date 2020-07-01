@@ -110,6 +110,7 @@ let compile (filename: string) opt =
         write_file "/tmp/temp.mligo" comp;
         Sys.command "ligo compile-contract /tmp/temp.mligo main" |> ignore;
         ""
+      | _ -> comp
     )
     |> print_endline
 
