@@ -238,10 +238,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         TMap (kt, rt), MapMapWith ((te, ee), (TLambda (TTuple([a;b]), rt), lame))
       | _, TMap (kt, kv), "fold", [(TLambda (TTuple([llkt; llkv; rt']), rt), lame); (ft, ff)] when kt=llkt && kv=llkv && rt=rt' && rt=ft -> 
         ft, MapFold((te, ee), (TLambda (TTuple([llkt; llkv; rt']), rt), lame), (ft, ff))
+
+      | StorageRef(sr), TMap (kt, kv), "filter", [(TLambda (TTuple([a;b]), TBool), lame)] when (a=kt && b=kv) -> 
+        TUnit, SAssign(sr, (TMap(kt, kv), MapFilter ((te, ee), (TLambda (TTuple([a;b]), TBool), lame))))
       | _, TMap (kt, kv), "filter", [(TLambda (TTuple([a;b]), TBool), lame)] when (a=kt && b=kv) -> 
         TMap (kt, kv), MapFilter ((te, ee), (TLambda (TTuple([a;b]), TBool), lame))
   
-
       | StorageRef(sr), TMap (kt, kv), "remove", [(kk, e)] when kk = kt -> 
         TUnit, SAssign(sr, (TMap (kt, kv), MapRemove((te, ee), (kk, e))))
       | _, TMap (kt, kv), "remove", [(kk, e)] when kk = kt -> 
