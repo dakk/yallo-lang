@@ -1,0 +1,11 @@
+(library
+ (name interface_of_michelson)
+ (public_name yallo.tools.interface_of_michelson)
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries ppx_deriving yallo.tools.michelson)
+ (modules transform))
+
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

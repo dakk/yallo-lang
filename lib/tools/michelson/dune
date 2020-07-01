@@ -1,0 +1,19 @@
+(ocamllex lexer)
+
+(menhir 
+ (modules parser)
+ (flags --explain --inspection --table --dump)
+)
+
+
+(library
+ (name michelson)
+ (public_name yallo.tools.michelson)
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries ppx_deriving menhirLib helpers)
+ (modules parser lexer ast))
+
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

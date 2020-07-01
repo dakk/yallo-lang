@@ -129,7 +129,6 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 (* map *)
 | MapMem of expr * expr
 | MapMapWith of expr * expr
-| MapGetForce of expr * expr
 | MapFold of expr * expr * expr *)
 | MapSize (mape) -> "Map.size (" ^ to_ligo_expr ast mape ^ ")"
 | MapEmpty -> "Map.empty"
@@ -180,7 +179,6 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | ListFold of expr * expr * expr
 
 (* string *)
-| StringConcat of expr * expr 
 | StringSlice of expr * expr * expr
 | StringSize of expr
 *)
