@@ -97,12 +97,15 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Typed (e, t) -> "(" ^ to_ligo_expr ast e ^ ": " ^ to_ligo_type t ^ ")"
 | List (el) -> "[" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
 | EnumValue (i) -> i
-
-(* 
-| Set of expr list 
-| Map of (expr * expr) list
-| BigMap of (expr * expr) list
-*)
+| Set (el) -> "set [" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
+| Map (el) -> 
+  "Map.literal [" ^
+  merge_list el "; " (fun (a, b) -> "(" ^ to_ligo_expr ast a ^ "), (" ^ to_ligo_expr ast b ^ ")")
+  ^ "]"
+| BigMap (el) -> 
+  "Big_map.literal [" ^
+  merge_list el "; " (fun (a, b) -> "(" ^ to_ligo_expr ast a ^ "), (" ^ to_ligo_expr ast b ^ ")")
+  ^ "]"
 | Tuple (el) -> 
   "(" ^ merge_list el ", " (fun v -> to_ligo_expr ast v) ^ ")"
 | Lambda (il, e) -> 
@@ -125,11 +128,15 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | OptionIsSome(oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> true | None -> false"
 | OptionIsNone(oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> true | None -> true"
 
-(*
+
 (* map *)
-| MapMem of expr * expr
-| MapMapWith of expr * expr
-| MapFold of expr * expr * expr *)
+| MapMem (mape, vkey) -> 
+  "(match Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
+  ^ " with | None -> false | Some (v) -> true)"
+| MapFold (le, ll, initial) -> 
+  "Map.fold (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ") (" ^ to_ligo_expr ast initial ^ ")"
+| MapMapWith (le, ll) -> 
+  "Map.map (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ")"
 | MapSize (mape) -> "Map.size (" ^ to_ligo_expr ast mape ^ ")"
 | MapEmpty -> "Map.empty"
 | MapGetForce (mape, vkey) -> 
@@ -148,27 +155,30 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   
 
 (* bigmap *)
-(* | BigMapGetForce of expr * expr *)
 | BigMapEmpty -> "Big_map.empty"
+| BigMapMem (mape, vkey) -> 
+  "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
+  ^ " with | None -> false | Some (v) -> true)"
+| BigMapGetForce (mape, vkey) -> 
+  let mapvt = match fst mape with | TMap (a, b) -> b in
+  "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
+  ^ " with | None -> ((failwith \"Key not present\"): " ^ show_ttype mapvt ^ ") | Some (v) -> v)"
 | BigMapGet (mape, vkey, vdef) ->
   "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
   ^ " with | None -> " ^ to_ligo_expr ast vdef ^ " | Some (v) -> v)"
 | BigMapGetOpt (mape, vkey) ->
   "Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape
 | BigMapUpdate (mape, vkey, vval) -> 
-  let_surround ("Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape)
+  "Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape
 | BigMapRemove (mape, vkey) -> 
-  let_surround ("Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape)
-
-(*
-| BigMapMem of expr * expr
+  "Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape
 
 (* set *)
-| SetEmpty
-| SetMem of expr * expr
-| SetSize of expr
-*)
 | SetEmpty -> "Set.empty"
+| SetSize (le) ->
+  "Set.size (" ^ to_ligo_expr ast le ^ ")"
+| SetMem (le, lv) ->
+  "Set.mem (" ^ to_ligo_expr ast lv ^ ") (" ^ to_ligo_expr ast le ^ ")"
 | SetUpdate (se, sv, cc) -> 
   "if (" ^ to_ligo_expr ast cc ^ ") then (Set.add (" ^ to_ligo_expr ast sv ^ ") (" ^ to_ligo_expr ast se ^ ")) else (Set.remove (" ^ to_ligo_expr ast sv ^ ") (" ^ to_ligo_expr ast se ^ "))"
 
@@ -188,15 +198,15 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 
 (* string *)
 | StringSlice of expr * expr * expr
-| StringSize of expr
 *)
+| StringSize (s) -> "String.length (" ^ to_ligo_expr ast s ^ ")"
 | StringConcat (s1, s2) -> to_ligo_expr ast s1 ^ " ^ " ^ to_ligo_expr ast s2
 
 (* bytes *)
 | BytesPack(a) -> "Bytes.pack (" ^ to_ligo_expr ast a ^ ")"
 | BytesUnpack(a) -> "Bytes.unpack (" ^ to_ligo_expr ast a ^ ")"
-(* | BytesSize(a)
-| BytesSlice(a,b,c) *)
+| BytesSize (s) -> "Bytes.length (" ^ to_ligo_expr ast s ^ ")"
+(* BytesSlice(a,b,c) *)
 | BytesConcat (s1, s2) -> to_ligo_expr ast s1 ^ " ^ " ^ to_ligo_expr ast s2
 
 (*

@@ -211,69 +211,85 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEApply (PEDot(e,i), el) -> 
     let (te, ee) = transform_expr e env' ic in
     let el' = el |> transform_expr_list in 
-    (match te, i, el' with 
-      | TOption (ts), "getSome", [] -> ts, OptionGetSome(te, ee)
-      | TOption (ts), "isSome", [] -> TBool, OptionIsSome(te, ee)
-      | TOption (ts), "isNone", [] -> TBool, OptionIsNone(te, ee)
+    (match ee, te, i, el' with 
+      | _, TOption (ts), "getSome", [] -> ts, OptionGetSome(te, ee)
+      | _, TOption (ts), "isSome", [] -> TBool, OptionIsSome(te, ee)
+      | _, TOption (ts), "isNone", [] -> TBool, OptionIsNone(te, ee)
 
       (* List *)
-      | TList (_), "size", [] -> TNat, ListSize (te, ee)
-      | TList (l), "head", [] -> l, ListHead (te, ee)
-      | TList (l), "tail", [] -> TList (l), ListTail (te, ee)
-      | TList (l), "prepend", [(ll, e)] when ll = l -> TList (l), ListPrepend ((te, ee), (ll, e))
-      | TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame))
-      | TList (l), "fold", [(TLambda (TTuple([ll; rt']), rt), lame); (ft, ff)] when l=ll && rt=rt' && rt=ft -> 
+      | _, TList (_), "size", [] -> TNat, ListSize (te, ee)
+      | _, TList (l), "head", [] -> l, ListHead (te, ee)
+      | _, TList (l), "tail", [] -> TList (l), ListTail (te, ee)
+      | _, TList (l), "prepend", [(ll, e)] when ll = l -> TList (l), ListPrepend ((te, ee), (ll, e))
+      | _, TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame))
+      | _, TList (l), "fold", [(TLambda (TTuple([ll; rt']), rt), lame); (ft, ff)] when l=ll && rt=rt' && rt=ft -> 
         ft, ListFold((te, ee), (TLambda (TTuple([ll; rt']), rt), lame), (ft, ff))
 
       (* Map *)
-      | TMap (_, _), "size", [] -> TNat, MapSize (te, ee)
-      | TMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, MapGetForce((te, ee), (kk, e))
-      | TMap (kt, kv), "getOpt", [(kk, e)] when kk = kt -> TOption (kv), MapGetOpt((te, ee), (kk, e))
-      | TMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = kt -> 
+      | _, TMap (_, _), "size", [] -> TNat, MapSize (te, ee)
+      | _, TMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, MapGetForce((te, ee), (kk, e))
+      | _, TMap (kt, kv), "getOpt", [(kk, e)] when kk = kt -> TOption (kv), MapGetOpt((te, ee), (kk, e))
+      | _, TMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = kt -> 
         kv, MapGet((te, ee), (kk,e), (kvv,kvd))
-      | TMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, MapMem((te,ee), (kk, e))
-      | TMap (kt, _), "remove", [(kk, e)] when kk = kt -> TUnit, MapRemove((te, ee), (kk, e))
-      | TMap (kt, kv), "mapWith", [(TLambda (TTuple([a;b]), rt), lame)] when (a=kt && b=kv) -> 
+      | _, TMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, MapMem((te,ee), (kk, e))
+      | _, TMap (kt, kv), "mapWith", [(TLambda (TTuple([a;b]), rt), lame)] when (a=kt && b=kv) -> 
         TMap (kt, rt), MapMapWith ((te, ee), (TLambda (TTuple([a;b]), rt), lame))
-      | TMap (kt, kv), "fold", [(TLambda (TTuple([llkt; llkv; rt']), rt), lame); (ft, ff)] when kt=llkt && kv=llkv && rt=rt' && rt=ft -> 
+      | _, TMap (kt, kv), "fold", [(TLambda (TTuple([llkt; llkv; rt']), rt), lame); (ft, ff)] when kt=llkt && kv=llkv && rt=rt' && rt=ft -> 
         ft, MapFold((te, ee), (TLambda (TTuple([llkt; llkv; rt']), rt), lame), (ft, ff))
-      | TMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
-        TUnit, MapUpdate((te, ee), (kkt, ek), (kkv, ev))
+
+      | StorageRef(sr), TMap (kt, kv), "remove", [(kk, e)] when kk = kt -> 
+        TUnit, SAssign(sr, (TMap (kt, kv), MapRemove((te, ee), (kk, e))))
+      | _, TMap (kt, kv), "remove", [(kk, e)] when kk = kt -> 
+        TMap (kt, kv), MapRemove((te, ee), (kk, e))
+  
+      | StorageRef(sr), TMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
+        TUnit, SAssign(sr, (TMap (kt, kv), MapUpdate((te, ee), (kkt, ek), (kkv, ev))))
+      | _, TMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
+        TMap (kt, kv), MapUpdate((te, ee), (kkt, ek), (kkv, ev))
 
       (* BigMap *)
-      | TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, BigMapGetForce((te, ee), (kk, e))
-      | TBigMap (kt, kv), "getOpt", [(kk, e)] when kk = kt -> TOption(kv), BigMapGetOpt((te, ee), (kk, e))
-      | TBigMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = 
+      | _, TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, BigMapGetForce((te, ee), (kk, e))
+      | _, TBigMap (kt, kv), "getOpt", [(kk, e)] when kk = kt -> TOption(kv), BigMapGetOpt((te, ee), (kk, e))
+      | _, TBigMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = 
         kt -> kv, BigMapGet((te, ee), (kk,e), (kvv,kvd))
-      | TBigMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, BigMapMem((te,ee), (kk, e))
-      | TBigMap (kt, _), "remove", [(kk, e)] when kk = kt -> TUnit, BigMapRemove((te, ee), (kk, e))
-      | TBigMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
-        TUnit, BigMapUpdate((te, ee), (kkt, ek), (kkv, ev))
+      | _, TBigMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, BigMapMem((te,ee), (kk, e))
+
+      | StorageRef(sr), TBigMap (kt, kv), "remove", [(kk, e)] when kk = kt -> 
+        TUnit, SAssign (sr, (TBigMap(kt, kv), BigMapRemove((te, ee), (kk, e))))
+      | _, TBigMap (kt, kv), "remove", [(kk, e)] when kk = kt -> 
+        TBigMap(kt, kv), BigMapRemove((te, ee), (kk, e))
+
+      | StorageRef(sr), TBigMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
+        TUnit, SAssign (sr, (TBigMap (kt, kv), BigMapUpdate((te, ee), (kkt, ek), (kkv, ev))))
+      | _, TBigMap (kt, kv), "update", [(kkt, ek); (kkv, ev)] when kkt=kt && kkv=kv ->
+        TBigMap (kt, kv), BigMapUpdate((te, ee), (kkt, ek), (kkv, ev))
 
       (* Set *)
-      | TSet (_), "size", [] -> TNat, SetSize (te, ee)
-      | TSet (kt), "mem", [(ll, e)] when kt = ll -> TBool, SetMem ((te, ee), (ll, e))
-      | TSet (kt), "update", [(kkt, ek); (TBool, ev)] when kkt=kt ->
-        TUnit, SetUpdate((te, ee), (kkt, ek), (TBool, ev))
+      | _, TSet (_), "size", [] -> TNat, SetSize (te, ee)
+      | _, TSet (kt), "mem", [(ll, e)] when kt = ll -> TBool, SetMem ((te, ee), (ll, e))
+      | StorageRef(sr), TSet (kt), "update", [(kkt, ek); (TBool, ev)] when kkt=kt ->
+        TUnit, SAssign(sr, (TSet (kt), SetUpdate((te, ee), (kkt, ek), (TBool, ev))))
+      | _, TSet (kt), "update", [(kkt, ek); (TBool, ev)] when kkt=kt ->
+        TSet (kt), SetUpdate((te, ee), (kkt, ek), (TBool, ev))
 
       (* String *)
-      | TString, "slice", [(TInt, i1); (TInt, i2)] -> TString, StringSlice ((te, ee), (TNat, i1), (TNat, i2))
-      | TString, "size", [] -> TNat, StringSize(te, ee)
+      | _, TString, "slice", [(TInt, i1); (TInt, i2)] -> TString, StringSlice ((te, ee), (TNat, i1), (TNat, i2))
+      | _, TString, "size", [] -> TNat, StringSize(te, ee)
 
       (* Bytes *)
-      | TBytes, "slice", [(TInt, i1); (TInt, i2)] -> TBytes, BytesSlice ((te, ee), (TNat, i1), (TNat, i2))
-      | TBytes, "size", [] -> TNat, BytesSize(te, ee)
+      | _, TBytes, "slice", [(TInt, i1); (TInt, i2)] -> TBytes, BytesSlice ((te, ee), (TNat, i1), (TNat, i2))
+      | _, TBytes, "size", [] -> TNat, BytesSize(te, ee)
 
       (* Tuple *)
-      | TTuple ([a; _]), "fst", [] -> a, TupleFst (te, ee)
-      | TTuple ([_; b]), "snd", [] -> b, TupleSnd (te, ee)
+      | _, TTuple ([a; _]), "fst", [] -> a, TupleFst (te, ee)
+      | _, TTuple ([_; b]), "snd", [] -> b, TupleSnd (te, ee)
 
       (* Interface to contract instance *)
-      | TInterface(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta)
-      | TContractCode(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta)
+      | _, TInterface(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta)
+      | _, TContractCode(sl), "of", [(TAddress, ta)] -> TContractInstance(TInterface(sl)), ContractInstance(TAddress, ta)
 
       (* contract instance call *)
-      | TContractInstance(TInterface(sl)), i, tl -> 
+      | _, TContractInstance(TInterface(sl)), i, tl -> 
         (match List.assoc_opt i sl with 
         | None -> raise @@ ContractError (pel, "Unknown contract entrypoint '" ^ i ^ "' on contract instance")
         | Some(es) when es=(fst @@ List.split tl) -> TOperation, (
@@ -285,7 +301,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         | _ -> raise @@ TypeError (pel, "Invalid types on contract instance apply over entrypoint '" ^ i ^ "'")
       )
 
-      | _, i, _-> 
+      | _, _, i, _-> 
         raise @@ TypeError (pel, "Invalid apply of " ^ i ^ " over '" ^ show_ttype te ^ "'")
     )
 
