@@ -40,7 +40,7 @@ let command =
         and target  = flag "-target" (optional string) ~doc:" target language"
       in fun () -> 
         let opt = Compiler.{
-          target = if is_none target then Some("ligo") else target;
+          target = if is_none target then Some("tz") else target;
           contract = contract;
           print_pt = ppt;
           print_ast = past;

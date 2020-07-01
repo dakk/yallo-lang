@@ -227,7 +227,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
 
       (* Map *)
       | TMap (_, _), "size", [] -> TNat, MapSize (te, ee)
-      | TMap (kt, kv), "get", [(kk, e)] when kk = kt -> TOption (kv), MapGetOpt((te, ee), (kk, e))
+      | TMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, MapGetForce((te, ee), (kk, e))
+      | TMap (kt, kv), "getOpt", [(kk, e)] when kk = kt -> TOption (kv), MapGetOpt((te, ee), (kk, e))
       | TMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = kt -> 
         kv, MapGet((te, ee), (kk,e), (kvv,kvd))
       | TMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, MapMem((te,ee), (kk, e))
@@ -240,7 +241,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         TUnit, MapUpdate((te, ee), (kkt, ek), (kkv, ev))
 
       (* BigMap *)
-      | TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> TOption(kv), BigMapGetOpt((te, ee), (kk, e))
+      | TBigMap (kt, kv), "get", [(kk, e)] when kk = kt -> kv, BigMapGetForce((te, ee), (kk, e))
+      | TBigMap (kt, kv), "getOpt", [(kk, e)] when kk = kt -> TOption(kv), BigMapGetOpt((te, ee), (kk, e))
       | TBigMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = 
         kt -> kv, BigMapGet((te, ee), (kk,e), (kvv,kvd))
       | TBigMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, BigMapMem((te,ee), (kk, e))

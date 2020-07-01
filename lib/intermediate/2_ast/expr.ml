@@ -66,6 +66,7 @@ type expr =
 | MapEmpty
 | MapGetOpt of texpr * texpr
 | MapGet of texpr * texpr * texpr
+| MapGetForce of texpr * texpr
 | MapMem of texpr * texpr
 | MapSize of texpr
 | MapMapWith of texpr * texpr
@@ -77,6 +78,7 @@ type expr =
 | BigMapEmpty
 | BigMapGetOpt of texpr * texpr
 | BigMapGet of texpr * texpr * texpr
+| BigMapGetForce of texpr * texpr
 | BigMapMem of texpr * texpr
 | BigMapUpdate of texpr * texpr * texpr 
 | BigMapRemove of texpr * texpr 

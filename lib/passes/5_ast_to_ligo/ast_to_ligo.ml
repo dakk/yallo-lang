@@ -128,10 +128,15 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 (*
 (* map *)
 | MapMem of expr * expr
-| MapSize of expr
 | MapMapWith of expr * expr
+| MapGetForce of expr * expr
 | MapFold of expr * expr * expr *)
+| MapSize (mape) -> "Map.size (" ^ to_ligo_expr ast mape ^ ")"
 | MapEmpty -> "Map.empty"
+| MapGetForce (mape, vkey) -> 
+  let mapvt = match fst mape with | TMap (a, b) -> b in
+  "(match Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
+  ^ " with | None -> ((failwith \"Key not present\"): " ^ show_ttype mapvt ^ ") | Some (v) -> v)"
 | MapGet (mape, vkey, vdef) ->
   "(match Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
   ^ " with | None -> " ^ to_ligo_expr ast vdef ^ " | Some (v) -> v)"
@@ -144,6 +149,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   
 
 (* bigmap *)
+(* | BigMapGetForce of expr * expr *)
 | BigMapEmpty -> "Big_map.empty"
 | BigMapGet (mape, vkey, vdef) ->
   "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
@@ -242,11 +248,11 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Fail (e) -> let_surround ("failwith (" ^ to_ligo_expr ast e ^ ")")
 | Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else failwith \"Assertion\"")
      
-| Let (id, tt, e) -> "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in"
+| Let (id, tt, e) -> "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in "
 | LetIn (id, tt, e, e2) -> 
-  "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in" ^ to_ligo_expr ast e2
-| SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in"
-| LetTuple (il, e) -> "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ to_ligo_expr ast e ^ " in"
+  "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in " ^ to_ligo_expr ast e2
+| SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in "
+| LetTuple (il, e) -> "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ to_ligo_expr ast e ^ " in "
 
 (*
 | LetTuple of (iden * ttype) list * expr 
@@ -254,7 +260,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | SRecAssign of iden * iden * expr  *)
 
 | Seq(a, (tl, List(e))) -> 
-  "  " ^ to_ligo_expr ast a ^ "\n  ((" ^ to_ligo_expr ast (tl, List(e)) ^ ": operation list), (s: storage))"
+  "  " ^ to_ligo_expr ast a ^ "\n  (" ^ to_ligo_expr ast (tl, List(e)) ^ ": operation list)"
 
 | Seq(a, b) -> "  " ^ to_ligo_expr ast a ^ "\n" ^ to_ligo_expr ast b
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
@@ -300,7 +306,7 @@ let generate_ligo_code (ast: t) (contract: string) =
     Str("let " ^ e.id ^ " (" ^
       list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
       "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> to_ligo_type it) ^
-      "storage) = \n" ^ to_ligo_expr ast e.expr ^ "\n\n"
+      "storage) = \n" ^ to_ligo_expr ast e.expr ^ ", (s: storage)\n\n"
     )
   ) ce.entries in
 

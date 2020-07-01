@@ -1,0 +1,12 @@
+contract LambdaMap {
+	field lmap: (nat, (int -> bool)) map;
+
+	entry addLambda (l: int -> bool) {
+		this.lmap.update (this.lmap.size(), l);
+		[]
+	}
+
+	view callLambda (vi: nat, va: int): bool {
+		this.lmap.get(vi)(va)
+	}
+}

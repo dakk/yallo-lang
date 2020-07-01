@@ -87,6 +87,7 @@ let () =
     ];
     "contract", [
       "view", `Quick, compile opt None "test/contract/view.yallo" None;
+      "lambda_map", `Quick, compile opt None "test/contract/lambda_map.yallo" None;
       "lambda_field", `Quick, compile opt None "test/contract/lambda_field.yallo" None;
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
       "king_of_tezos", `Quick, compile opt None "test/contract/king_of_tezos.yallo" None;

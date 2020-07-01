@@ -136,6 +136,8 @@ let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) =
   | FailIfMessage (a, b)
   | LetIn (_, _, a, b)
   | LetTupleIn(_, a, b)
+  | MapGetForce(a, b)
+  | BigMapGetForce(a, b)
   | Seq (a, b) -> jf (traverse' a) (traverse' b)
 
   | TezosTransfer (a, b, c)
