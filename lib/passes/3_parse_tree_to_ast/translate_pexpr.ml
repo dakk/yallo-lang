@@ -542,7 +542,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         rettype, Apply ((tt,ee), (TUnit, Unit))
       else if List.length argl > 1 then 
         rettype, Apply((tt, ee), (TTuple(argl), Tuple(ap)))
-      else 
+      else
         rettype, Apply((tt, ee), List.hd ap)
 
     (* Apply on contract, it is a transfer without mutez *)

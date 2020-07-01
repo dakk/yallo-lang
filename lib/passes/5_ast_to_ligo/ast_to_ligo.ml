@@ -106,7 +106,14 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Tuple (el) -> 
   "(" ^ merge_list el ", " (fun v -> to_ligo_expr ast v) ^ ")"
 | Lambda (il, e) -> 
-  "(fun (" ^ merge_list il ", " (fun (i,t) -> i ^ ": " ^ to_ligo_type t) ^ ") -> " ^ to_ligo_expr ast e ^ ")"
+  (
+    if List.length il = 0 then 
+      "( fun (override: unit) "
+    else 
+      "(fun (" ^ merge_list il ", " (fun (i,t) -> i) ^ (if List.length il > 0 then ": " else "") ^ merge_list il " * " (fun (i,t) -> to_ligo_type t)  ^ ") "
+  )
+  ^ "-> " ^ to_ligo_expr ast e ^ ")"
+  (* "(fun (" ^ merge_list (List.split il) ", " (fun (i,t) -> i ^ ": " ^ to_ligo_type t) ^ ") -> " ^ to_ligo_expr ast e ^ ")" *)
 
 (* 
 | Record of (iden * expr) list

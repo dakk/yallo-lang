@@ -6,15 +6,17 @@ type options = {
   target: string option;
   print_pt: bool;
   print_ast: bool;
+  print_ligo: bool;
   verbose: bool;
   no_remove_unused: bool;
 }
 
 let default_options = {
   contract = None;
-  target = Some ("ligo");
+  target = Some ("tz");
   print_pt = true;
   print_ast = true;
+  print_ligo = true;
   verbose = true;
   no_remove_unused = false;
 }
@@ -75,6 +77,11 @@ let build_ast (filename: string) opt =
   |> app opt.print_ast print_ast 
 
     
+let write_file (filename: string) data = 
+  let oc = open_out filename in 
+  fprintf oc "%s" data;
+  close_out oc 
+
 (* text_file => ast => target *)
 let compile (filename: string) opt =
   build_ast filename opt
@@ -86,13 +93,23 @@ let compile (filename: string) opt =
     (* output to a final language *)
     |> (fun ast -> match opt.target, opt.contract with 
       | None, _ -> ""
+      | Some ("tz"), Some(ctr)
       | Some ("ligo"), Some(ctr) -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
         Passes.Ast_to_ligo.generate_ligo ast ctr
+      | Some ("tz"), None
       | Some ("ligo"), None when (List.length ast.contracts) = 1 -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
         Passes.Ast_to_ligo.generate_ligo ast (fst @@ List.hd ast.contracts)
       | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
+    )
+    |> (fun comp -> match opt.target with 
+      | Some("tz") -> 
+        if opt.print_ligo then comp |> print_endline;
+        if opt.verbose then printf "===> Compilingo ligo to michelson\n\n%!";        
+        write_file "/tmp/temp.mligo" comp;
+        Sys.command "ligo compile-contract /tmp/temp.mligo main" |> ignore;
+        ""
     )
     |> print_endline
 

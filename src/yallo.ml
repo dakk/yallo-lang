@@ -34,6 +34,7 @@ let command =
         and contract  = flag "-contract" (optional string) ~doc:" selected contract"
         and past      = flag "-print-ast" no_arg ~doc:" print ast"
         and ppt       = flag "-print-pt" no_arg ~doc:" print parse-tree"
+        and pligo     = flag "-print-ligo" no_arg ~doc:" print ligo code"
         and verbose   = flag "-verbose" no_arg ~doc:" enable verbosity"
         and noremoveunused   = flag "-no-remove-unused" no_arg ~doc:" disable removing unused symbols"
         and target  = flag "-target" (optional string) ~doc:" target language"
@@ -43,6 +44,7 @@ let command =
           contract = contract;
           print_pt = ppt;
           print_ast = past;
+          print_ligo = pligo;
           verbose = verbose;
           no_remove_unused = noremoveunused;
         } in (

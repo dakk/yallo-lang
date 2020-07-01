@@ -6,6 +6,7 @@ let opt = Compiler.{
   target = None;
   print_pt = false;
   print_ast = false;
+  print_ligo = false;
   verbose = false;
   no_remove_unused = true;
 }
