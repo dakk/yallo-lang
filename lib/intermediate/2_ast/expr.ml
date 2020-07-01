@@ -73,6 +73,7 @@ type expr =
 | MapFold of texpr * texpr * texpr
 | MapUpdate of texpr * texpr * texpr 
 | MapRemove of texpr * texpr 
+| MapFilter of texpr * texpr
 
 (* bigmap *)
 | BigMapEmpty
@@ -97,6 +98,7 @@ type expr =
 | ListHead of texpr
 | ListTail of texpr
 | ListFold of texpr * texpr * texpr
+| ListFilter of texpr * texpr
 
 (* string *)
 | StringConcat of texpr * texpr 

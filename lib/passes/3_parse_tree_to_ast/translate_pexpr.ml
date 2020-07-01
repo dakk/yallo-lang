@@ -224,6 +224,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       | _, TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame))
       | _, TList (l), "fold", [(TLambda (TTuple([ll; rt']), rt), lame); (ft, ff)] when l=ll && rt=rt' && rt=ft -> 
         ft, ListFold((te, ee), (TLambda (TTuple([ll; rt']), rt), lame), (ft, ff))
+      | _, TList (l), "filter", [(TLambda (TTuple([ll; rt']), TBool), lame)] when l=ll && l=rt'-> 
+        TList (l), ListFilter((te, ee), (TLambda (TTuple([ll; rt']), TBool), lame))
 
       (* Map *)
       | _, TMap (_, _), "size", [] -> TNat, MapSize (te, ee)
@@ -236,6 +238,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         TMap (kt, rt), MapMapWith ((te, ee), (TLambda (TTuple([a;b]), rt), lame))
       | _, TMap (kt, kv), "fold", [(TLambda (TTuple([llkt; llkv; rt']), rt), lame); (ft, ff)] when kt=llkt && kv=llkv && rt=rt' && rt=ft -> 
         ft, MapFold((te, ee), (TLambda (TTuple([llkt; llkv; rt']), rt), lame), (ft, ff))
+      | _, TMap (kt, kv), "filter", [(TLambda (TTuple([a;b]), TBool), lame)] when (a=kt && b=kv) -> 
+        TMap (kt, kv), MapFilter ((te, ee), (TLambda (TTuple([a;b]), TBool), lame))
+  
 
       | StorageRef(sr), TMap (kt, kv), "remove", [(kk, e)] when kk = kt -> 
         TUnit, SAssign(sr, (TMap (kt, kv), MapRemove((te, ee), (kk, e))))
