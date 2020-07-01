@@ -1,6 +1,6 @@
 program: CONST IDENT COLON IDENT EQ UNIT WITH
 ##
-## Ends in an error in state: 298.
+## Ends in an error in state: 315.
 ##
 ## dconst -> CONST IDENT COLON type_expr EQ expr . SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ## expr -> expr . ADD expr [ SUB SEMICOLON OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -27,7 +27,7 @@ program: CONST IDENT COLON IDENT EQ UNIT WITH
 
 program: CONST IDENT COLON IDENT EQ WITH
 ##
-## Ends in an error in state: 297.
+## Ends in an error in state: 314.
 ##
 ## dconst -> CONST IDENT COLON type_expr EQ . expr SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -39,7 +39,7 @@ program: CONST IDENT COLON IDENT EQ WITH
 
 program: CONST IDENT COLON IDENT WITH
 ##
-## Ends in an error in state: 295.
+## Ends in an error in state: 312.
 ##
 ## type_expr -> type_sig . [ EQ CONTRACT CONT ]
 ## type_sig -> type_sig . LAMBDA type_sig [ LAMBDA EQ CONTRACT CONT ]
@@ -52,7 +52,7 @@ program: CONST IDENT COLON IDENT WITH
 
 program: CONST IDENT COLON WITH
 ##
-## Ends in an error in state: 294.
+## Ends in an error in state: 311.
 ##
 ## dconst -> CONST IDENT COLON . type_expr EQ expr SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -64,7 +64,7 @@ program: CONST IDENT COLON WITH
 
 program: CONST IDENT EQ CRYPTO DOT WITH
 ##
-## Ends in an error in state: 115.
+## Ends in an error in state: 122.
 ##
 ## left -> CRYPTO DOT . IDENT [ LPAR EQ DOT ]
 ##
@@ -76,7 +76,7 @@ program: CONST IDENT EQ CRYPTO DOT WITH
 
 program: CONST IDENT EQ CRYPTO WITH
 ##
-## Ends in an error in state: 114.
+## Ends in an error in state: 121.
 ##
 ## left -> CRYPTO . DOT IDENT [ LPAR EQ DOT ]
 ##
@@ -86,9 +86,9 @@ program: CONST IDENT EQ CRYPTO WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ IDENT DOT IDENT UNIT
+program: CONST IDENT EQ IDENT DOT IDENT VIEW
 ##
-## Ends in an error in state: 162.
+## Ends in an error in state: 169.
 ##
 ## expr -> left DOT IDENT . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## left -> left DOT IDENT . [ LPAR EQ DOT ]
@@ -101,7 +101,7 @@ program: CONST IDENT EQ IDENT DOT IDENT UNIT
 
 program: CONST IDENT EQ IDENT DOT WITH
 ##
-## Ends in an error in state: 161.
+## Ends in an error in state: 168.
 ##
 ## expr -> left DOT . IDENT [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## left -> left DOT . IDENT [ LPAR EQ DOT ]
@@ -112,9 +112,9 @@ program: CONST IDENT EQ IDENT DOT WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ IDENT EQ UNIT UNIT
+program: CONST IDENT EQ IDENT EQ UNIT VIEW
 ##
-## Ends in an error in state: 160.
+## Ends in an error in state: 167.
 ##
 ## expr -> left EQ expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -141,7 +141,7 @@ program: CONST IDENT EQ IDENT EQ UNIT UNIT
 
 program: CONST IDENT EQ IDENT EQ WITH
 ##
-## Ends in an error in state: 159.
+## Ends in an error in state: 166.
 ##
 ## expr -> left EQ . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -153,7 +153,7 @@ program: CONST IDENT EQ IDENT EQ WITH
 
 program: CONST IDENT EQ IDENT HT WITH
 ##
-## Ends in an error in state: 111.
+## Ends in an error in state: 118.
 ##
 ## expr -> IDENT HT . IDENT [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -165,7 +165,7 @@ program: CONST IDENT EQ IDENT HT WITH
 
 program: CONST IDENT EQ IDENT LPAR UNIT RSQUARE
 ##
-## Ends in an error in state: 123.
+## Ends in an error in state: 130.
 ##
 ## expr -> left LPAR loption(separated_nonempty_list(COMMA,expr)) . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -176,15 +176,15 @@ program: CONST IDENT EQ IDENT LPAR UNIT RSQUARE
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 125, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
-## In state 122, spurious reduction of production loption(separated_nonempty_list(COMMA,expr)) -> separated_nonempty_list(COMMA,expr) 
+## In state 132, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
+## In state 129, spurious reduction of production loption(separated_nonempty_list(COMMA,expr)) -> separated_nonempty_list(COMMA,expr) 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: CONST IDENT EQ IDENT LPAR WITH
 ##
-## Ends in an error in state: 121.
+## Ends in an error in state: 128.
 ##
 ## expr -> left LPAR . loption(separated_nonempty_list(COMMA,expr)) RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -194,9 +194,9 @@ program: CONST IDENT EQ IDENT LPAR WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ IDENT UNIT
+program: CONST IDENT EQ IDENT VIEW
 ##
-## Ends in an error in state: 110.
+## Ends in an error in state: 117.
 ##
 ## expr -> IDENT . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> IDENT . HT IDENT [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -208,9 +208,9 @@ program: CONST IDENT EQ IDENT UNIT
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ IF UNIT THEN UNIT ELSE UNIT UNIT
+program: CONST IDENT EQ IF UNIT THEN UNIT ELSE UNIT VIEW
 ##
-## Ends in an error in state: 167.
+## Ends in an error in state: 174.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -237,7 +237,7 @@ program: CONST IDENT EQ IF UNIT THEN UNIT ELSE UNIT UNIT
 
 program: CONST IDENT EQ IF UNIT THEN UNIT ELSE WITH
 ##
-## Ends in an error in state: 166.
+## Ends in an error in state: 173.
 ##
 ## expr -> IF expr THEN expr ELSE . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -249,7 +249,7 @@ program: CONST IDENT EQ IF UNIT THEN UNIT ELSE WITH
 
 program: CONST IDENT EQ IF UNIT THEN UNIT WITH
 ##
-## Ends in an error in state: 165.
+## Ends in an error in state: 172.
 ##
 ## expr -> expr . ADD expr [ SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ ELSE DOT DIV AND ADD ]
 ## expr -> expr . SUB expr [ SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ ELSE DOT DIV AND ADD ]
@@ -276,7 +276,7 @@ program: CONST IDENT EQ IF UNIT THEN UNIT WITH
 
 program: CONST IDENT EQ IF UNIT THEN WITH
 ##
-## Ends in an error in state: 164.
+## Ends in an error in state: 171.
 ##
 ## expr -> IF expr THEN . expr ELSE expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -288,7 +288,7 @@ program: CONST IDENT EQ IF UNIT THEN WITH
 
 program: CONST IDENT EQ IF UNIT WITH
 ##
-## Ends in an error in state: 163.
+## Ends in an error in state: 170.
 ##
 ## expr -> expr . ADD expr [ THEN SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
 ## expr -> expr . SUB expr [ THEN SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -315,7 +315,7 @@ program: CONST IDENT EQ IF UNIT WITH
 
 program: CONST IDENT EQ IF WITH
 ##
-## Ends in an error in state: 109.
+## Ends in an error in state: 116.
 ##
 ## expr -> IF . expr THEN expr ELSE expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -327,7 +327,7 @@ program: CONST IDENT EQ IF WITH
 
 program: CONST IDENT EQ LBRACE IDENT EQ ADDRESS COMMA WITH
 ##
-## Ends in an error in state: 172.
+## Ends in an error in state: 179.
 ##
 ## separated_nonempty_list(COMMA,erec_element) -> erec_element COMMA . separated_nonempty_list(COMMA,erec_element) [ RBRACE ]
 ##
@@ -339,7 +339,7 @@ program: CONST IDENT EQ LBRACE IDENT EQ ADDRESS COMMA WITH
 
 program: CONST IDENT EQ LBRACE IDENT EQ UNIT WITH
 ##
-## Ends in an error in state: 168.
+## Ends in an error in state: 175.
 ##
 ## erec_element -> IDENT EQ expr . [ RBRACE COMMA ]
 ## expr -> expr . ADD expr [ SUB RBRACE OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA AND ADD ]
@@ -366,7 +366,7 @@ program: CONST IDENT EQ LBRACE IDENT EQ UNIT WITH
 
 program: CONST IDENT EQ LBRACE IDENT EQ WITH
 ##
-## Ends in an error in state: 105.
+## Ends in an error in state: 112.
 ##
 ## erec_element -> IDENT EQ . expr [ RBRACE COMMA ]
 ##
@@ -378,7 +378,7 @@ program: CONST IDENT EQ LBRACE IDENT EQ WITH
 
 program: CONST IDENT EQ LBRACE IDENT WITH
 ##
-## Ends in an error in state: 104.
+## Ends in an error in state: 111.
 ##
 ## erec_element -> IDENT . EQ expr [ RBRACE COMMA ]
 ##
@@ -390,7 +390,7 @@ program: CONST IDENT EQ LBRACE IDENT WITH
 
 program: CONST IDENT EQ LBRACE WITH
 ##
-## Ends in an error in state: 103.
+## Ends in an error in state: 110.
 ##
 ## expr -> LBRACE . separated_nonempty_list(COMMA,erec_element) RBRACE [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -400,9 +400,9 @@ program: CONST IDENT EQ LBRACE WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT IN UNIT UNIT
+program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT IN UNIT VIEW
 ##
-## Ends in an error in state: 190.
+## Ends in an error in state: 197.
 ##
 ## expr -> LET IDENT COLON type_sig EQ expr IN expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -429,7 +429,7 @@ program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT IN UNIT UNIT
 
 program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT IN WITH
 ##
-## Ends in an error in state: 189.
+## Ends in an error in state: 196.
 ##
 ## expr -> LET IDENT COLON type_sig EQ expr IN . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -439,9 +439,9 @@ program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT IN WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT UNIT
+program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT VIEW
 ##
-## Ends in an error in state: 188.
+## Ends in an error in state: 195.
 ##
 ## expr -> LET IDENT COLON type_sig EQ expr . IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET IDENT COLON type_sig EQ expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -469,7 +469,7 @@ program: CONST IDENT EQ LET IDENT COLON IDENT EQ UNIT UNIT
 
 program: CONST IDENT EQ LET IDENT COLON IDENT EQ WITH
 ##
-## Ends in an error in state: 187.
+## Ends in an error in state: 194.
 ##
 ## expr -> LET IDENT COLON type_sig EQ . expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET IDENT COLON type_sig EQ . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -482,7 +482,7 @@ program: CONST IDENT EQ LET IDENT COLON IDENT EQ WITH
 
 program: CONST IDENT EQ LET IDENT COLON IDENT WITH
 ##
-## Ends in an error in state: 186.
+## Ends in an error in state: 193.
 ##
 ## expr -> LET IDENT COLON type_sig . EQ expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET IDENT COLON type_sig . EQ expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -497,7 +497,7 @@ program: CONST IDENT EQ LET IDENT COLON IDENT WITH
 
 program: CONST IDENT EQ LET IDENT COLON WITH
 ##
-## Ends in an error in state: 185.
+## Ends in an error in state: 192.
 ##
 ## expr -> LET IDENT COLON . type_sig EQ expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET IDENT COLON . type_sig EQ expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -508,9 +508,9 @@ program: CONST IDENT EQ LET IDENT COLON WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LET IDENT EQ UNIT IN UNIT UNIT
+program: CONST IDENT EQ LET IDENT EQ UNIT IN UNIT VIEW
 ##
-## Ends in an error in state: 184.
+## Ends in an error in state: 191.
 ##
 ## expr -> LET IDENT EQ expr IN expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -537,7 +537,7 @@ program: CONST IDENT EQ LET IDENT EQ UNIT IN UNIT UNIT
 
 program: CONST IDENT EQ LET IDENT EQ UNIT IN WITH
 ##
-## Ends in an error in state: 183.
+## Ends in an error in state: 190.
 ##
 ## expr -> LET IDENT EQ expr IN . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -547,9 +547,9 @@ program: CONST IDENT EQ LET IDENT EQ UNIT IN WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LET IDENT EQ UNIT UNIT
+program: CONST IDENT EQ LET IDENT EQ UNIT VIEW
 ##
-## Ends in an error in state: 182.
+## Ends in an error in state: 189.
 ##
 ## expr -> LET IDENT EQ expr . IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET IDENT EQ expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -577,7 +577,7 @@ program: CONST IDENT EQ LET IDENT EQ UNIT UNIT
 
 program: CONST IDENT EQ LET IDENT EQ WITH
 ##
-## Ends in an error in state: 181.
+## Ends in an error in state: 188.
 ##
 ## expr -> LET IDENT EQ . expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET IDENT EQ . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -590,7 +590,7 @@ program: CONST IDENT EQ LET IDENT EQ WITH
 
 program: CONST IDENT EQ LET IDENT WITH
 ##
-## Ends in an error in state: 180.
+## Ends in an error in state: 187.
 ##
 ## expr -> LET IDENT . COLON type_sig EQ expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET IDENT . COLON type_sig EQ expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -605,7 +605,7 @@ program: CONST IDENT EQ LET IDENT WITH
 
 program: CONST IDENT EQ LET LPAR IDENT COLON IDENT WITH
 ##
-## Ends in an error in state: 99.
+## Ends in an error in state: 106.
 ##
 ## param_opt_typed -> IDENT COLON type_sig . [ RPAR COMMA ]
 ## type_expr -> type_sig . [ CONTRACT CONT ]
@@ -619,7 +619,7 @@ program: CONST IDENT EQ LET LPAR IDENT COLON IDENT WITH
 
 program: CONST IDENT EQ LET LPAR IDENT COLON WITH
 ##
-## Ends in an error in state: 98.
+## Ends in an error in state: 105.
 ##
 ## param_opt_typed -> IDENT COLON . type_sig [ RPAR COMMA ]
 ##
@@ -631,7 +631,7 @@ program: CONST IDENT EQ LET LPAR IDENT COLON WITH
 
 program: CONST IDENT EQ LET LPAR IDENT COMMA WITH
 ##
-## Ends in an error in state: 178.
+## Ends in an error in state: 185.
 ##
 ## separated_nonempty_list(COMMA,param_opt_typed) -> param_opt_typed COMMA . separated_nonempty_list(COMMA,param_opt_typed) [ RPAR ]
 ##
@@ -641,9 +641,9 @@ program: CONST IDENT EQ LET LPAR IDENT COMMA WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT IN UNIT UNIT
+program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT IN UNIT VIEW
 ##
-## Ends in an error in state: 176.
+## Ends in an error in state: 183.
 ##
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ expr IN expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -670,7 +670,7 @@ program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT IN UNIT UNIT
 
 program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT IN WITH
 ##
-## Ends in an error in state: 175.
+## Ends in an error in state: 182.
 ##
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ expr IN . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -680,9 +680,9 @@ program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT IN WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT UNIT
+program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT VIEW
 ##
-## Ends in an error in state: 174.
+## Ends in an error in state: 181.
 ##
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ expr . IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -710,7 +710,7 @@ program: CONST IDENT EQ LET LPAR IDENT RPAR EQ UNIT UNIT
 
 program: CONST IDENT EQ LET LPAR IDENT RPAR EQ WITH
 ##
-## Ends in an error in state: 102.
+## Ends in an error in state: 109.
 ##
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ . expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -723,7 +723,7 @@ program: CONST IDENT EQ LET LPAR IDENT RPAR EQ WITH
 
 program: CONST IDENT EQ LET LPAR IDENT RPAR WITH
 ##
-## Ends in an error in state: 101.
+## Ends in an error in state: 108.
 ##
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR . EQ expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET LPAR separated_nonempty_list(COMMA,param_opt_typed) RPAR . EQ expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -736,7 +736,7 @@ program: CONST IDENT EQ LET LPAR IDENT RPAR WITH
 
 program: CONST IDENT EQ LET LPAR IDENT WITH
 ##
-## Ends in an error in state: 97.
+## Ends in an error in state: 104.
 ##
 ## param_opt_typed -> IDENT . COLON type_sig [ RPAR COMMA ]
 ## param_opt_typed -> IDENT . [ RPAR COMMA ]
@@ -749,7 +749,7 @@ program: CONST IDENT EQ LET LPAR IDENT WITH
 
 program: CONST IDENT EQ LET LPAR WITH
 ##
-## Ends in an error in state: 96.
+## Ends in an error in state: 103.
 ##
 ## expr -> LET LPAR . separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET LPAR . separated_nonempty_list(COMMA,param_opt_typed) RPAR EQ expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -762,7 +762,7 @@ program: CONST IDENT EQ LET LPAR WITH
 
 program: CONST IDENT EQ LET WITH
 ##
-## Ends in an error in state: 95.
+## Ends in an error in state: 102.
 ##
 ## expr -> LET . IDENT COLON type_sig EQ expr IN expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LET . IDENT COLON type_sig EQ expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -779,12 +779,12 @@ program: CONST IDENT EQ LET WITH
 
 program: CONST IDENT EQ LPAR IDENT COLON IDENT RBRACE
 ##
-## Ends in an error in state: 192.
+## Ends in an error in state: 199.
 ##
-## expr -> LPAR separated_nonempty_list(COMMA,parameter) . RPAR LAMBDAB LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
+## expr -> LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR LAMBDAB LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
 ## The known suffix of the stack is as follows:
-## LPAR separated_nonempty_list(COMMA,parameter)
+## LPAR loption(separated_nonempty_list(COMMA,parameter))
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
@@ -792,15 +792,31 @@ program: CONST IDENT EQ LPAR IDENT COLON IDENT RBRACE
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 41, spurious reduction of production parameter -> IDENT COLON type_sig 
 ## In state 44, spurious reduction of production separated_nonempty_list(COMMA,parameter) -> parameter 
+## In state 55, spurious reduction of production loption(separated_nonempty_list(COMMA,parameter)) -> separated_nonempty_list(COMMA,parameter) 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LPAR IDENT COLON IDENT RPAR LAMBDAB LPAR UNIT WITH
+program: CONST IDENT EQ LPAR IDENT WITH
 ##
-## Ends in an error in state: 196.
+## Ends in an error in state: 198.
 ##
-## expr -> LPAR separated_nonempty_list(COMMA,parameter) RPAR LAMBDAB LPAR expr . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
+## expr -> IDENT . [ SUB SEMICOLON RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA COLON AND ADD ]
+## expr -> IDENT . HT IDENT [ SUB SEMICOLON RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA COLON AND ADD ]
+## left -> IDENT . [ LPAR EQ DOT ]
+## parameter -> IDENT . COLON type_sig [ RPAR COMMA ]
+##
+## The known suffix of the stack is as follows:
+## IDENT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONST IDENT EQ LPAR RPAR LAMBDAB LPAR UNIT WITH
+##
+## Ends in an error in state: 203.
+##
+## expr -> LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LAMBDAB LPAR expr . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . ADD expr [ SUB RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
 ## expr -> expr . SUB expr [ SUB RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
 ## expr -> expr . DIV expr [ SUB RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -818,65 +834,50 @@ program: CONST IDENT EQ LPAR IDENT COLON IDENT RPAR LAMBDAB LPAR UNIT WITH
 ## expr -> expr . LPAR loption(separated_nonempty_list(COMMA,expr)) RPAR [ SUB RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
 ##
 ## The known suffix of the stack is as follows:
-## LPAR separated_nonempty_list(COMMA,parameter) RPAR LAMBDAB LPAR expr
+## LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LAMBDAB LPAR expr
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LPAR IDENT COLON IDENT RPAR LAMBDAB LPAR WITH
+program: CONST IDENT EQ LPAR RPAR LAMBDAB LPAR WITH
 ##
-## Ends in an error in state: 195.
+## Ends in an error in state: 202.
 ##
-## expr -> LPAR separated_nonempty_list(COMMA,parameter) RPAR LAMBDAB LPAR . expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
+## expr -> LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LAMBDAB LPAR . expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
 ## The known suffix of the stack is as follows:
-## LPAR separated_nonempty_list(COMMA,parameter) RPAR LAMBDAB LPAR
+## LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LAMBDAB LPAR
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LPAR IDENT COLON IDENT RPAR LAMBDAB WITH
+program: CONST IDENT EQ LPAR RPAR LAMBDAB WITH
 ##
-## Ends in an error in state: 194.
+## Ends in an error in state: 201.
 ##
-## expr -> LPAR separated_nonempty_list(COMMA,parameter) RPAR LAMBDAB . LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
+## expr -> LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LAMBDAB . LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
 ## The known suffix of the stack is as follows:
-## LPAR separated_nonempty_list(COMMA,parameter) RPAR LAMBDAB
+## LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LAMBDAB
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ LPAR IDENT COLON IDENT RPAR WITH
+program: CONST IDENT EQ LPAR RPAR WITH
 ##
-## Ends in an error in state: 193.
+## Ends in an error in state: 200.
 ##
-## expr -> LPAR separated_nonempty_list(COMMA,parameter) RPAR . LAMBDAB LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
-##
-## The known suffix of the stack is as follows:
-## LPAR separated_nonempty_list(COMMA,parameter) RPAR
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-program: CONST IDENT EQ LPAR IDENT WITH
-##
-## Ends in an error in state: 191.
-##
-## expr -> IDENT . [ SUB SEMICOLON RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA COLON AND ADD ]
-## expr -> IDENT . HT IDENT [ SUB SEMICOLON RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA COLON AND ADD ]
-## left -> IDENT . [ LPAR EQ DOT ]
-## parameter -> IDENT . COLON type_sig [ RPAR COMMA ]
+## expr -> LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . LAMBDAB LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
 ## The known suffix of the stack is as follows:
-## IDENT
+## LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: CONST IDENT EQ LPAR UNIT COLON IDENT WITH
 ##
-## Ends in an error in state: 210.
+## Ends in an error in state: 217.
 ##
 ## expr -> LPAR expr COLON type_sig . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## type_expr -> type_sig . [ CONTRACT CONT ]
@@ -890,7 +891,7 @@ program: CONST IDENT EQ LPAR UNIT COLON IDENT WITH
 
 program: CONST IDENT EQ LPAR UNIT COLON WITH
 ##
-## Ends in an error in state: 209.
+## Ends in an error in state: 216.
 ##
 ## expr -> LPAR expr COLON . type_sig RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -902,7 +903,7 @@ program: CONST IDENT EQ LPAR UNIT COLON WITH
 
 program: CONST IDENT EQ LPAR UNIT COMMA UNIT RSQUARE
 ##
-## Ends in an error in state: 207.
+## Ends in an error in state: 214.
 ##
 ## expr -> LPAR expr COMMA separated_nonempty_list(COMMA,expr) . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -913,14 +914,14 @@ program: CONST IDENT EQ LPAR UNIT COMMA UNIT RSQUARE
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 125, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
+## In state 132, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: CONST IDENT EQ LPAR UNIT COMMA WITH
 ##
-## Ends in an error in state: 206.
+## Ends in an error in state: 213.
 ##
 ## expr -> LPAR expr COMMA . separated_nonempty_list(COMMA,expr) RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -932,7 +933,7 @@ program: CONST IDENT EQ LPAR UNIT COMMA WITH
 
 program: CONST IDENT EQ LPAR UNIT SEMICOLON UNIT RBRACE
 ##
-## Ends in an error in state: 200.
+## Ends in an error in state: 207.
 ##
 ## expr -> LPAR expr SEMICOLON fun_body . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -943,14 +944,14 @@ program: CONST IDENT EQ LPAR UNIT SEMICOLON UNIT RBRACE
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 202, spurious reduction of production fun_body -> expr 
+## In state 209, spurious reduction of production fun_body -> expr 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: CONST IDENT EQ LPAR UNIT SEMICOLON UNIT SEMICOLON WITH
 ##
-## Ends in an error in state: 203.
+## Ends in an error in state: 210.
 ##
 ## fun_body -> expr SEMICOLON . fun_body [ RPAR RBRACE ]
 ##
@@ -962,7 +963,7 @@ program: CONST IDENT EQ LPAR UNIT SEMICOLON UNIT SEMICOLON WITH
 
 program: CONST IDENT EQ LPAR UNIT SEMICOLON UNIT WITH
 ##
-## Ends in an error in state: 202.
+## Ends in an error in state: 209.
 ##
 ## expr -> expr . ADD expr [ SUB SEMICOLON RPAR RBRACE OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
 ## expr -> expr . SUB expr [ SUB SEMICOLON RPAR RBRACE OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -990,7 +991,7 @@ program: CONST IDENT EQ LPAR UNIT SEMICOLON UNIT WITH
 
 program: CONST IDENT EQ LPAR UNIT SEMICOLON WITH
 ##
-## Ends in an error in state: 199.
+## Ends in an error in state: 206.
 ##
 ## expr -> LPAR expr SEMICOLON . fun_body RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1002,7 +1003,7 @@ program: CONST IDENT EQ LPAR UNIT SEMICOLON WITH
 
 program: CONST IDENT EQ LPAR UNIT WITH
 ##
-## Ends in an error in state: 198.
+## Ends in an error in state: 205.
 ##
 ## expr -> LPAR expr . COMMA separated_nonempty_list(COMMA,expr) RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . ADD expr [ SUB SEMICOLON RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA COLON AND ADD ]
@@ -1032,10 +1033,10 @@ program: CONST IDENT EQ LPAR UNIT WITH
 
 program: CONST IDENT EQ LPAR WITH
 ##
-## Ends in an error in state: 94.
+## Ends in an error in state: 101.
 ##
 ## expr -> LPAR . expr COMMA separated_nonempty_list(COMMA,expr) RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
-## expr -> LPAR . separated_nonempty_list(COMMA,parameter) RPAR LAMBDAB LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
+## expr -> LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR LAMBDAB LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LPAR . expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LPAR . expr COLON type_sig RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LPAR . expr SEMICOLON fun_body RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1048,7 +1049,7 @@ program: CONST IDENT EQ LPAR WITH
 
 program: CONST IDENT EQ LSQUARE LBRACE IDENT WITH
 ##
-## Ends in an error in state: 213.
+## Ends in an error in state: 220.
 ##
 ## erec_element -> IDENT . EQ expr [ RBRACE COMMA ]
 ## expr -> IDENT . [ SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COLON AND ADD ]
@@ -1063,7 +1064,7 @@ program: CONST IDENT EQ LSQUARE LBRACE IDENT WITH
 
 program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON ADDRESS RBRACE COMMA LBRACE WITH
 ##
-## Ends in an error in state: 224.
+## Ends in an error in state: 231.
 ##
 ## emap_element -> LBRACE . expr COLON expr RBRACE [ RSQUARE COMMA ]
 ##
@@ -1075,7 +1076,7 @@ program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON ADDRESS RBRACE COMMA LBRACE WI
 
 program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON ADDRESS RBRACE COMMA WITH
 ##
-## Ends in an error in state: 223.
+## Ends in an error in state: 230.
 ##
 ## separated_nonempty_list(COMMA,emap_element) -> emap_element COMMA . separated_nonempty_list(COMMA,emap_element) [ RSQUARE ]
 ##
@@ -1087,7 +1088,7 @@ program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON ADDRESS RBRACE COMMA WITH
 
 program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON ADDRESS RBRACE WITH
 ##
-## Ends in an error in state: 222.
+## Ends in an error in state: 229.
 ##
 ## separated_nonempty_list(COMMA,emap_element) -> emap_element . [ RSQUARE ]
 ## separated_nonempty_list(COMMA,emap_element) -> emap_element . COMMA separated_nonempty_list(COMMA,emap_element) [ RSQUARE ]
@@ -1100,7 +1101,7 @@ program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON ADDRESS RBRACE WITH
 
 program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON UNIT WITH
 ##
-## Ends in an error in state: 216.
+## Ends in an error in state: 223.
 ##
 ## emap_element -> LBRACE expr COLON expr . RBRACE [ RSQUARE COMMA ]
 ## expr -> expr . ADD expr [ SUB RBRACE OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -1127,7 +1128,7 @@ program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON UNIT WITH
 
 program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON WITH
 ##
-## Ends in an error in state: 215.
+## Ends in an error in state: 222.
 ##
 ## emap_element -> LBRACE expr COLON . expr RBRACE [ RSQUARE COMMA ]
 ##
@@ -1139,7 +1140,7 @@ program: CONST IDENT EQ LSQUARE LBRACE UNIT COLON WITH
 
 program: CONST IDENT EQ LSQUARE LBRACE UNIT WITH
 ##
-## Ends in an error in state: 214.
+## Ends in an error in state: 221.
 ##
 ## emap_element -> LBRACE expr . COLON expr RBRACE [ RSQUARE COMMA ]
 ## expr -> expr . ADD expr [ SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COLON AND ADD ]
@@ -1166,7 +1167,7 @@ program: CONST IDENT EQ LSQUARE LBRACE UNIT WITH
 
 program: CONST IDENT EQ LSQUARE LBRACE WITH
 ##
-## Ends in an error in state: 212.
+## Ends in an error in state: 219.
 ##
 ## emap_element -> LBRACE . expr COLON expr RBRACE [ RSQUARE COMMA ]
 ## expr -> LBRACE . separated_nonempty_list(COMMA,erec_element) RBRACE [ SUB RSQUARE OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA AND ADD ]
@@ -1179,7 +1180,7 @@ program: CONST IDENT EQ LSQUARE LBRACE WITH
 
 program: CONST IDENT EQ LSQUARE UNIT COMMA WITH
 ##
-## Ends in an error in state: 157.
+## Ends in an error in state: 164.
 ##
 ## separated_nonempty_list(COMMA,expr) -> expr COMMA . separated_nonempty_list(COMMA,expr) [ RSQUARE RPAR ]
 ##
@@ -1191,7 +1192,7 @@ program: CONST IDENT EQ LSQUARE UNIT COMMA WITH
 
 program: CONST IDENT EQ LSQUARE UNIT RPAR
 ##
-## Ends in an error in state: 220.
+## Ends in an error in state: 227.
 ##
 ## expr -> LSQUARE loption(separated_nonempty_list(COMMA,expr)) . RSQUARE [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1202,15 +1203,15 @@ program: CONST IDENT EQ LSQUARE UNIT RPAR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 125, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
-## In state 122, spurious reduction of production loption(separated_nonempty_list(COMMA,expr)) -> separated_nonempty_list(COMMA,expr) 
+## In state 132, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
+## In state 129, spurious reduction of production loption(separated_nonempty_list(COMMA,expr)) -> separated_nonempty_list(COMMA,expr) 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: CONST IDENT EQ LSQUARE UNIT WITH
 ##
-## Ends in an error in state: 125.
+## Ends in an error in state: 132.
 ##
 ## expr -> expr . ADD expr [ SUB RSQUARE RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA AND ADD ]
 ## expr -> expr . SUB expr [ SUB RSQUARE RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV COMMA AND ADD ]
@@ -1238,7 +1239,7 @@ program: CONST IDENT EQ LSQUARE UNIT WITH
 
 program: CONST IDENT EQ LSQUARE WITH
 ##
-## Ends in an error in state: 93.
+## Ends in an error in state: 100.
 ##
 ## expr -> LSQUARE . loption(separated_nonempty_list(COMMA,expr)) RSQUARE [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> LSQUARE . separated_nonempty_list(COMMA,emap_element) RSQUARE [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1249,9 +1250,9 @@ program: CONST IDENT EQ LSQUARE WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ MATCH UNIT UNIT
+program: CONST IDENT EQ MATCH UNIT VIEW
 ##
-## Ends in an error in state: 226.
+## Ends in an error in state: 233.
 ##
 ## expr -> expr . ADD expr [ WITH SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
 ## expr -> expr . SUB expr [ WITH SUB OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -1276,9 +1277,9 @@ program: CONST IDENT EQ MATCH UNIT UNIT
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ MATCH UNIT WITH PIPE UNDERSCORE LAMBDA UNIT UNIT
+program: CONST IDENT EQ MATCH UNIT WITH PIPE UNDERSCORE LAMBDA UNIT VIEW
 ##
-## Ends in an error in state: 231.
+## Ends in an error in state: 238.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1305,7 +1306,7 @@ program: CONST IDENT EQ MATCH UNIT WITH PIPE UNDERSCORE LAMBDA UNIT UNIT
 
 program: CONST IDENT EQ MATCH UNIT WITH PIPE UNDERSCORE LAMBDA WITH
 ##
-## Ends in an error in state: 230.
+## Ends in an error in state: 237.
 ##
 ## match_case -> PIPE UNDERSCORE LAMBDA . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1317,7 +1318,7 @@ program: CONST IDENT EQ MATCH UNIT WITH PIPE UNDERSCORE LAMBDA WITH
 
 program: CONST IDENT EQ MATCH UNIT WITH PIPE UNDERSCORE WITH
 ##
-## Ends in an error in state: 229.
+## Ends in an error in state: 236.
 ##
 ## match_case -> PIPE UNDERSCORE . LAMBDA expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1327,9 +1328,9 @@ program: CONST IDENT EQ MATCH UNIT WITH PIPE UNDERSCORE WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ MATCH UNIT WITH PIPE UNIT LAMBDA UNIT UNIT
+program: CONST IDENT EQ MATCH UNIT WITH PIPE UNIT LAMBDA UNIT VIEW
 ##
-## Ends in an error in state: 234.
+## Ends in an error in state: 241.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1356,7 +1357,7 @@ program: CONST IDENT EQ MATCH UNIT WITH PIPE UNIT LAMBDA UNIT UNIT
 
 program: CONST IDENT EQ MATCH UNIT WITH PIPE UNIT LAMBDA WITH
 ##
-## Ends in an error in state: 233.
+## Ends in an error in state: 240.
 ##
 ## match_case -> PIPE expr LAMBDA . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1368,7 +1369,7 @@ program: CONST IDENT EQ MATCH UNIT WITH PIPE UNIT LAMBDA WITH
 
 program: CONST IDENT EQ MATCH UNIT WITH PIPE UNIT WITH
 ##
-## Ends in an error in state: 232.
+## Ends in an error in state: 239.
 ##
 ## expr -> expr . ADD expr [ SUB OR NEQ MUL MOD LTE LT LPAR LAMBDA GTE GT EQEQ DOT DIV AND ADD ]
 ## expr -> expr . SUB expr [ SUB OR NEQ MUL MOD LTE LT LPAR LAMBDA GTE GT EQEQ DOT DIV AND ADD ]
@@ -1395,7 +1396,7 @@ program: CONST IDENT EQ MATCH UNIT WITH PIPE UNIT WITH
 
 program: CONST IDENT EQ MATCH UNIT WITH PIPE WITH
 ##
-## Ends in an error in state: 228.
+## Ends in an error in state: 235.
 ##
 ## match_case -> PIPE . expr LAMBDA expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## match_case -> PIPE . UNDERSCORE LAMBDA expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1408,7 +1409,7 @@ program: CONST IDENT EQ MATCH UNIT WITH PIPE WITH
 
 program: CONST IDENT EQ MATCH UNIT WITH WITH
 ##
-## Ends in an error in state: 227.
+## Ends in an error in state: 234.
 ##
 ## expr -> MATCH expr WITH . nonempty_list(match_case) [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1420,7 +1421,7 @@ program: CONST IDENT EQ MATCH UNIT WITH WITH
 
 program: CONST IDENT EQ MATCH WITH
 ##
-## Ends in an error in state: 92.
+## Ends in an error in state: 99.
 ##
 ## expr -> MATCH . expr WITH nonempty_list(match_case) [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1430,9 +1431,9 @@ program: CONST IDENT EQ MATCH WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ NOT UNIT UNIT
+program: CONST IDENT EQ NOT UNIT VIEW
 ##
-## Ends in an error in state: 238.
+## Ends in an error in state: 245.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1459,7 +1460,7 @@ program: CONST IDENT EQ NOT UNIT UNIT
 
 program: CONST IDENT EQ NOT WITH
 ##
-## Ends in an error in state: 88.
+## Ends in an error in state: 95.
 ##
 ## expr -> NOT . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1471,7 +1472,7 @@ program: CONST IDENT EQ NOT WITH
 
 program: CONST IDENT EQ SOME LPAR UNIT WITH
 ##
-## Ends in an error in state: 239.
+## Ends in an error in state: 246.
 ##
 ## expr -> SOME LPAR expr . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . ADD expr [ SUB RPAR OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -1498,7 +1499,7 @@ program: CONST IDENT EQ SOME LPAR UNIT WITH
 
 program: CONST IDENT EQ SOME LPAR WITH
 ##
-## Ends in an error in state: 86.
+## Ends in an error in state: 93.
 ##
 ## expr -> SOME LPAR . expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1510,7 +1511,7 @@ program: CONST IDENT EQ SOME LPAR WITH
 
 program: CONST IDENT EQ SOME WITH
 ##
-## Ends in an error in state: 85.
+## Ends in an error in state: 92.
 ##
 ## expr -> SOME . LPAR expr RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1522,7 +1523,7 @@ program: CONST IDENT EQ SOME WITH
 
 program: CONST IDENT EQ TEZOS DOT IDENT WITH
 ##
-## Ends in an error in state: 120.
+## Ends in an error in state: 127.
 ##
 ## expr -> left . EQ expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> left . DOT IDENT [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1537,7 +1538,7 @@ program: CONST IDENT EQ TEZOS DOT IDENT WITH
 
 program: CONST IDENT EQ TEZOS DOT WITH
 ##
-## Ends in an error in state: 82.
+## Ends in an error in state: 89.
 ##
 ## left -> TEZOS DOT . IDENT [ LPAR EQ DOT ]
 ##
@@ -1549,7 +1550,7 @@ program: CONST IDENT EQ TEZOS DOT WITH
 
 program: CONST IDENT EQ TEZOS WITH
 ##
-## Ends in an error in state: 81.
+## Ends in an error in state: 88.
 ##
 ## left -> TEZOS . DOT IDENT [ LPAR EQ DOT ]
 ##
@@ -1559,9 +1560,9 @@ program: CONST IDENT EQ TEZOS WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ THIS DOT IDENT UNIT
+program: CONST IDENT EQ THIS DOT IDENT VIEW
 ##
-## Ends in an error in state: 80.
+## Ends in an error in state: 87.
 ##
 ## expr -> THIS DOT IDENT . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## left -> THIS DOT IDENT . [ LPAR EQ DOT ]
@@ -1574,7 +1575,7 @@ program: CONST IDENT EQ THIS DOT IDENT UNIT
 
 program: CONST IDENT EQ THIS DOT WITH
 ##
-## Ends in an error in state: 79.
+## Ends in an error in state: 86.
 ##
 ## expr -> THIS DOT . IDENT [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## left -> THIS DOT . IDENT [ LPAR EQ DOT ]
@@ -1587,7 +1588,7 @@ program: CONST IDENT EQ THIS DOT WITH
 
 program: CONST IDENT EQ THIS WITH
 ##
-## Ends in an error in state: 78.
+## Ends in an error in state: 85.
 ##
 ## expr -> THIS . DOT IDENT [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## left -> THIS . DOT IDENT [ LPAR EQ DOT ]
@@ -1598,9 +1599,9 @@ program: CONST IDENT EQ THIS WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT ADD UNIT UNIT
+program: CONST IDENT EQ UNIT ADD UNIT VIEW
 ##
-## Ends in an error in state: 146.
+## Ends in an error in state: 153.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr ADD expr . [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1627,7 +1628,7 @@ program: CONST IDENT EQ UNIT ADD UNIT UNIT
 
 program: CONST IDENT EQ UNIT ADD WITH
 ##
-## Ends in an error in state: 145.
+## Ends in an error in state: 152.
 ##
 ## expr -> expr ADD . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1637,9 +1638,9 @@ program: CONST IDENT EQ UNIT ADD WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT AND UNIT UNIT
+program: CONST IDENT EQ UNIT AND UNIT VIEW
 ##
-## Ends in an error in state: 156.
+## Ends in an error in state: 163.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1666,7 +1667,7 @@ program: CONST IDENT EQ UNIT AND UNIT UNIT
 
 program: CONST IDENT EQ UNIT AND WITH
 ##
-## Ends in an error in state: 155.
+## Ends in an error in state: 162.
 ##
 ## expr -> expr AND . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1676,9 +1677,9 @@ program: CONST IDENT EQ UNIT AND WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT DIV UNIT UNIT
+program: CONST IDENT EQ UNIT DIV UNIT VIEW
 ##
-## Ends in an error in state: 138.
+## Ends in an error in state: 145.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1705,7 +1706,7 @@ program: CONST IDENT EQ UNIT DIV UNIT UNIT
 
 program: CONST IDENT EQ UNIT DIV WITH
 ##
-## Ends in an error in state: 137.
+## Ends in an error in state: 144.
 ##
 ## expr -> expr DIV . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1717,7 +1718,7 @@ program: CONST IDENT EQ UNIT DIV WITH
 
 program: CONST IDENT EQ UNIT DOT WITH
 ##
-## Ends in an error in state: 133.
+## Ends in an error in state: 140.
 ##
 ## expr -> expr DOT . IDENT [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1727,9 +1728,9 @@ program: CONST IDENT EQ UNIT DOT WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT EQEQ UNIT UNIT
+program: CONST IDENT EQ UNIT EQEQ UNIT VIEW
 ##
-## Ends in an error in state: 154.
+## Ends in an error in state: 161.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1756,7 +1757,7 @@ program: CONST IDENT EQ UNIT EQEQ UNIT UNIT
 
 program: CONST IDENT EQ UNIT EQEQ WITH
 ##
-## Ends in an error in state: 153.
+## Ends in an error in state: 160.
 ##
 ## expr -> expr EQEQ . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1766,9 +1767,9 @@ program: CONST IDENT EQ UNIT EQEQ WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT GT UNIT UNIT
+program: CONST IDENT EQ UNIT GT UNIT VIEW
 ##
-## Ends in an error in state: 152.
+## Ends in an error in state: 159.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1795,7 +1796,7 @@ program: CONST IDENT EQ UNIT GT UNIT UNIT
 
 program: CONST IDENT EQ UNIT GT WITH
 ##
-## Ends in an error in state: 151.
+## Ends in an error in state: 158.
 ##
 ## expr -> expr GT . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1805,9 +1806,9 @@ program: CONST IDENT EQ UNIT GT WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT GTE UNIT UNIT
+program: CONST IDENT EQ UNIT GTE UNIT VIEW
 ##
-## Ends in an error in state: 150.
+## Ends in an error in state: 157.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1834,7 +1835,7 @@ program: CONST IDENT EQ UNIT GTE UNIT UNIT
 
 program: CONST IDENT EQ UNIT GTE WITH
 ##
-## Ends in an error in state: 149.
+## Ends in an error in state: 156.
 ##
 ## expr -> expr GTE . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1846,7 +1847,7 @@ program: CONST IDENT EQ UNIT GTE WITH
 
 program: CONST IDENT EQ UNIT LPAR UNIT RSQUARE
 ##
-## Ends in an error in state: 131.
+## Ends in an error in state: 138.
 ##
 ## expr -> expr LPAR loption(separated_nonempty_list(COMMA,expr)) . RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1857,15 +1858,15 @@ program: CONST IDENT EQ UNIT LPAR UNIT RSQUARE
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 125, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
-## In state 122, spurious reduction of production loption(separated_nonempty_list(COMMA,expr)) -> separated_nonempty_list(COMMA,expr) 
+## In state 132, spurious reduction of production separated_nonempty_list(COMMA,expr) -> expr 
+## In state 129, spurious reduction of production loption(separated_nonempty_list(COMMA,expr)) -> separated_nonempty_list(COMMA,expr) 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: CONST IDENT EQ UNIT LPAR WITH
 ##
-## Ends in an error in state: 130.
+## Ends in an error in state: 137.
 ##
 ## expr -> expr LPAR . loption(separated_nonempty_list(COMMA,expr)) RPAR [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1875,9 +1876,9 @@ program: CONST IDENT EQ UNIT LPAR WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT LT UNIT UNIT
+program: CONST IDENT EQ UNIT LT UNIT VIEW
 ##
-## Ends in an error in state: 148.
+## Ends in an error in state: 155.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1904,7 +1905,7 @@ program: CONST IDENT EQ UNIT LT UNIT UNIT
 
 program: CONST IDENT EQ UNIT LT WITH
 ##
-## Ends in an error in state: 147.
+## Ends in an error in state: 154.
 ##
 ## expr -> expr LT . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1914,9 +1915,9 @@ program: CONST IDENT EQ UNIT LT WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT LTE UNIT UNIT
+program: CONST IDENT EQ UNIT LTE UNIT VIEW
 ##
-## Ends in an error in state: 144.
+## Ends in an error in state: 151.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1943,7 +1944,7 @@ program: CONST IDENT EQ UNIT LTE UNIT UNIT
 
 program: CONST IDENT EQ UNIT LTE WITH
 ##
-## Ends in an error in state: 143.
+## Ends in an error in state: 150.
 ##
 ## expr -> expr LTE . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1953,9 +1954,9 @@ program: CONST IDENT EQ UNIT LTE WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT MOD UNIT UNIT
+program: CONST IDENT EQ UNIT MOD UNIT VIEW
 ##
-## Ends in an error in state: 136.
+## Ends in an error in state: 143.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -1982,7 +1983,7 @@ program: CONST IDENT EQ UNIT MOD UNIT UNIT
 
 program: CONST IDENT EQ UNIT MOD WITH
 ##
-## Ends in an error in state: 135.
+## Ends in an error in state: 142.
 ##
 ## expr -> expr MOD . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -1992,9 +1993,9 @@ program: CONST IDENT EQ UNIT MOD WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT MUL UNIT UNIT
+program: CONST IDENT EQ UNIT MUL UNIT VIEW
 ##
-## Ends in an error in state: 129.
+## Ends in an error in state: 136.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -2021,7 +2022,7 @@ program: CONST IDENT EQ UNIT MUL UNIT UNIT
 
 program: CONST IDENT EQ UNIT MUL WITH
 ##
-## Ends in an error in state: 128.
+## Ends in an error in state: 135.
 ##
 ## expr -> expr MUL . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -2031,9 +2032,9 @@ program: CONST IDENT EQ UNIT MUL WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT NEQ UNIT UNIT
+program: CONST IDENT EQ UNIT NEQ UNIT VIEW
 ##
-## Ends in an error in state: 142.
+## Ends in an error in state: 149.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -2060,7 +2061,7 @@ program: CONST IDENT EQ UNIT NEQ UNIT UNIT
 
 program: CONST IDENT EQ UNIT NEQ WITH
 ##
-## Ends in an error in state: 141.
+## Ends in an error in state: 148.
 ##
 ## expr -> expr NEQ . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -2070,9 +2071,9 @@ program: CONST IDENT EQ UNIT NEQ WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT OR UNIT UNIT
+program: CONST IDENT EQ UNIT OR UNIT VIEW
 ##
-## Ends in an error in state: 140.
+## Ends in an error in state: 147.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -2099,7 +2100,7 @@ program: CONST IDENT EQ UNIT OR UNIT UNIT
 
 program: CONST IDENT EQ UNIT OR WITH
 ##
-## Ends in an error in state: 139.
+## Ends in an error in state: 146.
 ##
 ## expr -> expr OR . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -2109,9 +2110,9 @@ program: CONST IDENT EQ UNIT OR WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: CONST IDENT EQ UNIT SUB UNIT UNIT
+program: CONST IDENT EQ UNIT SUB UNIT VIEW
 ##
-## Ends in an error in state: 127.
+## Ends in an error in state: 134.
 ##
 ## expr -> expr . ADD expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ## expr -> expr . SUB expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
@@ -2138,7 +2139,7 @@ program: CONST IDENT EQ UNIT SUB UNIT UNIT
 
 program: CONST IDENT EQ UNIT SUB WITH
 ##
-## Ends in an error in state: 126.
+## Ends in an error in state: 133.
 ##
 ## expr -> expr SUB . expr [ WITH THEN SUB SEMICOLON RSQUARE RPAR RBRACE PIPE OR NEQ MUL MOD LTE LT LPAR LAMBDA IN GTE GT EQEQ ELSE DOT DIV COMMA COLON AND ADD ]
 ##
@@ -2150,7 +2151,7 @@ program: CONST IDENT EQ UNIT SUB WITH
 
 program: CONST IDENT EQ UNIT WITH
 ##
-## Ends in an error in state: 292.
+## Ends in an error in state: 309.
 ##
 ## dconst -> CONST IDENT EQ expr . SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ## expr -> expr . ADD expr [ SUB SEMICOLON OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -2177,7 +2178,7 @@ program: CONST IDENT EQ UNIT WITH
 
 program: CONST IDENT EQ WITH
 ##
-## Ends in an error in state: 291.
+## Ends in an error in state: 308.
 ##
 ## dconst -> CONST IDENT EQ . expr SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2189,7 +2190,7 @@ program: CONST IDENT EQ WITH
 
 program: CONST IDENT WITH
 ##
-## Ends in an error in state: 290.
+## Ends in an error in state: 307.
 ##
 ## dconst -> CONST IDENT . COLON type_expr EQ expr SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ## dconst -> CONST IDENT . EQ expr SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
@@ -2202,7 +2203,7 @@ program: CONST IDENT WITH
 
 program: CONST WITH
 ##
-## Ends in an error in state: 289.
+## Ends in an error in state: 306.
 ##
 ## dconst -> CONST . IDENT COLON type_expr EQ expr SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ## dconst -> CONST . IDENT EQ expr SEMICOLON [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
@@ -2215,7 +2216,7 @@ program: CONST WITH
 
 program: CONTRACT IDENT IMPLEMENTS IDENT LBRACE WITH
 ##
-## Ends in an error in state: 286.
+## Ends in an error in state: 303.
 ##
 ## dcontract -> CONTRACT IDENT IMPLEMENTS IDENT LBRACE . dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2227,7 +2228,7 @@ program: CONTRACT IDENT IMPLEMENTS IDENT LBRACE WITH
 
 program: CONTRACT IDENT IMPLEMENTS IDENT WITH
 ##
-## Ends in an error in state: 285.
+## Ends in an error in state: 302.
 ##
 ## dcontract -> CONTRACT IDENT IMPLEMENTS IDENT . LBRACE dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2239,7 +2240,7 @@ program: CONTRACT IDENT IMPLEMENTS IDENT WITH
 
 program: CONTRACT IDENT IMPLEMENTS WITH
 ##
-## Ends in an error in state: 284.
+## Ends in an error in state: 301.
 ##
 ## dcontract -> CONTRACT IDENT IMPLEMENTS . IDENT LBRACE dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2251,9 +2252,9 @@ program: CONTRACT IDENT IMPLEMENTS WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR IDENT COLON IDENT RBRACE
 ##
-## Ends in an error in state: 261.
+## Ends in an error in state: 278.
 ##
-## dcontract_constructor -> CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR LBRACE list(dcontract_constructor_assign) RBRACE [ RBRACE ENTRY ]
+## dcontract_constructor -> CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR LBRACE list(dcontract_constructor_assign) RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter))
@@ -2271,7 +2272,7 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR IDENT COLON IDENT RBRACE
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE RBRACE WITH
 ##
-## Ends in an error in state: 277.
+## Ends in an error in state: 294.
 ##
 ## dcontract_body -> list(terminated(dcontract_field,SEMICOLON)) dcontract_constructor . list(dcontract_entry) [ RBRACE ]
 ##
@@ -2283,7 +2284,7 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE RBRACE WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT EQ ADDRESS SEMICOLON WITH
 ##
-## Ends in an error in state: 272.
+## Ends in an error in state: 289.
 ##
 ## list(dcontract_constructor_assign) -> dcontract_constructor_assign . list(dcontract_constructor_assign) [ RBRACE ]
 ##
@@ -2295,7 +2296,7 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT EQ AD
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT EQ UNIT WITH
 ##
-## Ends in an error in state: 268.
+## Ends in an error in state: 285.
 ##
 ## dcontract_constructor_assign -> THIS DOT IDENT EQ expr . SEMICOLON [ THIS RBRACE ]
 ## expr -> expr . ADD expr [ SUB SEMICOLON OR NEQ MUL MOD LTE LT LPAR GTE GT EQEQ DOT DIV AND ADD ]
@@ -2322,7 +2323,7 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT EQ UN
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT EQ WITH
 ##
-## Ends in an error in state: 267.
+## Ends in an error in state: 284.
 ##
 ## dcontract_constructor_assign -> THIS DOT IDENT EQ . expr SEMICOLON [ THIS RBRACE ]
 ##
@@ -2334,7 +2335,7 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT EQ WI
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT WITH
 ##
-## Ends in an error in state: 266.
+## Ends in an error in state: 283.
 ##
 ## dcontract_constructor_assign -> THIS DOT IDENT . EQ expr SEMICOLON [ THIS RBRACE ]
 ##
@@ -2346,7 +2347,7 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT IDENT WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT WITH
 ##
-## Ends in an error in state: 265.
+## Ends in an error in state: 282.
 ##
 ## dcontract_constructor_assign -> THIS DOT . IDENT EQ expr SEMICOLON [ THIS RBRACE ]
 ##
@@ -2358,7 +2359,7 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS DOT WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS WITH
 ##
-## Ends in an error in state: 264.
+## Ends in an error in state: 281.
 ##
 ## dcontract_constructor_assign -> THIS . DOT IDENT EQ expr SEMICOLON [ THIS RBRACE ]
 ##
@@ -2370,9 +2371,9 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE THIS WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE WITH
 ##
-## Ends in an error in state: 263.
+## Ends in an error in state: 280.
 ##
-## dcontract_constructor -> CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE . list(dcontract_constructor_assign) RBRACE [ RBRACE ENTRY ]
+## dcontract_constructor -> CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE . list(dcontract_constructor_assign) RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE
@@ -2382,9 +2383,9 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR LBRACE WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR WITH
 ##
-## Ends in an error in state: 262.
+## Ends in an error in state: 279.
 ##
-## dcontract_constructor -> CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . LBRACE list(dcontract_constructor_assign) RBRACE [ RBRACE ENTRY ]
+## dcontract_constructor -> CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . LBRACE list(dcontract_constructor_assign) RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## CONSTRUCTOR LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR
@@ -2394,9 +2395,9 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR RPAR WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR WITH
 ##
-## Ends in an error in state: 260.
+## Ends in an error in state: 277.
 ##
-## dcontract_constructor -> CONSTRUCTOR LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE list(dcontract_constructor_assign) RBRACE [ RBRACE ENTRY ]
+## dcontract_constructor -> CONSTRUCTOR LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE list(dcontract_constructor_assign) RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## CONSTRUCTOR LPAR
@@ -2406,9 +2407,9 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR LPAR WITH
 
 program: CONTRACT IDENT LBRACE CONSTRUCTOR WITH
 ##
-## Ends in an error in state: 259.
+## Ends in an error in state: 276.
 ##
-## dcontract_constructor -> CONSTRUCTOR . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE list(dcontract_constructor_assign) RBRACE [ RBRACE ENTRY ]
+## dcontract_constructor -> CONSTRUCTOR . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE list(dcontract_constructor_assign) RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## CONSTRUCTOR
@@ -2418,9 +2419,9 @@ program: CONTRACT IDENT LBRACE CONSTRUCTOR WITH
 
 program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR IDENT COLON IDENT RBRACE
 ##
-## Ends in an error in state: 254.
+## Ends in an error in state: 271.
 ##
-## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR LBRACE fun_body RBRACE [ RBRACE ENTRY ]
+## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter))
@@ -2438,7 +2439,7 @@ program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR IDENT COLON IDENT RBRACE
 
 program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR LBRACE ADDRESS RBRACE WITH
 ##
-## Ends in an error in state: 275.
+## Ends in an error in state: 292.
 ##
 ## list(dcontract_entry) -> dcontract_entry . list(dcontract_entry) [ RBRACE ]
 ##
@@ -2450,9 +2451,9 @@ program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR LBRACE ADDRESS RBRACE WITH
 
 program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR LBRACE UNIT RPAR
 ##
-## Ends in an error in state: 257.
+## Ends in an error in state: 274.
 ##
-## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body . RBRACE [ RBRACE ENTRY ]
+## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body . RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body
@@ -2461,16 +2462,16 @@ program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR LBRACE UNIT RPAR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 202, spurious reduction of production fun_body -> expr 
+## In state 209, spurious reduction of production fun_body -> expr 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR LBRACE WITH
 ##
-## Ends in an error in state: 256.
+## Ends in an error in state: 273.
 ##
-## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE . fun_body RBRACE [ RBRACE ENTRY ]
+## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE . fun_body RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE
@@ -2480,9 +2481,9 @@ program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR LBRACE WITH
 
 program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR WITH
 ##
-## Ends in an error in state: 255.
+## Ends in an error in state: 272.
 ##
-## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . LBRACE fun_body RBRACE [ RBRACE ENTRY ]
+## dcontract_entry -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR
@@ -2492,9 +2493,9 @@ program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR RPAR WITH
 
 program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR WITH
 ##
-## Ends in an error in state: 253.
+## Ends in an error in state: 270.
 ##
-## dcontract_entry -> ENTRY IDENT LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body RBRACE [ RBRACE ENTRY ]
+## dcontract_entry -> ENTRY IDENT LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## ENTRY IDENT LPAR
@@ -2504,9 +2505,9 @@ program: CONTRACT IDENT LBRACE ENTRY IDENT LPAR WITH
 
 program: CONTRACT IDENT LBRACE ENTRY IDENT WITH
 ##
-## Ends in an error in state: 252.
+## Ends in an error in state: 269.
 ##
-## dcontract_entry -> ENTRY IDENT . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body RBRACE [ RBRACE ENTRY ]
+## dcontract_entry -> ENTRY IDENT . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## ENTRY IDENT
@@ -2516,9 +2517,9 @@ program: CONTRACT IDENT LBRACE ENTRY IDENT WITH
 
 program: CONTRACT IDENT LBRACE ENTRY WITH
 ##
-## Ends in an error in state: 251.
+## Ends in an error in state: 268.
 ##
-## dcontract_entry -> ENTRY . IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body RBRACE [ RBRACE ENTRY ]
+## dcontract_entry -> ENTRY . IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
 ##
 ## The known suffix of the stack is as follows:
 ## ENTRY
@@ -2528,9 +2529,9 @@ program: CONTRACT IDENT LBRACE ENTRY WITH
 
 program: CONTRACT IDENT LBRACE FIELD IDENT COLON IDENT SEMICOLON WITH
 ##
-## Ends in an error in state: 280.
+## Ends in an error in state: 297.
 ##
-## list(terminated(dcontract_field,SEMICOLON)) -> dcontract_field SEMICOLON . list(terminated(dcontract_field,SEMICOLON)) [ RBRACE ENTRY CONSTRUCTOR ]
+## list(terminated(dcontract_field,SEMICOLON)) -> dcontract_field SEMICOLON . list(terminated(dcontract_field,SEMICOLON)) [ VIEW RBRACE ENTRY CONSTRUCTOR ]
 ##
 ## The known suffix of the stack is as follows:
 ## dcontract_field SEMICOLON
@@ -2540,7 +2541,7 @@ program: CONTRACT IDENT LBRACE FIELD IDENT COLON IDENT SEMICOLON WITH
 
 program: CONTRACT IDENT LBRACE FIELD IDENT COLON IDENT WITH
 ##
-## Ends in an error in state: 249.
+## Ends in an error in state: 256.
 ##
 ## dcontract_field -> FIELD IDENT COLON type_sig . [ SEMICOLON ]
 ## type_expr -> type_sig . [ CONTRACT CONT ]
@@ -2554,7 +2555,7 @@ program: CONTRACT IDENT LBRACE FIELD IDENT COLON IDENT WITH
 
 program: CONTRACT IDENT LBRACE FIELD IDENT COLON WITH
 ##
-## Ends in an error in state: 248.
+## Ends in an error in state: 255.
 ##
 ## dcontract_field -> FIELD IDENT COLON . type_sig [ SEMICOLON ]
 ##
@@ -2566,7 +2567,7 @@ program: CONTRACT IDENT LBRACE FIELD IDENT COLON WITH
 
 program: CONTRACT IDENT LBRACE FIELD IDENT WITH
 ##
-## Ends in an error in state: 247.
+## Ends in an error in state: 254.
 ##
 ## dcontract_field -> FIELD IDENT . COLON type_sig [ SEMICOLON ]
 ##
@@ -2578,7 +2579,7 @@ program: CONTRACT IDENT LBRACE FIELD IDENT WITH
 
 program: CONTRACT IDENT LBRACE FIELD WITH
 ##
-## Ends in an error in state: 246.
+## Ends in an error in state: 253.
 ##
 ## dcontract_field -> FIELD . IDENT COLON type_sig [ SEMICOLON ]
 ##
@@ -2588,9 +2589,133 @@ program: CONTRACT IDENT LBRACE FIELD WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
+program: CONTRACT IDENT LBRACE VIEW IDENT LPAR IDENT COLON IDENT RBRACE
+##
+## Ends in an error in state: 261.
+##
+## dcontract_entry -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR COLON type_sig LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter))
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 41, spurious reduction of production parameter -> IDENT COLON type_sig 
+## In state 44, spurious reduction of production separated_nonempty_list(COMMA,parameter) -> parameter 
+## In state 55, spurious reduction of production loption(separated_nonempty_list(COMMA,parameter)) -> separated_nonempty_list(COMMA,parameter) 
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW IDENT LPAR RPAR COLON IDENT LBRACE UNIT RPAR
+##
+## Ends in an error in state: 266.
+##
+## dcontract_entry -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body . RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 209, spurious reduction of production fun_body -> expr 
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW IDENT LPAR RPAR COLON IDENT LBRACE WITH
+##
+## Ends in an error in state: 265.
+##
+## dcontract_entry -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE . fun_body RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW IDENT LPAR RPAR COLON IDENT WITH
+##
+## Ends in an error in state: 264.
+##
+## dcontract_entry -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig . LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
+## type_expr -> type_sig . [ CONTRACT CONT ]
+## type_sig -> type_sig . LAMBDA type_sig [ LBRACE LAMBDA CONTRACT CONT ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW IDENT LPAR RPAR COLON WITH
+##
+## Ends in an error in state: 263.
+##
+## dcontract_entry -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON . type_sig LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW IDENT LPAR RPAR WITH
+##
+## Ends in an error in state: 262.
+##
+## dcontract_entry -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . COLON type_sig LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW IDENT LPAR WITH
+##
+## Ends in an error in state: 260.
+##
+## dcontract_entry -> VIEW IDENT LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW IDENT WITH
+##
+## Ends in an error in state: 259.
+##
+## dcontract_entry -> VIEW IDENT . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: CONTRACT IDENT LBRACE VIEW WITH
+##
+## Ends in an error in state: 258.
+##
+## dcontract_entry -> VIEW . IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body RBRACE [ VIEW RBRACE ENTRY ]
+##
+## The known suffix of the stack is as follows:
+## VIEW
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
 program: CONTRACT IDENT LBRACE WITH
 ##
-## Ends in an error in state: 245.
+## Ends in an error in state: 252.
 ##
 ## dcontract -> CONTRACT IDENT LBRACE . dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2602,7 +2727,7 @@ program: CONTRACT IDENT LBRACE WITH
 
 program: CONTRACT IDENT WITH
 ##
-## Ends in an error in state: 244.
+## Ends in an error in state: 251.
 ##
 ## dcontract -> CONTRACT IDENT . IMPLEMENTS IDENT LBRACE dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ## dcontract -> CONTRACT IDENT . LBRACE dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
@@ -2615,7 +2740,7 @@ program: CONTRACT IDENT WITH
 
 program: CONTRACT WITH
 ##
-## Ends in an error in state: 243.
+## Ends in an error in state: 250.
 ##
 ## dcontract -> CONTRACT . IDENT IMPLEMENTS IDENT LBRACE dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ## dcontract -> CONTRACT . IDENT LBRACE dcontract_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
@@ -2640,7 +2765,7 @@ program: FUNCTION IDENT LPAR IDENT COLON IDENT COMMA WITH
 
 program: FUNCTION IDENT LPAR IDENT COLON IDENT RBRACE
 ##
-## Ends in an error in state: 71.
+## Ends in an error in state: 78.
 ##
 ## dfunction -> FUNCTION IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR COLON type_sig LBRACE fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2698,7 +2823,7 @@ program: FUNCTION IDENT LPAR IDENT WITH
 
 program: FUNCTION IDENT LPAR RPAR COLON IDENT LBRACE UNIT RPAR
 ##
-## Ends in an error in state: 241.
+## Ends in an error in state: 248.
 ##
 ## dfunction -> FUNCTION IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body . RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2709,14 +2834,14 @@ program: FUNCTION IDENT LPAR RPAR COLON IDENT LBRACE UNIT RPAR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 202, spurious reduction of production fun_body -> expr 
+## In state 209, spurious reduction of production fun_body -> expr 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 program: FUNCTION IDENT LPAR RPAR COLON IDENT LBRACE WITH
 ##
-## Ends in an error in state: 75.
+## Ends in an error in state: 82.
 ##
 ## dfunction -> FUNCTION IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE . fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2728,7 +2853,7 @@ program: FUNCTION IDENT LPAR RPAR COLON IDENT LBRACE WITH
 
 program: FUNCTION IDENT LPAR RPAR COLON IDENT WITH
 ##
-## Ends in an error in state: 74.
+## Ends in an error in state: 81.
 ##
 ## dfunction -> FUNCTION IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig . LBRACE fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ## type_expr -> type_sig . [ CONTRACT CONT ]
@@ -2742,7 +2867,7 @@ program: FUNCTION IDENT LPAR RPAR COLON IDENT WITH
 
 program: FUNCTION IDENT LPAR RPAR COLON WITH
 ##
-## Ends in an error in state: 73.
+## Ends in an error in state: 80.
 ##
 ## dfunction -> FUNCTION IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON . type_sig LBRACE fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2754,7 +2879,7 @@ program: FUNCTION IDENT LPAR RPAR COLON WITH
 
 program: FUNCTION IDENT LPAR RPAR WITH
 ##
-## Ends in an error in state: 72.
+## Ends in an error in state: 79.
 ##
 ## dfunction -> FUNCTION IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . COLON type_sig LBRACE fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2766,7 +2891,7 @@ program: FUNCTION IDENT LPAR RPAR WITH
 
 program: FUNCTION IDENT LPAR WITH
 ##
-## Ends in an error in state: 70.
+## Ends in an error in state: 77.
 ##
 ## dfunction -> FUNCTION IDENT LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2778,7 +2903,7 @@ program: FUNCTION IDENT LPAR WITH
 
 program: FUNCTION IDENT WITH
 ##
-## Ends in an error in state: 69.
+## Ends in an error in state: 76.
 ##
 ## dfunction -> FUNCTION IDENT . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2790,7 +2915,7 @@ program: FUNCTION IDENT WITH
 
 program: FUNCTION WITH
 ##
-## Ends in an error in state: 68.
+## Ends in an error in state: 75.
 ##
 ## dfunction -> FUNCTION . IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig LBRACE fun_body RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2802,7 +2927,7 @@ program: FUNCTION WITH
 
 program: IMPORT STRING SEMICOLON WITH
 ##
-## Ends in an error in state: 309.
+## Ends in an error in state: 326.
 ##
 ## list(dimport) -> dimport . list(dimport) [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2838,7 +2963,7 @@ program: IMPORT WITH
 
 program: INTERFACE IDENT EXTENDS IDENT LBRACE WITH
 ##
-## Ends in an error in state: 65.
+## Ends in an error in state: 72.
 ##
 ## dinterface -> INTERFACE IDENT EXTENDS IDENT LBRACE . list(terminated(signature,SEMICOLON)) RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2850,7 +2975,7 @@ program: INTERFACE IDENT EXTENDS IDENT LBRACE WITH
 
 program: INTERFACE IDENT EXTENDS IDENT WITH
 ##
-## Ends in an error in state: 64.
+## Ends in an error in state: 71.
 ##
 ## dinterface -> INTERFACE IDENT EXTENDS IDENT . LBRACE list(terminated(signature,SEMICOLON)) RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2862,7 +2987,7 @@ program: INTERFACE IDENT EXTENDS IDENT WITH
 
 program: INTERFACE IDENT EXTENDS WITH
 ##
-## Ends in an error in state: 63.
+## Ends in an error in state: 70.
 ##
 ## dinterface -> INTERFACE IDENT EXTENDS . IDENT LBRACE list(terminated(signature,SEMICOLON)) RBRACE [ TYPE INTERFACE FUNCTION EOF CONTRACT CONST ]
 ##
@@ -2874,7 +2999,7 @@ program: INTERFACE IDENT EXTENDS WITH
 
 program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR IDENT COLON IDENT RBRACE
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 63.
 ##
 ## signature -> ENTRY IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR [ SEMICOLON ]
 ##
@@ -2894,7 +3019,7 @@ program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR IDENT COLON IDENT RBRACE
 
 program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR RPAR SEMICOLON WITH
 ##
-## Ends in an error in state: 59.
+## Ends in an error in state: 66.
 ##
 ## list(terminated(signature,SEMICOLON)) -> signature SEMICOLON . list(terminated(signature,SEMICOLON)) [ RBRACE ]
 ##
@@ -2906,7 +3031,7 @@ program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR RPAR SEMICOLON WITH
 
 program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR RPAR WITH
 ##
-## Ends in an error in state: 58.
+## Ends in an error in state: 65.
 ##
 ## list(terminated(signature,SEMICOLON)) -> signature . SEMICOLON list(terminated(signature,SEMICOLON)) [ RBRACE ]
 ##
@@ -2918,7 +3043,7 @@ program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR RPAR WITH
 
 program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR WITH
 ##
-## Ends in an error in state: 54.
+## Ends in an error in state: 62.
 ##
 ## signature -> ENTRY IDENT LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR [ SEMICOLON ]
 ##
@@ -2930,7 +3055,7 @@ program: INTERFACE IDENT LBRACE ENTRY IDENT LPAR WITH
 
 program: INTERFACE IDENT LBRACE ENTRY IDENT WITH
 ##
-## Ends in an error in state: 53.
+## Ends in an error in state: 61.
 ##
 ## signature -> ENTRY IDENT . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR [ SEMICOLON ]
 ##
@@ -2942,7 +3067,7 @@ program: INTERFACE IDENT LBRACE ENTRY IDENT WITH
 
 program: INTERFACE IDENT LBRACE ENTRY WITH
 ##
-## Ends in an error in state: 52.
+## Ends in an error in state: 60.
 ##
 ## signature -> ENTRY . IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR [ SEMICOLON ]
 ##
@@ -2954,12 +3079,106 @@ program: INTERFACE IDENT LBRACE ENTRY WITH
 
 program: INTERFACE IDENT LBRACE RBRACE WITH
 ##
-## Ends in an error in state: 305.
+## Ends in an error in state: 322.
 ##
 ## list(declaration) -> declaration . list(declaration) [ EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## declaration
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: INTERFACE IDENT LBRACE VIEW IDENT LPAR IDENT COLON IDENT RBRACE
+##
+## Ends in an error in state: 56.
+##
+## signature -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) . RPAR COLON type_sig [ SEMICOLON ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter))
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 41, spurious reduction of production parameter -> IDENT COLON type_sig 
+## In state 44, spurious reduction of production separated_nonempty_list(COMMA,parameter) -> parameter 
+## In state 55, spurious reduction of production loption(separated_nonempty_list(COMMA,parameter)) -> separated_nonempty_list(COMMA,parameter) 
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: INTERFACE IDENT LBRACE VIEW IDENT LPAR RPAR COLON IDENT WITH
+##
+## Ends in an error in state: 59.
+##
+## signature -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig . [ SEMICOLON ]
+## type_expr -> type_sig . [ CONTRACT CONT ]
+## type_sig -> type_sig . LAMBDA type_sig [ SEMICOLON LAMBDA CONTRACT CONT ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: INTERFACE IDENT LBRACE VIEW IDENT LPAR RPAR COLON WITH
+##
+## Ends in an error in state: 58.
+##
+## signature -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON . type_sig [ SEMICOLON ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: INTERFACE IDENT LBRACE VIEW IDENT LPAR RPAR WITH
+##
+## Ends in an error in state: 57.
+##
+## signature -> VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR . COLON type_sig [ SEMICOLON ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: INTERFACE IDENT LBRACE VIEW IDENT LPAR WITH
+##
+## Ends in an error in state: 54.
+##
+## signature -> VIEW IDENT LPAR . loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig [ SEMICOLON ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT LPAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: INTERFACE IDENT LBRACE VIEW IDENT WITH
+##
+## Ends in an error in state: 53.
+##
+## signature -> VIEW IDENT . LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig [ SEMICOLON ]
+##
+## The known suffix of the stack is as follows:
+## VIEW IDENT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: INTERFACE IDENT LBRACE VIEW WITH
+##
+## Ends in an error in state: 52.
+##
+## signature -> VIEW . IDENT LPAR loption(separated_nonempty_list(COMMA,parameter)) RPAR COLON type_sig [ SEMICOLON ]
+##
+## The known suffix of the stack is as follows:
+## VIEW
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -3004,7 +3223,7 @@ program: INTERFACE WITH
 
 program: PRAGMA STRING SEMICOLON WITH
 ##
-## Ends in an error in state: 311.
+## Ends in an error in state: 328.
 ##
 ## list(dpragma) -> dpragma . list(dpragma) [ TYPE INTERFACE IMPORT FUNCTION EOF CONTRACT CONST ]
 ##
@@ -3087,20 +3306,6 @@ program: TYPE IDENT EQ ENUM WITH
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-program: TYPE IDENT EQ IDENT LAMBDA IDENT WITH
-##
-## Ends in an error in state: 30.
-##
-## type_expr -> type_sig . [ CONTRACT CONT ]
-## type_sig -> type_sig . LAMBDA type_sig [ SEMICOLON RPAR RBRACE LBRACE LAMBDA EQ CONTRACT CONT COMMA ]
-## type_sig -> type_sig LAMBDA type_sig . [ SEMICOLON RPAR RBRACE LBRACE LAMBDA EQ CONTRACT CONT COMMA ]
-##
-## The known suffix of the stack is as follows:
-## type_sig LAMBDA type_sig
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 program: TYPE IDENT EQ IDENT LAMBDA WITH
 ##
 ## Ends in an error in state: 29.
@@ -3172,8 +3377,8 @@ program: TYPE IDENT EQ LPAR IDENT WITH
 ##
 ## type_expr -> type_sig . [ CONTRACT CONT ]
 ## type_sig -> LPAR type_sig . COMMA separated_nonempty_list(COMMA,type_sig) RPAR [ SEMICOLON RPAR RBRACE LBRACE LAMBDA EQ CONTRACT CONT COMMA ]
-## type_sig -> type_sig . LAMBDA type_sig [ RPAR LAMBDA CONTRACT CONT COMMA ]
 ## type_sig -> LPAR type_sig . RPAR [ SEMICOLON RPAR RBRACE LBRACE LAMBDA EQ CONTRACT CONT COMMA ]
+## type_sig -> type_sig . LAMBDA type_sig [ RPAR LAMBDA CONTRACT CONT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAR type_sig

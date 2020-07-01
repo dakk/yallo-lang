@@ -1,0 +1,23 @@
+const a = [1,2,3,4];
+const l = (e: int) => (e * 2);
+const b = a.mapWith(l);
+const c = a.mapWith((e: int) => (e * 2));
+
+
+contract AMap {
+	field zf: int list;
+
+	constructor () {
+		this.zf = a.prepend(5);
+	}
+
+	entry double() {
+		this.zf = this.zf.mapWith(l);
+		this.zf = this.zf.prepend(int (this.zf.size()));
+		[]
+	}
+
+	view foldList(): int {
+		this.zf.fold ((acc: int, e: int) => (acc+e), 0)
+	}
+}

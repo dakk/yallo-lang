@@ -5,7 +5,6 @@
 
 %token EOF
 // QUOTE SIZE HT ASTERISK AT GET HAS QUESTION ASSERT
-%token LAMBDA
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, LSQUARE, RSQUARE
 %token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, FUNCTION, FIELD, VIEW
 %token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, TRUE, FALSE
@@ -13,8 +12,8 @@
 %token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT, LET, IN
 %token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO, UNDERSCORE
 %token PRAGMA, IMPORT
+%token LAMBDA
 %token <string> MODIFIER
-%token <string> IDENT
 %token <string> STRING
 %token <string> ADDRESS
 %token <string> BYTES
@@ -26,6 +25,7 @@
 %token <int> NAT
 %token <int> MTZ
 %token <string> CONT
+%token <string> IDENT
 
 %left NOT
 %left OR
@@ -58,9 +58,9 @@
 
   type_sig:
     | t=ident                                       { Parse_tree.PTBuiltin (t) }
+    | bt=type_expr c=CONT                           { Parse_tree.PTCont (c, bt) }
     | LPAR t1=type_sig COMMA tl=separated_nonempty_list(COMMA, type_sig) RPAR         
                                                     { Parse_tree.PTTuple (t1::tl) }
-    | bt=type_expr c=CONT                           { Parse_tree.PTCont (c, bt) }
     | bt=type_expr CONTRACT                         { Parse_tree.PTCont ("contract", bt) }
     | RECORD LBRACE tl=separated_nonempty_list(COMMA, parameter) RBRACE
                                                     { Parse_tree.PTRecord (tl)}

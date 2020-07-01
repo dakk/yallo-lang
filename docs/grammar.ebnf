@@ -12,8 +12,8 @@
                 <type_sig>
 
 <type_sig> ::= <ident>
-             | LPAR <type_sig> COMMA <type_sig> (COMMA <type_sig>)* RPAR
              | <type_expr> CONT
+             | LPAR <type_sig> COMMA <type_sig> (COMMA <type_sig>)* RPAR
              | <type_expr> CONTRACT
              | RECORD LBRACE <parameter> (COMMA <parameter>)* RBRACE
              | ENUM LPAR [<ident> (PIPE <ident>)*] RPAR

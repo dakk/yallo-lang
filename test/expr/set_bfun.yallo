@@ -1,0 +1,12 @@
+contract ASet {
+	field ss: nat set;
+
+	entry add(i: nat) {
+		this.ss.update (i, true);
+		[]
+	}
+	entry remove(i: nat) {
+		this.ss.update (i, false);
+		[]
+	}
+}

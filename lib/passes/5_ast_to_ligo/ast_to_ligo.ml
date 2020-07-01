@@ -167,16 +167,24 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | SetEmpty
 | SetMem of expr * expr
 | SetSize of expr
-| SetUpdate of expr * expr * expr 
+*)
+| SetEmpty -> "Set.empty"
+| SetUpdate (se, sv, cc) -> 
+  "if (" ^ to_ligo_expr ast cc ^ ") then (Set.add (" ^ to_ligo_expr ast sv ^ ") (" ^ to_ligo_expr ast se ^ ")) else (Set.remove (" ^ to_ligo_expr ast sv ^ ") (" ^ to_ligo_expr ast se ^ "))"
 
 (* list *)
-| ListEmpty
-| ListSize of expr
-| ListPrepend of expr * expr
-| ListMapWith of expr * expr
+| ListEmpty -> "[]"
+| ListMapWith (le, ll) -> 
+  "List.map (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ")"
+| ListPrepend (le, el) -> 
+  "(" ^ to_ligo_expr ast el ^ ") :: (" ^ to_ligo_expr ast le ^ ")"
+| ListSize (le) ->
+  "List.size (" ^ to_ligo_expr ast le ^ ")"
+| ListFold (le, ll, initial) -> 
+  "List.fold (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ") (" ^ to_ligo_expr ast initial ^ ")"
+(*
 | ListHead of expr
 | ListTail of expr
-| ListFold of expr * expr * expr
 
 (* string *)
 | StringSlice of expr * expr * expr

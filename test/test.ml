@@ -44,6 +44,8 @@ let () =
     ];
     "expression", [
       "pack_unpack", `Quick, compile opt None "test/expr/pack_unpack.yallo" None;
+      "list_bfun", `Quick, compile opt None "test/expr/list_bfun.yallo" None;
+      "set_bfun", `Quick, compile opt None "test/expr/set_bfun.yallo" None;
       "timestamp_duration", `Quick, compile opt None "test/expr/timestamp_duration.yallo" None;
       "neg_fail", `Quick, compile opt (Some(APIError(None, ""))) "test/expr/neg_fail.yallo" None;
       "record", `Quick, compile opt None "test/expr/record.yallo" None;
