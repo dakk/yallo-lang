@@ -11,11 +11,38 @@ let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)
 let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)
 let let_surround s = "let ovverraidable = " ^ s ^ " in"
 
+let rec to_ligo_type (a: ttype) = match a with
+| TUnit -> "unit"
+| TAddress -> "address"
+| TInt -> "int"
+| TChainId -> "chain_id"
+| TOperation -> "operation"
+| TNat -> "nat"
+| TMutez -> "tez"
+| TTimestamp -> "timestamp"
+| TBool -> "bool"
+| TSignature -> "signature"
+| TKeyHash -> "key_hash"
+| TKey -> "key"
+| TString -> "string"
+| TBytes -> "bytes"
+| TLambda (p, r) -> "(" ^ to_ligo_type p ^ " -> " ^ to_ligo_type r ^ ")"
+| TEnum (el) -> List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " | ") ^ x) "" el
+| TList (t) -> to_ligo_type t ^ " list"
+| TSet (t) -> to_ligo_type t ^ " set"
+| TMap (t, t') -> "(" ^ to_ligo_type t ^ ", " ^ to_ligo_type t' ^ ") map"
+| TBigMap (t, t') -> "(" ^ to_ligo_type t ^ ", " ^ to_ligo_type t' ^ ") big_map"
+| TOption (t) -> to_ligo_type t ^ " option"
+| TRecord (l) -> "record { " ^ List.fold_left (fun acc (x, xt) -> acc ^ (if acc = "" then "" else ", ") ^ x ^ ": " ^ to_ligo_type xt) "" l ^ " }"
+| TTuple (tl) -> "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ to_ligo_type x) "" tl ^ ")"
+| TContract (t) -> to_ligo_type t ^ " contract"
+| _ -> raise @@ TypeError (None, "Type '" ^ show_ttype a ^ "' is not translable to ligo")
+
 let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with 
-| StorageEntry (i) -> "((Tezos.self \"%" ^ i ^ "\"): " ^ show_ttype te ^ ")"
+| StorageEntry (i) -> "((Tezos.self \"%" ^ i ^ "\"): " ^ to_ligo_type te ^ ")"
 | Entrypoint((te2, ContractInstance((tt,e))), i) -> 
   "match ((Tezos.get_entrypoint_opt \"%" ^ i ^ "\" (" ^ to_ligo_expr ast (tt,e) ^ ")): (" 
-  ^ show_ttype te ^ ") option) with | None -> (failwith \"Invalid entrypoint\": " ^ show_ttype te ^ ") | Some (ep) -> ep"
+  ^ to_ligo_type te ^ ") option) with | None -> (failwith \"Invalid entrypoint\": " ^ to_ligo_type te ^ ") | Some (ep) -> ep"
 (* | ContractInstance of expr 
 | BuildContractCodeAndStorage of iden * expr list
 | Entrypoint of expr * iden
@@ -67,7 +94,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 (*
 | ChainId of int
 | Enum of ttype * string*)
-| Typed (e, t) -> "(" ^ to_ligo_expr ast e ^ ": " ^ show_ttype t ^ ")"
+| Typed (e, t) -> "(" ^ to_ligo_expr ast e ^ ": " ^ to_ligo_type t ^ ")"
 | List (el) -> "[" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
 | EnumValue (i) -> i
 
@@ -79,7 +106,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Tuple (el) -> 
   "(" ^ merge_list el ", " (fun v -> to_ligo_expr ast v) ^ ")"
 | Lambda (il, e) -> 
-  "(fun (" ^ merge_list il ", " (fun (i,t) -> i ^ ": " ^ show_ttype t) ^ ") -> " ^ to_ligo_expr ast e ^ ")"
+  "(fun (" ^ merge_list il ", " (fun (i,t) -> i ^ ": " ^ to_ligo_type t) ^ ") -> " ^ to_ligo_expr ast e ^ ")"
 
 (* 
 | Record of (iden * expr) list
@@ -208,9 +235,9 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Fail (e) -> let_surround ("failwith (" ^ to_ligo_expr ast e ^ ")")
 | Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else failwith \"Assertion\"")
      
-| Let (id, tt, e) -> "let " ^ id ^ ": " ^ show_ttype tt ^ " = " ^ to_ligo_expr ast e ^ " in"
+| Let (id, tt, e) -> "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in"
 | LetIn (id, tt, e, e2) -> 
-  "let " ^ id ^ ": " ^ show_ttype tt ^ " = " ^ to_ligo_expr ast e ^ " in" ^ to_ligo_expr ast e2
+  "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in" ^ to_ligo_expr ast e2
 | SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in"
 (*
 | LetTuple of (iden * ttype) list * expr 
@@ -243,7 +270,7 @@ let generate_ligo_code (ast: t) (contract: string) =
       Str("type storage = unit\n\n")
     else 
       Str ("type storage = {\n" ^
-      merge_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ show_ttype t) ^
+      merge_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ to_ligo_type t) ^
       ";\n}");
     Empty; Empty
   ] in 
@@ -253,7 +280,7 @@ let generate_ligo_code (ast: t) (contract: string) =
     Str("type action = "); 
     Level(List.map (fun e -> 
       Str("| " ^ String.capitalize_ascii e.id ^ 
-        if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> show_ttype it)
+        if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> to_ligo_type it)
         else " of unit")
       ) ce.entries
     ); Empty; Empty
@@ -263,7 +290,7 @@ let generate_ligo_code (ast: t) (contract: string) =
   let entrs = List.map (fun e -> 
     Str("let " ^ e.id ^ " (" ^
       list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
-      "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> show_ttype it) ^
+      "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> to_ligo_type it) ^
       "storage) = \n" ^ to_ligo_expr ast e.expr ^ "\n\n"
     )
   ) ce.entries in
