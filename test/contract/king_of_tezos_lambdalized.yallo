@@ -1,0 +1,56 @@
+contract KingOfTezos {
+	field theKing: address;
+	field currentPrice: mutez;
+	field beTheKingLambda: unit -> (mutez, operation list);
+	field beTheKingLambda2: (address, mutez) -> (mutez, operation list);
+	field beTheKingLambda3: (mutez -> mutez) -> (mutez, operation list);
+
+	entry setLambda() {
+		this.beTheKingLambda = () => (
+			let op = Tezos.transfer (this.theKing, this.currentPrice) in
+			((Tezos.amount() * 2n), [ op ])
+		);
+		[]
+	}
+
+	entry setLambda2() {
+		this.beTheKingLambda2 = (tk: address, cp: mutez) => (
+			let op = Tezos.transfer (tk, cp) in
+			((Tezos.amount() * 2n), [ op ])
+		);
+		[]
+	}
+
+
+	entry setLambda3() {
+		this.beTheKingLambda3 = (up: (mutez -> mutez)) => (
+			let op = Tezos.transfer (this.theKing, this.currentPrice) in
+			(up (Tezos.amount()), [ op ])
+		);
+		[]
+	}
+
+	entry beTheKing() {
+		assert (Tezos.amount() >= this.currentPrice);
+		let (cp, ops) = this.beTheKingLambda();
+		this.theKing = Tezos.sender();
+		this.currentPrice = cp;
+		ops
+	}
+
+	entry beTheKing2() {
+		assert (Tezos.amount() >= this.currentPrice);
+		let (cp, ops) = this.beTheKingLambda2(this.theKing, this.currentPrice);
+		this.theKing = Tezos.sender();
+		this.currentPrice = cp;
+		ops
+	}
+
+	entry beTheKing3() {
+		assert (Tezos.amount() >= this.currentPrice);
+		let (cp, ops) = this.beTheKingLambda3((a: mutez) => (a * 2n));
+		this.theKing = Tezos.sender();
+		this.currentPrice = cp;
+		ops
+	}
+}

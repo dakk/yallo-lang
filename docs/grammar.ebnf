@@ -13,12 +13,12 @@
 
 <type_sig> ::= <ident>
              | LPAR <type_sig> COMMA <type_sig> (COMMA <type_sig>)* RPAR
-             | <type_sig> LAMBDA <type_sig>
              | <type_expr> CONT
              | <type_expr> CONTRACT
              | RECORD LBRACE <parameter> (COMMA <parameter>)* RBRACE
              | ENUM LPAR [<ident> (PIPE <ident>)*] RPAR
              | LPAR <type_sig> RPAR
+             | <type_sig> LAMBDA <type_sig>
 
 <type_expr> ::= <type_sig>
 
@@ -58,7 +58,7 @@
          | LSQUARE [<expr> (COMMA <expr>)*] RSQUARE
          | LPAR <expr> COMMA <expr> (COMMA <expr>)* RPAR
          | LSQUARE <emap_element> (COMMA <emap_element>)* RSQUARE
-         | LPAR <parameter> (COMMA <parameter>)* RPAR LAMBDAB LPAR <expr>
+         | LPAR [<parameter> (COMMA <parameter>)*] RPAR LAMBDAB LPAR <expr>
            RPAR
          | LET IDENT COLON <type_sig> EQ <expr> IN <expr>
          | LET IDENT COLON <type_sig> EQ <expr>

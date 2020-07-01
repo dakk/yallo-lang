@@ -5,9 +5,10 @@
 
 %token EOF
 // QUOTE SIZE HT ASTERISK AT GET HAS QUESTION ASSERT
+%token LAMBDA
 %token LBRACE, RBRACE, LPAR, RPAR, COMMA, COLON, SEMICOLON, PIPE, EQ, DOT, LSQUARE, RSQUARE
 %token INTERFACE, CONTRACT, ENTRY, EXTENDS, IMPLEMENTS, FUNCTION, FIELD, VIEW
-%token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, LAMBDA, TRUE, FALSE
+%token ENUM, TYPE, RECORD, CONST, THIS, AND, OR, NOT, TRUE, FALSE
 %token ADD, SUB, DIV, MUL, MOD, IF, THEN, ELSE, WITH, MATCH
 %token LTE, LT, GT, GTE, EQEQ, NONE, SOME, HT, LET, IN
 %token TEZOS, CONSTRUCTOR, LAMBDAB, NEQ, UNIT, CRYPTO, UNDERSCORE
@@ -59,13 +60,13 @@
     | t=ident                                       { Parse_tree.PTBuiltin (t) }
     | LPAR t1=type_sig COMMA tl=separated_nonempty_list(COMMA, type_sig) RPAR         
                                                     { Parse_tree.PTTuple (t1::tl) }
-    | p=type_sig LAMBDA pr=type_sig									{ Parse_tree.PTLambda (p, pr) }
     | bt=type_expr c=CONT                           { Parse_tree.PTCont (c, bt) }
     | bt=type_expr CONTRACT                         { Parse_tree.PTCont ("contract", bt) }
     | RECORD LBRACE tl=separated_nonempty_list(COMMA, parameter) RBRACE
                                                     { Parse_tree.PTRecord (tl)}
     | ENUM LPAR el=separated_list(PIPE, ident) RPAR { Parse_tree.PTEnum (el) }
     | LPAR t=type_sig RPAR											    { t }
+    | p=type_sig LAMBDA pr=type_sig									{ Parse_tree.PTLambda (p, pr) }
 
   type_expr: | te=type_sig {te}
 
@@ -112,7 +113,7 @@
                                 { loce $startpos $endpos @@ Parse_tree.PETuple (t::tl) }
     | LSQUARE tl=separated_nonempty_list(COMMA, emap_element) RSQUARE
                                 { loce $startpos $endpos @@ Parse_tree.PEMap (tl) }
-    | LPAR tl=separated_nonempty_list(COMMA, parameter) RPAR LAMBDAB LPAR e=expr RPAR
+    | LPAR tl=separated_list(COMMA, parameter) RPAR LAMBDAB LPAR e=expr RPAR
                                 { loce $startpos $endpos @@ Parse_tree.PELambda (tl, e) }
 
 		// bindings 

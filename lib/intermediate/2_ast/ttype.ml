@@ -143,5 +143,6 @@ let compare_type_lazy t t' = (match t', t with
 ) 
 
 let compare_list t1 t2 = 
-  List.length (List.filter (fun (a,b) -> a<>b) @@ List.combine t1 t2) = 0
+  if List.length t1 = 1 && List.length t2 == 0 && List.hd t1 = TUnit then true 
+  else List.length (List.filter (fun (a,b) -> a<>b) @@ List.combine t1 t2) = 0
 

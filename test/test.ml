@@ -86,8 +86,10 @@ let () =
     ];
     "contract", [
       "view", `Quick, compile opt None "test/contract/view.yallo" None;
+      "lambda_field", `Quick, compile opt None "test/contract/lambda_field.yallo" None;
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
       "king_of_tezos", `Quick, compile opt None "test/contract/king_of_tezos.yallo" None;
+      "king_of_tezos_lambdalized", `Quick, compile opt None "test/contract/king_of_tezos_lambdalized.yallo" None;
       "loan", `Quick, compile optc None "test/contract/loan.yallo" None;
       "token", `Quick, compile optc None "test/contract/token.yallo" None;
       "token_with_view", `Quick, compile optc None "test/contract/token_with_view.yallo" None;

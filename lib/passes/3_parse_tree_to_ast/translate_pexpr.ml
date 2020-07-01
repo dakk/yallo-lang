@@ -85,6 +85,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     (match tt, tt', ee with 
     | TOption (TAny), TOption(t), None -> TOption(t), None
     | TOption (TAny), TOption(t), be -> TOption(t), be
+    | TList (TAny), TList(t), ee -> TList(t), ee
     | a, b, _ when a=b -> a, ee
     | a, b, c -> raise @@ TypeError (pel, "Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c))
 
@@ -533,7 +534,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     | TLambda (arv, rettype) -> 
       let argl = argv_to_list arv in 
       let ap = el |> transform_expr_list in
-      if List.length argl <> List.length ap then 
+      if not (List.length ap = 0 && List.length argl = 1 && List.hd argl = TUnit) && List.length argl <> List.length ap then 
         raise @@ InvalidExpression (pel, "Invalid argument number for lambda apply");
       if not @@ Ast_ttype.compare_list argl (fst @@ List.split ap) then 
         raise @@ TypeError (pel, "Invalid argument types apply");
@@ -560,7 +561,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       let cc = (match ee with | GlobalRef (c) -> c | _ -> raise @@ InvalidExpression (pel, "Expected a globalref")) in
       TTuple([TContractCode (tl); TContractStorage]), BuildContractCodeAndStorage (cc, el |> transform_expr_list)
       
-    | _ -> raise @@ TypeError (pel, "Applying on not a lambda: " ^ (Parse_tree.show_pexpr (PEApply(e, el))))
+    | _ -> raise @@ TypeError (pel, "Applying on not a lambda: " ^ show_ttype tt)
+    
+    (* (Parse_tree.show_pexpr (PEApply(e, el)))) *)
   )
   
 

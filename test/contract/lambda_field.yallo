@@ -1,0 +1,11 @@
+contract LambdaField {
+	field alam: int -> (operation list);
+
+	constructor () {
+		this.alam = (n: int) => ([]);
+	}
+
+	entry call() {
+		this.alam(12)
+	}
+}
