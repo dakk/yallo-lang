@@ -12,9 +12,10 @@ contract AMap {
 	}
 
 	entry double() {
-		this.zf = this.zf.mapWith(l);
-		this.zf = this.zf.mapWith(l);
-		this.zf = this.zf.prepend(int (this.zf.size()));
+		this.zf = copy(this.zf).mapWith(l);
+		this.zf.mapWith(l);
+		this.zf = copy(this.zf).prepend(int (this.zf.size()));
+		this.zf.prepend(int (this.zf.size()));
 		[]
 	}
 
@@ -23,7 +24,8 @@ contract AMap {
 	}
 
 	entry filterList() {
-		this.zf = this.zf.filter ((a: int) => (a < 12));
+		this.zf = copy(this.zf).filter ((a: int) => (a < 12));
+		this.zf.filter ((a: int) => (a < 12));
 		[]
 	}
 }

@@ -192,8 +192,8 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   "List.size (" ^ to_ligo_expr ast le ^ ")"
 | ListFold (le, ll, initial) -> 
   "List.fold (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ") (" ^ to_ligo_expr ast initial ^ ")"
-| ListFilter (le, ll) ->
-  "List.fold (fun acc e -> if (" ^ to_ligo_expr ast ll ^ ") then e::acc else acc) (" ^ to_ligo_expr ast le ^ ") []"
+| ListFilter ((TList(lt), le), ll) ->
+  "List.fold (fun (acc, e: " ^ to_ligo_type (TList(lt)) ^ " * " ^ to_ligo_type (lt) ^ " ) -> if (" ^ to_ligo_expr ast ll ^ ")(e) then e::acc else acc) (" ^ to_ligo_expr ast (TList(lt), le) ^ ") ([]: " ^ to_ligo_type (TList(lt)) ^ ")"
 (*
 | ListHead of expr
 | ListTail of expr
@@ -265,6 +265,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | FailIf (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then failwith \"Assertion\" else ()")
 | Fail (e) -> let_surround ("failwith (" ^ to_ligo_expr ast e ^ ")")
 | Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else failwith \"Assertion\"")
+| Copy (e) -> "(" ^ to_ligo_expr ast e ^ ")"
      
 | Let (id, tt, e) -> "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in "
 | LetIn (id, tt, e, e2) -> 

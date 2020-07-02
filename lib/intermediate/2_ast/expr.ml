@@ -144,6 +144,7 @@ type expr =
 | CaseDefault
 | Apply of texpr * texpr
 
+| Copy of texpr
 | Fail of texpr
 | FailIf of texpr
 | FailIfMessage of texpr * texpr

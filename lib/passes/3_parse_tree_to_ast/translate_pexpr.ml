@@ -220,18 +220,21 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       | _, TList (_), "size", [] -> TNat, ListSize (te, ee)
       | _, TList (l), "head", [] -> l, ListHead (te, ee)
       | _, TList (l), "tail", [] -> TList (l), ListTail (te, ee)
-      | _, TList (l), "prepend", [(ll, e)] when ll = l -> TList (l), ListPrepend ((te, ee), (ll, e))
       | _, TList (l), "fold", [(TLambda (TTuple([ll; rt']), rt), lame); (ft, ff)] when l=ll && rt=rt' && rt=ft -> 
         ft, ListFold((te, ee), (TLambda (TTuple([ll; rt']), rt), lame), (ft, ff))
 
+      | StorageRef(sr), TList (l), "prepend", [(ll, e)] when ll = l -> 
+        TUnit, SAssign(sr, (TList (l), ListPrepend ((te, ee), (ll, e))))
+      | _, TList (l), "prepend", [(ll, e)] when ll = l -> 
+        TList (l), ListPrepend ((te, ee), (ll, e))
 
-      (* | StorageRef(sr), TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> 
-        TUnit, SAssign(sr, (TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame)))) *)
+      | StorageRef(sr), TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> 
+        TUnit, SAssign(sr, (TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame))))
       | _, TList (l), "mapWith", [(TLambda (ll, rt), lame)] when l = ll -> 
         TList (rt), ListMapWith ((te, ee), (TLambda (ll, rt), lame))
 
-      (* | StorageRef(sr), TList (l), "filter", [(TLambda (ll, TBool), lame)] when l=ll -> 
-        TUnit, SAssign(sr, (TList(l), ListFilter((te, ee), (TLambda (ll, TBool), lame)))) *)
+      | StorageRef(sr), TList (l), "filter", [(TLambda (ll, TBool), lame)] when l=ll -> 
+        TUnit, SAssign(sr, (TList(l), ListFilter((te, ee), (TLambda (ll, TBool), lame))))
       | _, TList (l), "filter", [(TLambda (ll, TBool), lame)] when l=ll -> 
         TList (l), ListFilter((te, ee), (TLambda (ll, TBool), lame))
 
@@ -242,10 +245,13 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       | _, TMap (kt, kv), "get", [(kk, e); (kvv, kvd)] when kvv=kv && kk = kt -> 
         kv, MapGet((te, ee), (kk,e), (kvv,kvd))
       | _, TMap (kt, _), "mem", [(kk, e)] when kk = kt -> TBool, MapMem((te,ee), (kk, e))
-      | _, TMap (kt, kv), "mapWith", [(TLambda (TTuple([a;b]), rt), lame)] when (a=kt && b=kv) -> 
-        TMap (kt, rt), MapMapWith ((te, ee), (TLambda (TTuple([a;b]), rt), lame))
       | _, TMap (kt, kv), "fold", [(TLambda (TTuple([llkt; llkv; rt']), rt), lame); (ft, ff)] when kt=llkt && kv=llkv && rt=rt' && rt=ft -> 
         ft, MapFold((te, ee), (TLambda (TTuple([llkt; llkv; rt']), rt), lame), (ft, ff))
+
+      | StorageRef(sr), TMap (kt, kv), "mapWith", [(TLambda (TTuple([a;b]), rt), lame)] when (a=kt && b=kv) -> 
+        TUnit, SAssign(sr, (TMap (kt, rt), MapMapWith ((te, ee), (TLambda (TTuple([a;b]), rt), lame))))
+      | _, TMap (kt, kv), "mapWith", [(TLambda (TTuple([a;b]), rt), lame)] when (a=kt && b=kv) -> 
+        TMap (kt, rt), MapMapWith ((te, ee), (TLambda (TTuple([a;b]), rt), lame))
 
       | StorageRef(sr), TMap (kt, kv), "filter", [(TLambda (TTuple([a;b]), TBool), lame)] when (a=kt && b=kv) -> 
         TUnit, SAssign(sr, (TMap(kt, kv), MapFilter ((te, ee), (TLambda (TTuple([a;b]), TBool), lame))))
@@ -282,6 +288,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       (* Set *)
       | _, TSet (_), "size", [] -> TNat, SetSize (te, ee)
       | _, TSet (kt), "mem", [(ll, e)] when kt = ll -> TBool, SetMem ((te, ee), (ll, e))
+
       | StorageRef(sr), TSet (kt), "update", [(kkt, ek); (TBool, ev)] when kkt=kt ->
         TUnit, SAssign(sr, (TSet (kt), SetUpdate((te, ee), (kkt, ek), (TBool, ev))))
       | _, TSet (kt), "update", [(kkt, ek); (TBool, ev)] when kkt=kt ->
@@ -447,16 +454,16 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEOr (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    (match tt1, tt2 with 
-    | TBool, TBool -> TBool, Or ((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, "Or branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'"))
+    if tt1 <> TBool || tt2 <> TBool then 
+      raise @@ TypeError (pel, "Or branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'");
+    TBool, Or ((tt1, ee1), (tt2, ee2))
 
   | PEAnd (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
-    (match tt1, tt2 with 
-    | TBool, TBool -> TBool, And ((tt1, ee1), (tt2, ee2))
-    | _, _ -> raise @@ TypeError (pel, "And branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'"))
+    if tt1 <> TBool || tt2 <> TBool then 
+      raise @@ TypeError (pel, "And branches should be boolean expressions, got: '" ^ show_ttype tt1 ^ "' and '" ^ show_ttype tt2 ^ "'");
+    TBool, And ((tt1, ee1), (tt2, ee2))
   
   (* Compare *)
   | PEGt (e1, e2) -> 
@@ -515,6 +522,11 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     )
 
   (* apply *)
+  | PEApply (PERef("copy"), c) -> 
+    if List.length c <> 1 then raise @@ APIError (pel, "copy needs only one argument");
+    let (tt1, ee1) = transform_expr (List.hd c) env' ic in 
+    tt1, Copy ((tt1, ee1))
+
   | PEApply (PERef("abs"), c) -> 
     if List.length c <> 1 then raise @@ APIError (pel, "abs needs only one argument");
     let (tt1, ee1) = transform_expr (List.hd c) env' ic in 

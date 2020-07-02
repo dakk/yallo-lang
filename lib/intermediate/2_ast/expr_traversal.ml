@@ -97,6 +97,7 @@ let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) =
   | Neg (a)
   | IsNat (a)
   | Fail (a)
+  | Copy (a)
   | FailIf (a)
   | Assert (a)
   | Let (_, _, a)
