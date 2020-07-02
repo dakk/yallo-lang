@@ -91,9 +91,8 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Some(a) -> "Some (" ^ to_ligo_expr ast a ^ ")"
 | Bytes (s) -> sprintf "(\"%s\": bytes)" (Bytes.to_string s)
 | Signature (s) -> sprintf "(\"%s\": signature)" s
-(*
-| ChainId of int
-| Enum of ttype * string*)
+(* ChainId of int *)
+| Enum (_, i) -> i
 | Typed (e, t) -> "(" ^ to_ligo_expr ast e ^ ": " ^ to_ligo_type t ^ ")"
 | List (el) -> "[" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
 | EnumValue (i) -> i
@@ -252,18 +251,18 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   let rec rr el = (match el with 
   | [] -> ""
   | (e', te')::((_, CaseDefault), tee')::el' -> 
-    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ") else (" ^ to_ligo_expr ast tee' ^ ")"
+    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ": " ^ to_ligo_type te ^ ") else (" ^ to_ligo_expr ast tee' ^ ": " ^ to_ligo_type te ^ ")"
   | (e', te')::elle::el' -> 
-    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ") else " ^ rr @@ elle::el' 
+    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ": " ^ to_ligo_type te ^ ") else " ^ rr @@ elle::el' 
   | (e', te')::[] -> 
-    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ") " 
+    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ": " ^ to_ligo_type te ^ ") " 
   ) in "let tmwttemp = " ^ to_ligo_expr ast e ^ " in " ^ rr el
 
   
 | FailIfMessage (e, m) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then failwith (" ^ to_ligo_expr ast m ^ ") else ()")
 | FailIf (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then failwith \"Assertion\" else ()")
-| Fail (e) -> let_surround ("failwith (" ^ to_ligo_expr ast e ^ ")")
-| Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else failwith \"Assertion\"")
+| Fail (e) -> ("failwith (" ^ to_ligo_expr ast e ^ ")")
+| Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else (failwith \"Assertion\")")
 | Copy (e) -> "(" ^ to_ligo_expr ast e ^ ")"
      
 | Let (id, tt, e) -> "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in "
