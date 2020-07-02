@@ -2,3 +2,8 @@ const a: bytes = Bytes.pack (12n);
 
 const b: nat option = Bytes.unpack (a);
 const c = (Bytes.unpack (a) : nat option);
+const c2: nat option = Bytes.unpack (a);
+
+const lp: nat -> nat = (a1: nat) => (a1*2n);
+const plp = Bytes.pack (lp);
+const lp2: (nat -> nat) option = Bytes.unpack (plp);
