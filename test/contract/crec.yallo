@@ -1,11 +1,28 @@
 contract Test {
-	field a: record { b: int, c: record { d: int } };
+	field a2: record { b: int, c: record { d: int } };
+
+	field a: record {
+		aint: int,
+		astring: string,
+		arec: record { anotherint: int }
+	};
+
 
 	entry tentry () {
-		this.a = { b=12, c={d=13} };
-		this.a.b = 12;
-		this.a.c = {d=14};
+		this.a2 = { b=12, c={d=13} };
+		this.a2.b = 12;
+		this.a2.c = {d=14};
 		//this.a.c.d = 13;
+		[]
+	}
+
+
+	entry modifyRecord () {
+		this.a.aint = 12;
+		this.a.astring = "string";
+		this.a.arec = { anotherint = 12 };
+		this.a.aint = this.a.arec.anotherint;
+		// this.a.arec.anotherint = 12;
 		[]
 	}
 }

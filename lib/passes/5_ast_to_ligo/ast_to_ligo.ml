@@ -33,7 +33,7 @@ let rec to_ligo_type (a: ttype) = match a with
 | TMap (t, t') -> "(" ^ to_ligo_type t ^ ", " ^ to_ligo_type t' ^ ") map"
 | TBigMap (t, t') -> "(" ^ to_ligo_type t ^ ", " ^ to_ligo_type t' ^ ") big_map"
 | TOption (t) -> to_ligo_type t ^ " option"
-| TRecord (l) -> "record { " ^ List.fold_left (fun acc (x, xt) -> acc ^ (if acc = "" then "" else ", ") ^ x ^ ": " ^ to_ligo_type xt) "" l ^ " }"
+| TRecord (l) -> "{ " ^ List.fold_left (fun acc (x, xt) -> acc ^ (if acc = "" then "" else "; ") ^ x ^ ": " ^ to_ligo_type xt) "" l ^ " }"
 | TTuple (tl) -> "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ to_ligo_type x) "" tl ^ ")"
 | TContract (t) -> to_ligo_type t ^ " contract"
 | _ -> raise @@ TypeError (None, "Type '" ^ show_ttype a ^ "' is not translable to ligo")
@@ -117,11 +117,10 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   )
   ^ "-> " ^ to_ligo_expr ast e ^ ")"
   (* "(fun (" ^ merge_list (List.split il) ", " (fun (i,t) -> i ^ ": " ^ to_ligo_type t) ^ ") -> " ^ to_ligo_expr ast e ^ ")" *)
-
-(* 
-| Record of (iden * expr) list
-| RecordAccess of expr * iden
-*)
+| Record (il) -> 
+    "{ " ^ merge_list il "; " (fun (i, e) -> i ^ "=" ^ to_ligo_expr ast e) ^ " }"
+  
+| RecordAccess (e, i) -> to_ligo_expr ast e ^ "." ^ i
 
 (* option *)
 | OptionGetSome (oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> v | None -> failwith \"Expect some value\")"
@@ -211,14 +210,14 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 (* BytesSlice(a,b,c) *)
 | BytesConcat (s1, s2) -> to_ligo_expr ast s1 ^ " ^ " ^ to_ligo_expr ast s2
 
-(*
 
 (* tuple *)
+(*
 | TupleFst of expr
 | TupleSnd of expr
+*)
 
 (* aritmetic *) 
-*)
 | Add(a,b) -> "(" ^ to_ligo_expr ast a ^ ") + (" ^ to_ligo_expr ast b ^ ")"
 | Sub(a,b) -> "(" ^ to_ligo_expr ast a ^ ") - (" ^ to_ligo_expr ast b ^ ")"
 | Mul(a,b) -> "(" ^ to_ligo_expr ast a ^ ") * (" ^ to_ligo_expr ast b ^ ")"
@@ -270,13 +269,11 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Let (id, tt, e) -> "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in "
 | LetIn (id, tt, e, e2) -> 
   "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in " ^ to_ligo_expr ast e2
-| SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in "
 | LetTuple (il, e) -> "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ to_ligo_expr ast e ^ " in "
+| LetTupleIn (il, e, e2) -> "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ to_ligo_expr ast e ^ " in " ^ to_ligo_expr ast e2
 
-(*
-| LetTuple of (iden * ttype) list * expr 
-| LetTupleIn of (iden * ttype) list * expr * expr
-| SRecAssign of iden * iden * expr  *)
+| SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in "
+| SRecAssign (i, ii, expr) -> "let s = { s with " ^ i ^ "= { s." ^ i ^ " with "^ ii ^"=" ^ to_ligo_expr ast expr ^ "}} in "
 
 | Seq(a, (tl, List(e))) -> 
   "  " ^ to_ligo_expr ast a ^ "\n  (" ^ to_ligo_expr ast (tl, List(e)) ^ ": operation list)"
