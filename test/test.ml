@@ -13,6 +13,8 @@ let opt = Compiler.{
 
 let optc = { opt with no_remove_unused = false }
 
+let optl = { opt with target=Some("ligo") }
+let optlc = { optc with target=Some("ligo") }
 
 let compile opt exc path cname _ = 
   let compile_failure = try (Compiler.compile path { opt with contract=cname }; None) with 
@@ -88,20 +90,20 @@ let () =
       "base_fun", `Quick, compile opt None "test/function/base_fun.yallo" None;
     ];
     "contract", [
-      "view", `Quick, compile opt None "test/contract/view.yallo" None;
-      "lambda_map", `Quick, compile opt None "test/contract/lambda_map.yallo" None;
-      "lambda_field", `Quick, compile opt None "test/contract/lambda_field.yallo" None;
+      "view", `Quick, compile optl None "test/contract/view.yallo" None;
+      "lambda_map", `Quick, compile optl None "test/contract/lambda_map.yallo" None;
+      "lambda_field", `Quick, compile optl None "test/contract/lambda_field.yallo" None;
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
-      "king_of_tezos", `Quick, compile opt None "test/contract/king_of_tezos.yallo" None;
-      "king_of_tezos_lambdalized", `Quick, compile opt None "test/contract/king_of_tezos_lambdalized.yallo" None;
-      "loan", `Quick, compile optc None "test/contract/loan.yallo" None;
-      "token", `Quick, compile optc None "test/contract/token.yallo" None;
-      "token_with_view", `Quick, compile optc None "test/contract/token_with_view.yallo" None;
-      "token_create", `Quick, compile optc None "test/contract/token_create.yallo" None;
-      "token_using", `Quick, compile optc None "test/contract/token_using.yallo" None;
-      "crec", `Quick, compile optc None "test/contract/crec.yallo" None;
-      "cenum", `Quick, compile optc None "test/contract/cenum.yallo" None;
-      "unbound_field", `Quick, compile optc (Some(SymbolNotFound(None, ""))) "test/contract/unbound_field.yallo" None;
-      "ctor_fail", `Quick, compile optc (Some(DeclarationError(None, ""))) "test/contract/ctor_fail.yallo" None;
+      "king_of_tezos", `Quick, compile optl None "test/contract/king_of_tezos.yallo" None;
+      "king_of_tezos_lambdalized", `Quick, compile optl None "test/contract/king_of_tezos_lambdalized.yallo" None;
+      "loan", `Quick, compile optlc None "test/contract/loan.yallo" None;
+      "token", `Quick, compile optlc None "test/contract/token.yallo" None;
+      "token_with_view", `Quick, compile optlc None "test/contract/token_with_view.yallo" None;
+      "token_create", `Quick, compile optlc None "test/contract/token_create.yallo" None;
+      "token_using", `Quick, compile optlc None "test/contract/token_using.yallo" None;
+      "crec", `Quick, compile optlc None "test/contract/crec.yallo" None;
+      "cenum", `Quick, compile optlc None "test/contract/cenum.yallo" None;
+      "unbound_field", `Quick, compile optlc (Some(SymbolNotFound(None, ""))) "test/contract/unbound_field.yallo" None;
+      "ctor_fail", `Quick, compile optlc (Some(DeclarationError(None, ""))) "test/contract/ctor_fail.yallo" None;
     ]
   ]

@@ -98,9 +98,9 @@ let compile (filename: string) opt =
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
         Passes.Ast_to_ligo.generate_ligo ast ctr
       | Some ("tz"), None
-      | Some ("ligo"), None when (List.length ast.contracts) = 1 -> 
+      | Some ("ligo"), None when (List.length ast.contracts) > 0 -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
-        Passes.Ast_to_ligo.generate_ligo ast (fst @@ List.hd ast.contracts)
+        Passes.Ast_to_ligo.generate_ligo ast (fst @@ List.nth ast.contracts @@ (List.length ast.contracts) - 1)
       | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
     )
     |> (fun comp -> match opt.target with 
