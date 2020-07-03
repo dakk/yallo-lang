@@ -45,7 +45,6 @@ type expr =
 | Key of string 
 | Signature of string
 | Some of texpr
-| Enum of ttype * string
 | Typed of texpr * ttype
 | List of texpr list 
 | Set of texpr list 

@@ -10,6 +10,10 @@ let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
 let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)
 let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)
 let let_surround s = "let ovverraidable = " ^ s ^ " in"
+let rec enum_index e i ii = match e with 
+| [] -> failwith "Enum value not found"
+| x::xe when x = i -> ii
+| x::xe -> enum_index xe i (ii+1)
 
 let rec to_ligo_type (a: ttype) = match a with
 | TUnit -> "unit"
@@ -27,7 +31,8 @@ let rec to_ligo_type (a: ttype) = match a with
 | TString -> "string"
 | TBytes -> "bytes"
 | TLambda (p, r) -> "(" ^ to_ligo_type p ^ " -> " ^ to_ligo_type r ^ ")"
-| TEnum (el) -> List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " | ") ^ x) "" el
+| TEnum (el) -> "nat"
+(* List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " | ") ^ x) "" el *)
 | TList (t) -> to_ligo_type t ^ " list"
 | TSet (t) -> to_ligo_type t ^ " set"
 | TMap (t, t') -> "(" ^ to_ligo_type t ^ ", " ^ to_ligo_type t' ^ ") map"
@@ -92,10 +97,9 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | Bytes (s) -> sprintf "(\"%s\": bytes)" (Bytes.to_string s)
 | Signature (s) -> sprintf "(\"%s\": signature)" s
 (* ChainId of int *)
-| Enum (_, i) -> i
+| EnumValue (i) -> (match te with | TEnum(e) -> Printf.sprintf "%dn" @@ enum_index e i 0)
 | Typed (e, t) -> "(" ^ to_ligo_expr ast e ^ ": " ^ to_ligo_type t ^ ")"
 | List (el) -> "[" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
-| EnumValue (i) -> i
 | Set (el) -> "set [" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
 | Map (el) -> 
   "Map.literal [" ^

@@ -32,7 +32,6 @@ let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) =
       (List.fold_left (fun acc e -> jf (traverse' e) acc) empty a)
       (List.fold_left (fun acc e -> jf (traverse' e) acc) empty b))
 
-  | Enum (_, _)
   | Bool (_)
   | Nat (_)
   | Int (_)

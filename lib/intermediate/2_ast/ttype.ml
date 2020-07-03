@@ -74,7 +74,7 @@ let attributes (t: ttype) = match t with
   | TString ->        { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TBytes ->         { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TLambda (_, _) -> { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
-  | TEnum (_) ->      { cmp=true; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  } 
+  | TEnum (_) ->      { cmp=true;  pass=true;  store=true;  push=true;  pack=true;  bm_val=true  } 
   | TList (_) ->      { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TSet (_) ->       { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
   | TMap (_,_) ->     { cmp=false; pass=true;  store=true;  push=true;  pack=true;  bm_val=true  }
@@ -87,7 +87,8 @@ let attributes (t: ttype) = match t with
 
   (* internal types *)
   | TAny ->           { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
-  | TContractCode (_) ->  { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
+  | TContractCode (_) ->  
+                      { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TContractStorage ->  
                       { cmp=false; pass=false; store=false; push=false; pack=false; bm_val=false }
   | TInterface (_) ->     
@@ -129,7 +130,6 @@ let rec show_ttype (at: ttype) = match at with
 | TContractInstance (_) -> "instance"
 
 let pp_ttype fmt (t: ttype) = Format.pp_print_string fmt (show_ttype t); ()
-
 
 let compare t1 t2 = t1 = t2
 
