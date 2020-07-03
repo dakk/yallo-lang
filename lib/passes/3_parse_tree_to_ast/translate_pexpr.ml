@@ -179,6 +179,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
   | PEApply (PEDot (PERef("Map"), "empty"), []) -> TMap(TAny, TAny), MapEmpty
   | PEApply (PEDot (PERef("BigMap"), "empty"), []) -> TBigMap(TAny, TAny), BigMapEmpty
 
+  | PEApply (PEDot (PERef("Timestamp"), "now"), []) -> TTimestamp, TezosNow
   | PEApply (PEDot (PERef("Timestamp"), "duration"), c) ->
     if List.length c <> 2 then raise @@ APIError (pel, "Timestamp.duration needs two argument");
     let (ht,hm) = transform_expr (List.nth c 0) env' ic in 
