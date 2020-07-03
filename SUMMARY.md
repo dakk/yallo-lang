@@ -13,7 +13,3 @@
 * [Crypto functions](docs/crypto-functions.md)
 * [Helper functions](docs/helper-functions.md)
 
----
-
-* [Untitled](untitled.md)
-
