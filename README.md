@@ -1,15 +1,14 @@
-# Yallo-lang
-Yallo is a yet another high level experimental language for Tezos, with the purpose of 
-providing a better abstraction for integrating different contracts.
+# Introduction
 
-Internally, the language is a functional language with side effects (storage assignments).
+Yallo is a yet another high level experimental language for Tezos, with the purpose of providing a better abstraction for integrating different contracts.
 
-This is only a research project, it is not (yet) intendeed for real usage.
+Internally, the language is a functional language with side effects \(storage assignments\).
 
+This is only a research project, it is not \(yet\) intendeed for real usage.
 
 ## Usage
 
-```
+```text
 Yallo-lang compiler
 
   yallo.exe ACTION FILENAME
@@ -22,62 +21,66 @@ Yallo-lang compiler
   extract-interface file.yallo -dcontract ContractName
                  extracts the yallo interface for the given contract
 
+  interface-of-michelson file.tz
+                 produce a yallo interface from michelson contract
+
 === flags ===
 
-  [-contract _]  selected contract
-  [-target _]    target language
-  [-print-ast]   print ast
-  [-print-pt]    print parse-tree
-  [-verbose]     enable verbosity
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-```
+  [-contract _]        selected contract
+  [-no-remove-unused]  disable removing unused symbols
+  [-print-ast]         print ast
+  [-print-ligo]        print ligo code
+  [-print-pt]          print parse-tree
+  [-target _]          target language
+  [-verbose]           enable verbosity
+  [-build-info]        print info about this build and exit
+  [-version]           print the version of this build and exit
+  [-help]              print this help text and exit
+                       (alias: -?)
 
+```
 
 ## An example
 
-We first define an interface describing the signature of a token contract, and another interface extending IToken with a getTotalSupply. (Views are entrypoint which receives as last argument 'a contract)
+We first define an interface describing the signature of a token contract, and another interface extending IToken with a getTotalSupply. \(Views are entrypoint which receives as last argument 'a contract\)
 
 ```java
 interface IToken {
-	entry transfer(from: address, to: address, val: nat);
-	view getBalance(ad: address): nat;
+    entry transfer(from: address, to: address, val: nat);
+    view getBalance(ad: address): nat;
 }
 
 interface ITokenWithGetTotalSupply extends IToken {
-	view getTotalSupply (): nat;
+    view getTotalSupply (): nat;
 }
 ```
 
-Now we can implement our token contract; the constructor is only an helper for building an initial
-storage value during compilation. 
+Now we can implement our token contract; the constructor is only an helper for building an initial storage value during compilation.
 
 ```java
 contract Token implements IToken {
-	field balances: (address, nat) big_map;
-	field totalSupply: nat;
-	field symbol: string;
+    field balances: (address, nat) big_map;
+    field totalSupply: nat;
+    field symbol: string;
 
-	constructor (owner: address, supply: nat, symbol: string) {
-		this.balances = [ { owner: supply } ];
-		this.totalSupply = supply;
-		this.symbol = symbol;
-	}
+    constructor (owner: address, supply: nat, symbol: string) {
+        this.balances = [ { owner: supply } ];
+        this.totalSupply = supply;
+        this.symbol = symbol;
+    }
 
-	entry transfer(from: address, to: address, val: nat) {
-		let a: nat = this.balances.get(from, 0n);
-		let b: nat = this.balances.get(to, 0n);
-		assert (a >= val);
-		this.balances.update(from, a - val);
-		this.balances.update(to, b + val); 
-		[]
-	}
+    entry transfer(from: address, to: address, val: nat) {
+        let a: nat = this.balances.get(from, 0n);
+        let b: nat = this.balances.get(to, 0n);
+        assert (a >= val);
+        this.balances.update(from, a - val);
+        this.balances.update(to, b + val); 
+        []
+    }
 
-	view getBalance(ad: address): nat {
-		this.balances.get(ad, 0n)
-	}
+    view getBalance(ad: address): nat {
+        this.balances.get(ad, 0n)
+    }
 }
 ```
 
@@ -89,19 +92,18 @@ import "IToken.yallo";
 const tokenContractAddress: address = @KT1ThEdxfUcWUwqsdergy3QnbCWGHSUHeHJq;
 
 contract usingAToken {
-	field bal: nat;
+    field bal: nat;
 
-	entry checkBalance(a: address) {
-		[IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback)]
-	}
+    entry checkBalance(a: address) {
+        [IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback)]
+    }
 
-	entry checkBalanceCallback(b: nat) {
-		this.bal = b;
-		[]
-	}
+    entry checkBalanceCallback(b: nat) {
+        this.bal = b;
+        []
+    }
 }
 ```
-
 
 Or, if we want to deploy a token contract from another contract:
 
@@ -109,19 +111,19 @@ Or, if we want to deploy a token contract from another contract:
 import "Token.yallo";
 
 contract deployAToken {
-	field tokenAddress: address;
+    field tokenAddress: address;
 
-	entry deployToken() {
-		let (a: address, op: operation) = Tezos.createContract (Token(100, "ourToken"), None, 0);
-		this.tokenAddress = a;
-		[op]
-	}
+    entry deployToken() {
+        let (a: address, op: operation) = Tezos.createContract (Token(100, "ourToken"), None, 0);
+        this.tokenAddress = a;
+        [op]
+    }
 }
 ```
 
 ## License
 
-```
+```text
 Copyright (c) 2020 Davide Gessa
 
 Permission is hereby granted, free of charge, to any person
@@ -145,3 +147,4 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ```
+
