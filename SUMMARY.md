@@ -11,5 +11,7 @@
 * [Tezos functions](docs/tezos-functions.md)
 * [Crypto functions](docs/crypto-functions.md)
 * [Helper functions](docs/helper-functions.md)
+* [Interface](docs/interface.md)
+* [Expressions](docs/expressions.md)
 * [Contract structure](docs/contract-structure.md)
 
