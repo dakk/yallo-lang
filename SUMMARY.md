@@ -4,6 +4,7 @@
 
 ## Documentation <a id="docs"></a>
 
+* [Contract structure](docs/contract-structure.md)
 * [Types](docs/types/README.md)
   * [Base Types](docs/types/untitled.md)
   * [Composed Types](docs/types/composed-types.md)
@@ -14,6 +15,5 @@
 
 ---
 
-* [Contract structure](contract-structure.md)
 * [Untitled](untitled.md)
 
