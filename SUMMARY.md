@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Introduction](README.md)
+* [Yallo-lang](README.md)
 
 ## Documentation <a id="docs"></a>
 

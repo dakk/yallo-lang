@@ -1,4 +1,4 @@
-# Introduction
+# Yallo-lang
 
 Yallo is a yet another high level experimental language for Tezos, with the purpose of providing a better abstraction for integrating different contracts.
 
