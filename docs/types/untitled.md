@@ -90,7 +90,54 @@ const aFalse: bool = false;
 
 ## Enum
 
-## String & Bytes
+Enum type are unit variants; low level are represented as nat, so they are comparable \(only for equality\).
+
+```cpp
+type anEnum = enum (Started | Stopped);
+
+let av: anEnum = anEnum#Started;
+let b: bool = av = anEnum#Stopped; // false
+```
+
+## String
+
+String are sequences of characters.
+
+```cpp
+let a: string = "Hello World";
+```
+
+We can get the length of a string with _size:_
+
+```cpp
+let b: nat = a.size();
+```
+
+And get a _slice_:
+
+```cpp
+let c: string = a.slice(1, 5);
+```
+
+## Bytes
+
+Bytes are sequences of bytes. Like strings you can get the _length_ and a _slice_. 
+
+```cpp
+let a: bytes = "...";
+let b: nat = a.size();
+let c: bytes = a.slice(1, 5);
+```
+
+Bytes type is useful for encoding/decoding Michelson data using _pack_ and _unpack_:
+
+```cpp
+let n: nat = 12n;
+let a: bytes = Bytes.pack (n); // pack a nat
+let b: nat option = (Bytes.unpack (a): nat option);
+
+let c: bool = n = (Option.getSome(b));
+```
 
 ## Unit
 
