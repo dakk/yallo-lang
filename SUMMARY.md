@@ -14,7 +14,7 @@
 * [Import](docs/import.md)
 * [Function and constant](docs/function-and-constant.md)
 * [Interface](docs/interface.md)
-* [Control flow](docs/control-flow.md)
 * [Expressions](docs/expressions.md)
+* [Control flow](docs/control-flow.md)
 * [Contract structure](docs/contract-structure.md)
 
