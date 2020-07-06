@@ -1,4 +1,4 @@
-# Yallo-lang
+# Introduction
 
 Yallo is a yet another high level experimental language for Tezos, with the purpose of providing a better abstraction for integrating different contracts.
 
@@ -37,7 +37,6 @@ Yallo-lang compiler
   [-version]           print the version of this build and exit
   [-help]              print this help text and exit
                        (alias: -?)
-
 ```
 
 ## An example

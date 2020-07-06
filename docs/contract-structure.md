@@ -10,24 +10,24 @@ A contract is composed by three blocks:
 contract AContract {
     field a: nat;
     field b: string;
-    
+
     constructor (z: nat) {
         this.a = z;
         this.b = "string";
     }
-    
+
     entry anEntry(v: nat) {
         this.a = v;
         []
     }
-    
+
     view aView(): nat {
         this.a
     }
 }
 ```
 
-### Fields
+## Fields
 
 A field represents a named value in the contract storage:
 
@@ -35,7 +35,7 @@ A field represents a named value in the contract storage:
 field fieldName: fieldType;
 ```
 
-### Constructor
+## Constructor
 
 A constructor is an optional block, which allows to build an initial storage value for the contract; if defined, all storage field should be assigned in the body. The constructor could receive parameters, used to compute the initial storage: this is useful when a contract want to instantiate another contract using _createContract_.
 
@@ -46,9 +46,9 @@ constructor (aParam: atype) {
 }
 ```
 
-### Entries and Views
+## Entries and Views
 
-Entries and views defined the callable functionalities of the smart contract; they have a name and they could receive parameters. 
+Entries and views defined the callable functionalities of the smart contract; they have a name and they could receive parameters.
 
 An entry body is essentially an expression which always evalutes to an _operation list_. Entry body expression can modify the contract storage using particular expression with side effects \(assignments and type specific modifiers\).
 
@@ -74,6 +74,4 @@ entry aView (p: nat, cb: nat contrac) {
     [ cb (p * 2n) ]
 }
 ```
-
-
 
