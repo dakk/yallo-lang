@@ -70,7 +70,7 @@ view aView (p: nat): nat {
 Which is equivalent to:
 
 ```csharp
-entry aView (p: nat, cb: nat callback) {
+entry aView (p: nat, cb: nat contrac) {
     [ cb (p * 2n) ]
 }
 ```
