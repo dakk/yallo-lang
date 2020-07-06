@@ -11,7 +11,10 @@
 * [Tezos functions](docs/tezos-functions.md)
 * [Crypto functions](docs/crypto-functions.md)
 * [Helper functions](docs/helper-functions.md)
+* [Import](docs/import.md)
+* [Function and constant](docs/function-and-constant.md)
 * [Interface](docs/interface.md)
+* [Control flow](docs/control-flow.md)
 * [Expressions](docs/expressions.md)
 * [Contract structure](docs/contract-structure.md)
 
