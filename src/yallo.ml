@@ -49,9 +49,7 @@ let command =
           no_remove_unused = noremoveunused;
         } in (
           let pp_err p cc m = pp_message p cc m true in 
-          try 
-            run action filename opt
-          with 
+          try run action filename opt with 
           | CompilerError (m) -> print_endline @@ pp_err None "CompilerError" m
           | SyntaxError (p,m) -> print_endline @@ pp_err p "SyntaxError" m
           | ParsingError (p,m) -> print_endline @@ pp_err p "ParsingError" m

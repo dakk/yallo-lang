@@ -1,0 +1,10 @@
+(library
+ (name bast)
+ (public_name yallo.intermediate.bast)
+ (preprocess (pps ppx_jane ppx_deriving.show))
+ (libraries ppx_deriving helpers)
+ (modules bast btype))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

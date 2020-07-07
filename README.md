@@ -113,7 +113,7 @@ contract deployAToken {
     field tokenAddress: address;
 
     entry deployToken() {
-        let (a: address, op: operation) = Tezos.createContract (Token(100, "ourToken"), None, 0);
+        let (a: address, op: operation) = Tezos.createContract (Token(Tezos.selfAddress(), 100, "ourToken"), None, 0);
         this.tokenAddress = a;
         [op]
     }

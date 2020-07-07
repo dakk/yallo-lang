@@ -1,0 +1,29 @@
+opam-version: "2.0"
+name: "yallo-lang"
+version: "0.1.5"
+synopsis: "Yallo Tezos Language"
+description: """
+An high level language for Tezos smart contracts
+"""
+maintainer: "Davide Gessa <gessadavide@gmail.com>"
+authors: [
+  "Davide Gessa <gessadavide@gmail.com>"
+]
+
+homepage: "https://github.com/dakk/nmea"
+bug-reports: "https://github.com/dakk/nmea/issues"
+license: "MIT"
+dev-repo: "git+https://github.com/dakk/nmea.git"
+build: ["dune" "build" "-p" name "-j" jobs]
+
+depends: [
+  "ocaml" {>= "4.05.0"}
+  
+  "dune" {>= "2.5.0"}
+  "menhir" {>= "20200211"}
+
+  "ounit" {with-test & >= "2.0.8"}
+]
+
+depexts: [
+]
