@@ -1,5 +1,9 @@
-const a = Some (12n);
-
-const b: bool = a.isSome();
-const c: bool = a.isNone();
-const d: nat = a.getSome();
+contract AC {
+	entry acc () {
+		let a = Some (12n);
+		let b: bool = a.isSome();
+		let c: bool = a.isNone();
+		let d: nat = a.getSome();
+		[]
+	}
+}

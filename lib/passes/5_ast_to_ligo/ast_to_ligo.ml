@@ -127,8 +127,8 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 
 (* option *)
 | OptionGetSome (oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> v | None -> failwith \"Expect some value\")"
-| OptionIsSome(oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> true | None -> false"
-| OptionIsNone(oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> true | None -> true"
+| OptionIsSome(oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> true | None -> false)"
+| OptionIsNone(oe) -> "(match (" ^ to_ligo_expr ast oe ^ ") with | Some(v) -> true | None -> true)"
 
 
 (* map *)
