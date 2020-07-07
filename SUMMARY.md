@@ -17,4 +17,5 @@
 * [Expressions](docs/expressions.md)
 * [Control flow](docs/control-flow.md)
 * [Contract structure](docs/contract-structure.md)
+* [Contract interoperability](docs/contract-interoperability.md)
 

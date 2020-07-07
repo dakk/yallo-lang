@@ -50,3 +50,5 @@ Transfer mutez to address
 
 Transfer mutez to contract
 
+### Tezos.createContract \('a code, key\_hash option, mutez\): operation
+
