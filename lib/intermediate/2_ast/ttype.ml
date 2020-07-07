@@ -138,6 +138,7 @@ let compare_type_lazy t t' = (match t', t with
   | TSet(_), TSet(TAny) -> true 
   | TMap(_,_), TMap(TAny,TAny) -> true 
   | TBigMap(_,_), TBigMap(TAny,TAny) -> true 
+  | TContract(_), TContract(TAny) -> true
   | a, b when a=b -> true
   | _, _ -> false
 ) 

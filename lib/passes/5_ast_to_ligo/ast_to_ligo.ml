@@ -45,8 +45,8 @@ let rec to_ligo_type (a: ttype) = match a with
 
 let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with 
 | StorageEntry (i) -> "((Tezos.self \"%" ^ i ^ "\"): " ^ to_ligo_type te ^ ")"
-| Entrypoint((te2, ContractInstance((tt,e))), i) -> 
-  "match ((Tezos.get_entrypoint_opt \"%" ^ i ^ "\" (" ^ to_ligo_expr ast (tt,e) ^ ")): (" 
+| Entrypoint((te2, ContractInstance((tt,e))), (TString, i)) -> 
+  "match ((Tezos.get_entrypoint_opt \"%" ^ to_ligo_expr ast (TString, i) ^ "\" (" ^ to_ligo_expr ast (tt,e) ^ ")): (" 
   ^ to_ligo_type te ^ ") option) with | None -> (failwith \"Invalid entrypoint\": " ^ to_ligo_type te ^ ") | Some (ep) -> ep"
 (* | ContractInstance of expr 
 | BuildContractCodeAndStorage of iden * expr list

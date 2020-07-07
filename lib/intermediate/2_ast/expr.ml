@@ -4,7 +4,7 @@ type expr =
 | ContractInstance of texpr 
 | StorageEntry of iden
 | BuildContractCodeAndStorage of iden * texpr list
-| Entrypoint of texpr * iden
+| Entrypoint of texpr * texpr
 
 | TezosNow
 | TezosAmount

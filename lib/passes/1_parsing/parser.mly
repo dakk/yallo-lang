@@ -86,6 +86,7 @@
 		| l=left DOT i=IDENT				{ loce $startpos $endpos @@ Parse_tree.PEDot (l, i) }
     | i=IDENT 						      { loce $startpos $endpos @@ Parse_tree.PERef (i) }
     | TEZOS DOT i=IDENT         { loce $startpos $endpos @@ Parse_tree.PETRef (i) }
+    | TEZOS DOT CONTRACT        { loce $startpos $endpos @@ Parse_tree.PETRef ("contract") }
     | THIS DOT i=IDENT          { loce $startpos $endpos @@ Parse_tree.PESRef (i) }
     | CRYPTO DOT i=IDENT 				{ loce $startpos $endpos @@ Parse_tree.PECRef (i) }
 

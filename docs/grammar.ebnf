@@ -36,6 +36,7 @@
 <left> ::= <left> DOT IDENT
          | IDENT
          | TEZOS DOT IDENT
+         | TEZOS DOT CONTRACT
          | THIS DOT IDENT
          | CRYPTO DOT IDENT
 

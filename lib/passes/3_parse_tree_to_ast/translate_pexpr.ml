@@ -17,8 +17,25 @@ type iref =
 | Local of ttype
 [@@deriving show {with_path = false}]
 
+type ireft = 
+| IStorage
+| ILocal
+| IAny
+
 type bindings = (iden * iref) list
 [@@deriving show {with_path = false}]
+
+let binding_find ic (st: ireft) i: iref option = 
+  match (List.find_opt (fun (a, b) -> 
+    match st, b with 
+    | IAny, _ when i=a -> true
+    | IStorage, Storage(_) when i=a -> true
+    | IStorage, StorageEntry(_) when i=a -> true
+    | ILocal, Local(_) when i=a -> true
+    | _, _ -> false
+  ) ic) with 
+  | Some(a,b) -> Some(b)
+  | None -> None
 
 (* transform an pexpr to (ttype * expr) *)
 let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : texpr = 
@@ -93,6 +110,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     | TOption (TAny), TOption(t), None -> TOption(t), None
     | TOption (TAny), TOption(t), be -> TOption(t), be
     | TList (TAny), TList(t), ee -> TList(t), ee
+    | TContract (TAny), TContract(t), ee -> TContract(t), ee
     | a, b, _ when a=b -> a, ee
     | a, b, c -> raise @@ TypeError (pel, "Invalid cast from '" ^ show_ttype a ^ "' to '" ^ show_ttype b ^ "' for value: " ^ show_expr c))
 
@@ -138,6 +156,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       | "selfAddress", [] -> TAddress, TezosSelfAddress
       | "address", [(TContract(ctt), ad)] -> TAddress, TezosAddressOfContract (TContract(ctt), ad)
       | "contract", [(TAddress, ad)] -> TContract(TAny), TezosContractOfAddress (TAddress, ad)
+      | "contract", [(TAddress, ad); (TString, ep)] -> 
+        TContract(TAny), Entrypoint ((TAddress, ad), (TString, ep))
       | "setDelegate", [(TOption (TKeyHash), kho)] -> TOperation, TezosSetDelegate (TOption(TKeyHash), kho)
       | "setDelegate", [(TOption (TAny), None)] -> TOperation, TezosSetDelegate (TOption(TKeyHash), None)
       | "implicitAccount", [(TKeyHash, kh)] -> TContract (TUnit), TezosImplicitAccount(TKeyHash, kh)
@@ -317,9 +337,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         | None -> raise @@ ContractError (pel, "Unknown contract entrypoint '" ^ i ^ "' on contract instance")
         | Some(es) when es=(fst @@ List.split tl) -> TOperation, (
           match List.length tl with 
-          | 0 -> Apply((TContract(TUnit), Entrypoint((te, ee), i)), (TUnit, Unit))
-          | 1 -> Apply((TContract(List.hd es), Entrypoint((te, ee), i)), List.hd @@ tl)
-          | _ -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), i)), (TTuple(fst @@ List.split tl), Tuple(tl)))
+          | 0 -> Apply((TContract(TUnit), Entrypoint((te, ee), (TString, String(i)))), (TUnit, Unit))
+          | 1 -> Apply((TContract(List.hd es), Entrypoint((te, ee), (TString, String(i)))), List.hd @@ tl)
+          | _ -> Apply((TContract(TTuple (es)), Entrypoint((te, ee), (TString, String(i)))), (TTuple(fst @@ List.split tl), Tuple(tl)))
         )
         | _ -> raise @@ TypeError (pel, "Invalid types on contract instance apply over entrypoint '" ^ i ^ "'")
       )
@@ -337,11 +357,11 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       (match List.assoc_opt i ct with 
         | None -> raise @@ ContractError (pel, "Unkown contract entrypoint '" ^ i ^ "'")
         | Some(tl) when List.length tl > 1 -> 
-          TContract(TTuple(tl)), Entrypoint((te, ee), i)
+          TContract(TTuple(tl)), Entrypoint((te, ee), (TString, String(i)))
         | Some(tl) when List.length tl = 1 -> 
-          TContract(List.hd tl), Entrypoint((te, ee), i)
+          TContract(List.hd tl), Entrypoint((te, ee), (TString, String(i)))
         | Some(_) -> 
-          TContract(TUnit), Entrypoint((te, ee), i))
+          TContract(TUnit), Entrypoint((te, ee), (TString, String(i))))
 
     (* PEDot record access *)
     | TRecord(t) -> 
@@ -505,8 +525,10 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     
 
   (* symbol reference *)
+
+  
   | PESRef (i) ->
-    (match List.assoc_opt i ic with 
+    (match binding_find ic IStorage i with 
       | None -> raise @@ ContractError (pel, "Unknow storage field: '" ^ i ^ "'")
       | Some (Storage(t)) -> t, StorageRef (i)
       | Some (StorageEntry(tl)) when List.length tl = 0 -> TContract(TUnit), StorageEntry (i)
@@ -516,7 +538,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       )
   
   | PERef (i) -> 
-    (match List.assoc_opt i ic with 
+    (match binding_find ic ILocal i with 
     | None -> Env.get_ref i env', GlobalRef (i)
     | Some (Local(t)) -> t, LocalRef (i)
     | _ -> raise @@ SymbolNotFound (pel, "Symbol '" ^ i ^ "' is not a valid ref")
@@ -656,9 +678,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
     tt1, LetIn (i, t', (tt, ee), (tt1, ee1))
 
-  | PESeq(PELet(i, Some(t), e), en) -> 
-    let t' = transform_type t env' in
+  | PESeq(PELet(i, top, e), en) -> 
     let (tt, ee) = transform_expr e env' ic in 
+    let t' = match top with | None -> tt | Some(t) -> transform_type t env' in
     if not @@ compare_type_lazy tt t' then raise @@ TypeError (pel, "Let type mismatch; " ^ show_ttype_got_expect tt t'); 
     let (tnt, ene) = transform_expr en env' @@ push_ic i (Local(t')) ic in
     tnt, Seq((TUnit, Let(i, t', (tt, ee))), (tnt, ene))

@@ -1,0 +1,19 @@
+type status = enum (Pending | Terminated);
+
+contract Test {
+	field a: nat list;
+
+	entry tentry () {
+		this.a = [ 12n, 13n ];
+		[]
+	}
+
+	entry tentry2 (b: nat) {
+		this.a.prepend(b);
+		[]
+	}
+
+	view tentry3 (a: nat): nat list {
+		copy(this.a).prepend(a)
+	}
+}

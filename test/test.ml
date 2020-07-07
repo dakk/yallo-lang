@@ -91,8 +91,6 @@ let () =
     ];
     "contract", [
       "view", `Quick, compile optl None "test/contract/view.yallo" None;
-      "lambda_map", `Quick, compile optl None "test/contract/lambda_map.yallo" None;
-      "lambda_field", `Quick, compile optl None "test/contract/lambda_field.yallo" None;
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
       "king_of_tezos", `Quick, compile optl None "test/contract/king_of_tezos.yallo" None;
       "king_of_tezos_lambdalized", `Quick, compile optl None "test/contract/king_of_tezos_lambdalized.yallo" None;
@@ -101,9 +99,13 @@ let () =
       "token_with_view", `Quick, compile optlc None "test/contract/token_with_view.yallo" None;
       "token_create", `Quick, compile optlc None "test/contract/token_create.yallo" None;
       "token_using", `Quick, compile optlc None "test/contract/token_using.yallo" None;
-      "crec", `Quick, compile optlc None "test/contract/crec.yallo" None;
-      "cenum", `Quick, compile optlc None "test/contract/cenum.yallo" None;
-      "unbound_field", `Quick, compile optlc (Some(SymbolNotFound(None, ""))) "test/contract/unbound_field.yallo" None;
-      "ctor_fail", `Quick, compile optlc (Some(DeclarationError(None, ""))) "test/contract/ctor_fail.yallo" None;
+      "field_record", `Quick, compile optlc None "test/contract/field_record.yallo" None;
+      "field_list", `Quick, compile optlc None "test/contract/field_list.yallo" None;
+      "field_enum", `Quick, compile optlc None "test/contract/field_enum.yallo" None;
+      "field_lambda_map", `Quick, compile optl None "test/contract/field_lambda_map.yallo" None;
+      "field_lambda", `Quick, compile optl None "test/contract/field_lambda.yallo" None;
+      "field_unbound", `Quick, compile optlc (Some(SymbolNotFound(None, ""))) "test/contract/field_unbound.yallo" None;
+      "ctor_incomplete_fail", `Quick, compile optlc (Some(DeclarationError(None, ""))) "test/contract/ctor_incomplete_fail.yallo" None;
+      "ctor_ok", `Quick, compile optlc None "test/contract/ctor_ok.yallo" None;
     ]
   ]

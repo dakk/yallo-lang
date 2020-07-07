@@ -13,6 +13,12 @@ contract usingAToken {
 		[ op ]
 	}
 
+	entry sendTezosInCall2(a: address) {
+		let getBalance: (address, nat contract) contract = Tezos.contract(tokenContractAddress, "getBalance") in
+		let op = getBalance(a, this.checkBalanceCallback) in
+		[ op ]
+	}
+
 	entry sendTezos(a: address) {
 		let op = Tezos.transfer (a, 12mtz) in
 		[ op ]

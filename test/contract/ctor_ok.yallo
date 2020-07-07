@@ -1,0 +1,11 @@
+contract Test {
+	field z: nat;
+	field y: string;
+	field x: int;
+
+	constructor (a: nat, b: string) {
+		this.z = a;
+		this.y = b;
+		this.x = int(a);
+	}
+}

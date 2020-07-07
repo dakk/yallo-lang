@@ -68,7 +68,6 @@ let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) =
   | Lambda (_, a)
   | ContractInstance (a) 
   | TezosImplicitAccount (a)
-  | Entrypoint (a, _)
   | TezosSetDelegate (a)
   | TezosAddressOfContract (a)
   | TezosContractOfAddress (a)
@@ -106,6 +105,7 @@ let traverse (te: texpr) (tf: 'a t_ovverride) (jf: 'a t_join) (empty: 'a) =
   | ToInt (a)
   | SRecAssign (_, _, a) -> traverse' a
 
+  | Entrypoint (a, b)
   | MapGetOpt (a, b)
   | MapMem (a, b)
   | MapMapWith (a, b)
