@@ -9,7 +9,7 @@ open Helpers.Gen_utils
 let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
 let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)
 let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)
-let let_surround s = "let ovverraidable = " ^ s ^ " in"
+let let_surround s = "let ovverraidable = " ^ s ^ " in "
 let rec enum_index e i ii = match e with 
 | [] -> failwith "Enum value not found"
 | x::xe when x = i -> ii
@@ -263,10 +263,10 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
   ) in "let tmwttemp = " ^ to_ligo_expr ast e ^ " in " ^ rr el
 
   
-| FailIfMessage (e, m) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then failwith (" ^ to_ligo_expr ast m ^ ") else ()")
-| FailIf (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then failwith \"Assertion\" else ()")
+| FailIfMessage (e, m) -> ("if (" ^ to_ligo_expr ast e ^ ") then failwith (" ^ to_ligo_expr ast m ^ ") else ()")
+| FailIf (e) -> ("if (" ^ to_ligo_expr ast e ^ ") then failwith \"Assertion\" else ()")
 | Fail (e) -> ("failwith (" ^ to_ligo_expr ast e ^ ")")
-| Assert (e) -> let_surround ("if (" ^ to_ligo_expr ast e ^ ") then () else (failwith \"Assertion\")")
+| Assert (e) -> ("if (" ^ to_ligo_expr ast e ^ ") then () else (failwith \"Assertion\")")
 | Copy (e) -> "(" ^ to_ligo_expr ast e ^ ")"
      
 | Let (id, tt, e) -> "let " ^ id ^ ": " ^ to_ligo_type tt ^ " = " ^ to_ligo_expr ast e ^ " in "
@@ -278,10 +278,16 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | SAssign (i, e) -> "let s = { s with " ^ i ^ "=" ^ to_ligo_expr ast e ^ " } in "
 | SRecAssign (i, ii, expr) -> "let s = { s with " ^ i ^ "= { s." ^ i ^ " with "^ ii ^"=" ^ to_ligo_expr ast expr ^ "}} in "
 
-| Seq(a, (tl, List(e))) -> 
-  "  " ^ to_ligo_expr ast a ^ "\n  (" ^ to_ligo_expr ast (tl, List(e)) ^ ": operation list)"
+| Seq(a, b) -> 
+  (match a with 
+  | (TUnit, ae) -> let_surround (to_ligo_expr ast (TUnit, ae))
+  | _ -> to_ligo_expr ast a)
+  ^ "\n" ^
+  (match b with 
+  | (tl, List(e)) -> "(" ^ to_ligo_expr ast (tl, List(e)) ^ ": operation list)"
+  | _ -> to_ligo_expr ast b)
 
-| Seq(a, b) -> "  " ^ to_ligo_expr ast a ^ "\n" ^ to_ligo_expr ast b
+
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
 | _ -> "<<translation not handled: " ^ show_expr e ^ ">>"
 

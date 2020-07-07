@@ -1,10 +1,15 @@
-function assertNoTransfer (): unit {
+function assert_NoTransfer (): unit {
 	assert (Tezos.amount() == 0mtz)
+}
+
+function assert_NoBalance (): unit {
+	assert (Tezos.balance() == 0mtz)
 }
 
 contract Test {
 	entry test() {
-		assertNoTransfer();
+		assert_NoTransfer();
+		assert_NoBalance();
 		[]
 	}
 }
