@@ -108,7 +108,8 @@ let compile (filename: string) opt =
         if opt.print_ligo then comp |> print_endline;
         if opt.verbose then printf "===> Compilingo ligo to michelson\n\n%!";        
         write_file "/tmp/temp.mligo" comp;
-        Sys.command "ligo compile-contract /tmp/temp.mligo main" |> ignore;
+        let r = Sys.command "ligo compile-contract /tmp/temp.mligo main" in
+        if r <> 0 then raise @@ CompilerError ("Failed to compile ligo to tz");
         ""
       | _ -> comp
     )

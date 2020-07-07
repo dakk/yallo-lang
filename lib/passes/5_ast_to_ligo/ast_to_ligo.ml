@@ -151,9 +151,9 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | MapGetOpt (mape, vkey) ->
   "Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape
 | MapUpdate (mape, vkey, vval) -> 
-  let_surround ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape ^ "")
+  ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape ^ "")
 | MapRemove (mape, vkey) -> 
-  let_surround ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape)
+  ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape)
   
 
 (* bigmap *)
@@ -280,7 +280,13 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 
 | Seq(a, b) -> 
   (match a with 
-  | (TUnit, ae) -> let_surround (to_ligo_expr ast (TUnit, ae))
+  | (TUnit, LetTuple(_, _)) -> to_ligo_expr ast a
+  | (TUnit, LetTupleIn(_, _, _)) -> to_ligo_expr ast a
+  | (TUnit, LetIn(_, _, _, _)) -> to_ligo_expr ast a
+  | (TUnit, Let(_, _, _)) -> to_ligo_expr ast a
+  | (TUnit, SAssign(_, _)) -> to_ligo_expr ast a
+  | (TUnit, SRecAssign(_, _, _)) -> to_ligo_expr ast a
+  | (TUnit, _) -> let_surround (to_ligo_expr ast a)
   | _ -> to_ligo_expr ast a)
   ^ "\n" ^
   (match b with 
@@ -316,18 +322,23 @@ let generate_ligo_code (ast: t) (contract: string) =
   ] in 
 
   (* generate the action variant *)
-  let act = [ 
-    Str("type action = "); 
-    Level(List.map (fun e -> 
-      Str("| " ^ String.capitalize_ascii e.id ^ 
-        if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> to_ligo_type it)
-        else " of unit")
-      ) ce.entries
-    ); Empty; Empty
-   ] in 
+  let act = 
+    if List.length ce.entries = 0 then ([])
+    else (
+    [ 
+      Str("type action = "); 
+      Level(List.map (fun e -> 
+        Str("| " ^ String.capitalize_ascii e.id ^ 
+          if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> to_ligo_type it)
+          else " of unit")
+        ) ce.entries
+      ); Empty; Empty
+    ]
+  ) in 
 
   (* write entries *)
-  let entrs = List.map (fun e -> 
+  let entrs = 
+    List.map (fun e -> 
     Str("let " ^ e.id ^ " (" ^
       list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
       "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> to_ligo_type it) ^
@@ -336,20 +347,27 @@ let generate_ligo_code (ast: t) (contract: string) =
   ) ce.entries in
 
   (* write the main *)
-  let main = [
-    Str ("let main(a, s: action * storage): (operation list * storage) = ");
-    Level([
-      Str ("match a with");
-      Level (List.map (fun e -> 
-          Str ("| " ^ String.capitalize_ascii e.id ^ " (arg) -> " ^ 
-          if List.length e.arg > 0 then 
-            "let (" ^ merge_list e.arg ", " (fun (ii, it) -> ii)
-            ^ ") = arg in " ^ e.id ^ "(" ^ merge_list2 e.arg ", " (fun (ii, it) -> ii) ^ "s)"
-          else 
-            e.id ^ "(s)")
-      ) ce.entries)
+  let main =
+    if List.length ce.entries = 0 then (
+      [
+        Str ("let main(a, s: unit * storage): (operation list * storage) = ");
+        Str ("([]: operation list), s")
+      ]
+    ) else ([
+      Str ("let main(a, s: action * storage): (operation list * storage) = ");
+      Level([
+        Str ("match a with");
+        Level (List.map (fun e -> 
+            Str ("| " ^ String.capitalize_ascii e.id ^ " (arg) -> " ^ 
+            if List.length e.arg > 0 then 
+              "let (" ^ merge_list e.arg ", " (fun (ii, it) -> ii)
+              ^ ") = arg in " ^ e.id ^ "(" ^ merge_list2 e.arg ", " (fun (ii, it) -> ii) ^ "s)"
+            else 
+              e.id ^ "(s)")
+        ) ce.entries)
+      ])
     ])
-  ] in
+  in
   Level (consts@str@act@entrs@main)
 
 
