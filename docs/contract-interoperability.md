@@ -23,3 +23,23 @@ let getBalance: (address, nat contract) contract = Tezos.contract(tokenContractA
 let op = getBalance(addrToInvestigate, this.checkBalanceCallback);
 ```
 
+## Deploy a contract
+
+Yallo also allow deploying a contract from another contract. For instance, we can deploy the _Token_ contract from another contract:
+
+```python
+import "test/contract/token.yallo";
+
+contract deployAToken {
+	field tokenAddress: address;
+
+	entry deployToken() {
+		let (op: operation, a: address) = Tezos.createContract (Token(100, "ourToken"), None, 0mtz);
+		this.tokenAddress = a;
+		[op]
+	}
+}
+```
+
+We use the constructor of Token to produce the initial storage.
+
