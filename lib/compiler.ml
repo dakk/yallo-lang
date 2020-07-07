@@ -101,7 +101,7 @@ let compile (filename: string) opt =
       | Some ("ligo"), None when (List.length ast.contracts) > 0 -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
         Passes.Ast_to_ligo.generate_ligo ast (fst @@ List.nth ast.contracts @@ (List.length ast.contracts) - 1)
-      | Some (_), None -> raise @@ CompilerError ("No contract specified for compilation")
+      | _, _ -> raise @@ CompilerError ("No contract specified for compilation")
     )
     |> (fun comp -> match opt.target with 
       | Some("tz") -> 

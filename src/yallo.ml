@@ -48,7 +48,7 @@ let command =
           verbose = verbose;
           no_remove_unused = noremoveunused;
         } in (
-          let rec pp_err p cc m = pp_message p cc m true in 
+          let pp_err p cc m = pp_message p cc m true in 
           try 
             run action filename opt
           with 

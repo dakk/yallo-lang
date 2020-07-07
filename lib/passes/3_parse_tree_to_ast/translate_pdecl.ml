@@ -2,7 +2,6 @@ open Ast
 open Ast_ttype
 open Translate_pexpr
 open Translate_ptype
-open Helpers.Loc
 open Helpers.Errors
 open Parsing
 open Parse_tree

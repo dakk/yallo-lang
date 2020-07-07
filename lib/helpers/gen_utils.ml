@@ -16,7 +16,7 @@ let code_to_string c =
   let rec cts c l = match c with 
   | [] -> ""
   | Empty::cl' -> "\n" ^ cts cl' l
-  | Merge(sep, ll)::cl' -> merge_list ll sep (fun x -> cts [x] l)
+  | Merge(sep, ll)::cl' -> merge_list ll sep (fun x -> cts [x] l) ^ cts cl' l
   | Surround (a,b,e)::cl' -> a ^ (cts [e] l) ^ b ^ "\n" ^ cts cl' l
   | CStr(sl)::cl' -> (String.make (if l = 0 then 0 else 2*(l-1)) ' ') ^ cts sl l ^ "\n" ^ cts cl' l
   | Str(s)::cl' -> (String.make (if l = 0 then 0 else 2*(l-1)) ' ') ^ s ^ "\n" ^ cts cl' l

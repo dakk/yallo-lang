@@ -7,17 +7,17 @@ open Helpers
 
 module SymbolSet = Set.Make(String)
 
-let rec used_globalref_in_expr (t, e) = 
-  traverse (t, e) (fun (t, e) -> 
+let used_globalref_in_expr (t, e) = 
+  traverse (t, e) (fun (_, e) -> 
     match e with | GlobalRef (i) -> SymbolSet.singleton i
   ) SymbolSet.union SymbolSet.empty
   
-let rec used_globalref_in_contract ce = 
+let used_globalref_in_contract ce = 
   SymbolSet.union
     (List.fold_left (fun acc e -> SymbolSet.union acc @@ used_globalref_in_expr e.expr) SymbolSet.empty ce.entries)
     (List.fold_left (fun acc (_, e) -> SymbolSet.union acc @@ used_globalref_in_expr e) SymbolSet.empty @@ ce.constructor.exprs)
 
-let remove_unused ctr (ast: Ast.t) = 
+let remove_unused _ (ast: Ast.t) = 
   let used = SymbolSet.union 
     (List.fold_left (fun acc (i,ce) -> SymbolSet.union acc (used_globalref_in_expr ce)) SymbolSet.empty ast.consts)
     (List.fold_left (fun acc (i, ce) -> SymbolSet.union acc (used_globalref_in_contract ce)) SymbolSet.empty ast.contracts) 

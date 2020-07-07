@@ -4,7 +4,6 @@ open Ast_expr
 open Helpers.Errors
 open Parsing
 open Translate_ptype
-open Pt_loc
 
 let show_ttype_got_expect t1 t2 = "got: '" ^ show_ttype t1 ^ "' expect '" ^ show_ttype t2 ^ "'"
 let show_ttype_between_na t1 t2 = "between '" ^ show_ttype t1 ^ "' and '" ^ show_ttype t2 ^ "' is not allowed"
@@ -210,7 +209,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     | (TString, String("days")) -> Int (60 * 60 * 24)
     | (TString, String("weeks")) -> Int (60 * 60 * 24 * 7)
     | (TString, String("years")) -> Int (60 * 60 * 24 * 365)
-    | (TString, String(a)) -> raise @@ APIError (pel, "Timestamp.duration invalid unit: " ^ a))
+    | (TString, String(a)) -> raise @@ APIError (pel, "Timestamp.duration invalid unit: " ^ a)
+    | (_, _) -> raise @@ APIError (pel, "Timestamp.duration invalid arguments"))
     in
     if ht <> TInt then raise @@ APIError (pel, "Timestamp.duration invalid amount " ^ show_ttype_got_expect TInt ht);
     TInt, Mul ((ht, hm), (TInt, un))
@@ -435,7 +435,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     ) in
     rt, Mod ((tt1, ee1), (tt2, ee2))
 
-  | PEEDiv (e1, e2) -> 
+  | PEDiv (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
     let (tt2, ee2) = transform_expr e2 env' ic in 
     let rt = (match tt1, tt2 with 
@@ -671,9 +671,9 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
 
 
   (* let-binding and sequences *)
-  | PELetIn(i, Some(t), e, e1) -> 
-    let t' = transform_type t env' in
+  | PELetIn(i, top, e, e1) -> 
     let (tt, ee) = transform_expr e env' ic in 
+    let t' = match top with | None -> tt | Some(t) -> transform_type t env' in
     if not @@ compare_type_lazy tt t' then raise @@ TypeError (pel, "LetIn type mismatch; " ^ show_ttype_got_expect tt t');
     let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(t')) ic in 
     tt1, LetIn (i, t', (tt, ee), (tt1, ee1))
@@ -684,11 +684,6 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     if not @@ compare_type_lazy tt t' then raise @@ TypeError (pel, "Let type mismatch; " ^ show_ttype_got_expect tt t'); 
     let (tnt, ene) = transform_expr en env' @@ push_ic i (Local(t')) ic in
     tnt, Seq((TUnit, Let(i, t', (tt, ee))), (tnt, ene))
-
-  | PELetIn(i, None, e, e1) -> 
-    let (tt, ee) = transform_expr e env' ic in 
-    let (tt1, ee1) = transform_expr e1 env' @@ push_ic i (Local(tt)) ic in 
-    tt1, LetIn (i, tt, (tt, ee), (tt1, ee1))
 
   | PELetTuple(tl, e) -> 
     let (tt, ee) = transform_expr e env' ic in 
@@ -722,12 +717,6 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         tnt, Seq((TUnit, LetTuple(tl', (tt, ee))), (tnt, ene))
       | _ -> raise @@ TypeError (pel, "Expected a tuple")
     )
-
-
-  | PESeq(PELet(i, None, e), en) -> 
-    let (tt, ee) = transform_expr e env' ic in 
-    let (tnt, ene) = transform_expr en env' @@ push_ic i (Local(tt)) ic in
-    tnt, Seq((TUnit, Let(i, tt, (tt, ee))), (tnt, ene))
 
   | PESeq (e1, e2) -> 
     let (tt1, ee1) = transform_expr e1 env' ic in 
