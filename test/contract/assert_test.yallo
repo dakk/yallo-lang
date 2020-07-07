@@ -1,0 +1,10 @@
+function assertNoTransfer (): unit {
+	assert (Tezos.amount() == 0mtz)
+}
+
+contract Test {
+	entry test() {
+		assertNoTransfer();
+		[]
+	}
+}

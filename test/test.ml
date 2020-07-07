@@ -90,6 +90,7 @@ let () =
       "base_fun", `Quick, compile opt None "test/function/base_fun.yallo" None;
     ];
     "contract", [
+      "assert_test", `Quick, compile optl None "test/contract/assert_test.yallo" None;
       "view", `Quick, compile optl None "test/contract/view.yallo" None;
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
       "king_of_tezos", `Quick, compile optl None "test/contract/king_of_tezos.yallo" None;

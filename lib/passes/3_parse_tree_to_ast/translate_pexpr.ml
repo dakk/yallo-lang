@@ -611,6 +611,8 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
         rettype, Apply ((tt,ee), (TUnit, Unit))
       else if List.length argl > 1 then 
         rettype, Apply((tt, ee), (TTuple(argl), Tuple(ap)))
+      else if (List.length ap) = 0 && (List.length argl) = 0 then
+        rettype, Apply((tt, ee), (TUnit, Unit))
       else
         rettype, Apply((tt, ee), List.hd ap)
 
