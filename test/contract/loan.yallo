@@ -2,7 +2,7 @@ import "test/contract/itoken.yallo";
 
 type tstate = enum (WaitingBorrower | Loaned | CheckingRefund | Expired | Executed | Terminated);
 
-const loanBaker: key_hash = h"3423432";
+const loanBaker: key_hash = h"tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx";
 const d28 = 86400 * 28; // aka Timestamp.oneDay
 const d5 = 86400 * 5;
 

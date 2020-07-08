@@ -45,8 +45,8 @@ let rec to_ligo_type (a: ttype) = match a with
 
 let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with 
 | StorageEntry (i) -> "((Tezos.self \"%" ^ i ^ "\"): " ^ to_ligo_type te ^ ")"
-| Entrypoint((te2, ContractInstance((tt,e))), (TString, i)) -> 
-  "match ((Tezos.get_entrypoint_opt \"%" ^ to_ligo_expr ast (TString, i) ^ "\" (" ^ to_ligo_expr ast (tt,e) ^ ")): (" 
+| Entrypoint((te2, ContractInstance((tt,e))), (TString, String(i))) -> 
+  "match ((Tezos.get_entrypoint_opt \"%" ^ i ^ "\" (" ^ to_ligo_expr ast (tt,e) ^ ")): (" 
   ^ to_ligo_type te ^ ") option) with | None -> (failwith \"Invalid entrypoint\": " ^ to_ligo_type te ^ ") | Some (ep) -> ep"
 (* | ContractInstance of expr 
 | BuildContractCodeAndStorage of iden * expr list
@@ -66,7 +66,7 @@ let rec to_ligo_expr (ast: t) ((te,e): texpr) = match e with
 | TezosSetDelegate (a) -> "Tezos.set_delegate (" ^ to_ligo_expr ast a ^ ")"
 | TezosTransfer (ct, par, v) -> 
   "Tezos.transaction (" ^ to_ligo_expr ast par ^ ") (" ^ to_ligo_expr ast v ^ ") (" ^ to_ligo_expr ast ct ^ ")"
-
+| TezosSelfAddress -> "Tezos.self_address"
 (*
 | TezosCreateContract of expr * expr * expr
 | TezosImplicitAccount of expr
@@ -313,7 +313,7 @@ let generate_ligo_code (ast: t) (contract: string) =
   (* generate the storage record *)
   let str = [
     if List.length ce.fields = 0 then 
-      Str("type storage = unit\n\n")
+      Str("type storage = unit")
     else 
       Str ("type storage = {\n" ^
       merge_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ to_ligo_type t) ^

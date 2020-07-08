@@ -98,7 +98,7 @@ let () =
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
       "king_of_tezos", `Quick, compile optt None "test/contract/king_of_tezos.yallo" None;
       "king_of_tezos_lambdalized", `Quick, compile optt None "test/contract/king_of_tezos_lambdalized.yallo" None;
-      "loan", `Quick, compile optc None "test/contract/loan.yallo" None;
+      "loan", `Quick, compile optt None "test/contract/loan.yallo" None;
       "token", `Quick, compile optt None "test/contract/token.yallo" None;
       "token_with_view", `Quick, compile optt None "test/contract/token_with_view.yallo" None;
       "token_create", `Quick, compile optlc None "test/contract/token_create.yallo" None;
