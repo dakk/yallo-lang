@@ -12,3 +12,6 @@ let pp_list3 sep pp =
     ~pp_sep:(fun fmt () -> Format.fprintf fmt "%(%)" sep)
     pp
 
+
+let sfmt = Format.str_formatter
+let sget = Format.flush_str_formatter
