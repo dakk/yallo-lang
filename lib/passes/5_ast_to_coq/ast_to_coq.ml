@@ -13,8 +13,6 @@ let to_coq_expr ast (t, e) =
   ""
 
 let generate_coq_code (ast: t) (contract: string) = 
-  if List.assoc_opt contract ast.contracts = None then 
-    raise @@ CompilerError ("Unknown contract '" ^ contract ^ "'");
   let ce = List.assoc contract ast.contracts in
 
   let imps = [
@@ -58,7 +56,7 @@ let generate_coq_code (ast: t) (contract: string) =
   (* write entries *)
   let entrs = 
     List.map (fun e -> 
-    Str("let " ^ e.id ^ " (" ^
+    Str("Definition " ^ e.id ^ " (" ^
       list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
       "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> to_coq_type it) ^
       "storage) = \n" ^ to_coq_expr ast e.expr ^ ", (s: storage)\n\n"

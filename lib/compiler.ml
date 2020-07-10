@@ -90,19 +90,24 @@ let compile (filename: string) opt =
     |> ap (not opt.no_remove_unused) @@ Passes.Ast_remove_unused.remove_unused opt.contract
     |> app opt.print_ast print_ast 
 
-    (* output to a final language *)
-    |> (fun ast -> match opt.target, opt.contract with 
-      | None, _ -> ""
-      | Some ("tz"), Some(ctr)
-      | Some ("ligo"), Some(ctr) -> 
+    (* output to a final language - first pass *)
+    |> (fun ast -> 
+      let ctr () = match opt.contract with 
+      | None when (List.length ast.contracts) > 0 -> fst @@ List.nth ast.contracts @@ (List.length ast.contracts) - 1
+      | Some (ctr) -> ctr 
+      | None -> raise @@ CompilerError ("No contract specified for compilation")
+      in      
+      match opt.target with 
+      | None -> ""
+      | Some ("coq") -> 
+        if opt.verbose then printf "===> Generating coq code\n\n%!";  
+        Passes.Ast_to_coq.generate_coq ast (ctr ())
+      | Some ("tz")
+      | Some ("ligo") -> 
         if opt.verbose then printf "===> Generating ligo code\n\n%!";        
-        Passes.Ast_to_ligo.generate_ligo ast ctr
-      | Some ("tz"), None
-      | Some ("ligo"), None when (List.length ast.contracts) > 0 -> 
-        if opt.verbose then printf "===> Generating ligo code\n\n%!";        
-        Passes.Ast_to_ligo.generate_ligo ast (fst @@ List.nth ast.contracts @@ (List.length ast.contracts) - 1)
-      | _, _ -> raise @@ CompilerError ("No contract specified for compilation")
+        Passes.Ast_to_ligo.generate_ligo ast (ctr ())
     )
+    (* output to a final language - second pass *)
     |> (fun comp -> match opt.target with 
       | Some("tz") -> 
         if opt.print_ligo then comp |> print_endline;

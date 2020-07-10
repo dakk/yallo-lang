@@ -14,8 +14,8 @@ let run action filename opt =
 
 let summary = ""
 ^ "=== actions ===\n\n"
-^ "  compile file.yallo [-dcontract ContractName] [-target ligo]\n"
-^ "                 compiles a contract ContractName to ligo language\n\n"
+^ "  compile file.yallo [-dcontract ContractName] [-target ligo|tz|coq]\n"
+^ "                 compiles a contract ContractName to target language\n\n"
 ^ "  extract-interface file.yallo -dcontract ContractName\n"
 ^ "                 extracts the yallo interface for the given contract\n\n"
 ^ "  interface-of-michelson file.tz\n"
@@ -37,7 +37,7 @@ let command =
         and pligo     = flag "-print-ligo" no_arg ~doc:" print ligo code"
         and verbose   = flag "-verbose" no_arg ~doc:" enable verbosity"
         and noremoveunused   = flag "-no-remove-unused" no_arg ~doc:" disable removing unused symbols"
-        and target  = flag "-target" (optional string) ~doc:" target language"
+        and target    = flag "-target" (optional string) ~doc:" target language (ligo, tz, coq)"
       in fun () -> 
         let opt = Compiler.{
           target = if is_none target then Some("tz") else target;
