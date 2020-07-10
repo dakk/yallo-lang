@@ -16,45 +16,103 @@ let rec enum_index e i ii = match e with
 | x::xe -> enum_index xe i (ii+1)
 
 
-let rec to_ligo_type (a: ttype) = match a with
-| TUnit -> "unit"
-| TAddress -> "address"
-| TInt -> "int"
-| TChainId -> "chain_id"
-| TOperation -> "operation"
-| TNat -> "nat"
-| TMutez -> "tez"
-| TTimestamp -> "timestamp"
-| TBool -> "bool"
-| TSignature -> "signature"
-| TKeyHash -> "key_hash"
-| TKey -> "key"
-| TString -> "string"
-| TBytes -> "bytes"
-| TLambda (p, r) -> sprintf "(%s -> %s)" (to_ligo_type p) (to_ligo_type r)
-| TEnum (el) -> "nat"
+let rec pp_ltype (a: ttype) = match a with
+| TUnit -> 
+  sprintf "unit"
+
+| TAddress -> 
+  sprintf "address"
+
+| TInt -> 
+  sprintf "int"
+
+| TChainId -> 
+  sprintf "chain_id"
+
+| TOperation -> 
+  sprintf "operation"
+
+| TNat -> 
+  sprintf "nat"
+
+| TMutez -> 
+  sprintf "tez"
+
+| TTimestamp -> 
+  sprintf "timestamp"
+
+| TBool -> 
+  sprintf "bool"
+
+| TSignature -> 
+  sprintf "signature"
+
+| TKeyHash -> 
+  sprintf "key_hash"
+
+| TKey -> 
+  sprintf "key"
+
+| TString -> 
+  sprintf "string"
+
+| TBytes -> 
+  sprintf "bytes"
+
+| TLambda (p, r) -> 
+  sprintf "(%s -> %s)" 
+  (pp_ltype p) 
+  (pp_ltype r)
+
+| TEnum (el) -> 
+  sprintf "nat"
 (* List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " | ") ^ x) "" el *)
-| TList (t) -> to_ligo_type t ^ " list"
-| TSet (t) -> to_ligo_type t ^ " set"
-| TMap (t, t') -> sprintf "(%s, %s) map" (to_ligo_type t) (to_ligo_type t')
-| TBigMap (t, t') -> sprintf "(%s, %s) big_map" (to_ligo_type t) (to_ligo_type t')
-| TOption (t) -> sprintf "%s option" @@ to_ligo_type t
-| TRecord (l) -> "{ " ^ List.fold_left (fun acc (x, xt) -> acc ^ (if acc = "" then "" else "; ") ^ x ^ ": " ^ to_ligo_type xt) "" l ^ " }"
-| TTuple (tl) -> "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ to_ligo_type x) "" tl ^ ")"
-| TContract (t) -> to_ligo_type t ^ " contract"
+
+| TList (t) -> 
+  sprintf "%s list" @@ pp_ltype t
+
+| TSet (t) -> 
+  sprintf "%s set" @@ pp_ltype t
+
+| TMap (t, t') -> 
+  sprintf "(%s, %s) map" 
+  (pp_ltype t) 
+  (pp_ltype t')
+
+| TBigMap (t, t') -> 
+  sprintf "(%s, %s) big_map" 
+  (pp_ltype t) 
+  (pp_ltype t')
+
+| TOption (t) -> 
+  sprintf "%s option" @@ pp_ltype t
+
+| TRecord (l) -> "{ " ^ List.fold_left (fun acc (x, xt) -> acc ^ (if acc = "" then "" else "; ") ^ x ^ ": " ^ pp_ltype xt) "" l ^ " }"
+
+| TTuple (tl) -> "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ pp_ltype x) "" tl ^ ")"
+
+| TContract (t) -> 
+  sprintf "%s contract" @@ pp_ltype t
+
 | _ -> raise @@ TypeError (None, "Type '" ^ show_ttype a ^ "' is not translable to ligo")
 
 
 
-let rec to_ligo_expr (ast: t) ((te,e): texpr) = 
-  let pp_infix2 op a b = sprintf "(%s) %s (%s)" (to_ligo_expr ast a) op (to_ligo_expr ast b) in
+let rec pp_lexpr (ast: t) ((te,e): texpr) = 
+  let pp_infix2 op a b = sprintf "(%s) %s (%s)" (pp_lexpr ast a) op (pp_lexpr ast b) in
+  let pp_mergelist l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l) in
+  let pp_mergelist2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l) in
   
 match e with
-| StorageEntry (i) -> sprintf "((Tezos.self \"%%%s\"): %s)" i (to_ligo_type te)
+| StorageEntry (i) -> 
+  sprintf "((Tezos.self \"%%%s\"): %s)" i (pp_ltype te)
 
 | Entrypoint((te2, ContractInstance((tt,e))), (TString, String(i))) -> 
   sprintf "match ((Tezos.get_entrypoint_opt \"%%%s\" (%s)): (%s) option) with | None -> (failwith \"Invalid entrypoint\": %s) | Some (ep) -> ep"
-  i (to_ligo_expr ast (tt,e)) (to_ligo_type te) (to_ligo_type te)
+  i 
+  (pp_lexpr ast (tt,e)) 
+  (pp_ltype te) 
+  (pp_ltype te)
 
 (* 
 | ContractInstance of expr 
@@ -68,67 +126,85 @@ match e with
 
 | TezosContractOfAddress (ad) -> 
   sprintf "match (Tezos.get_contract_opt %s : unit contract option) with | None -> (failwith \"invalid contract\": unit contract) | Some(c) -> c"
-  (to_ligo_expr ast ad)
+  (pp_lexpr ast ad)
 
-| TezosNow -> "Tezos.now"
+| TezosNow -> 
+  sprintf "Tezos.now"
 
-| TezosAmount -> "Tezos.amount"
+| TezosAmount -> 
+  sprintf "Tezos.amount"
 
-| TezosBalance -> "Tezos.balance"
+| TezosBalance -> 
+  sprintf "Tezos.balance"
 
-| TezosChainId -> "Tezos.chain_id"
+| TezosChainId -> 
+  sprintf "Tezos.chain_id"
 
-| TezosSource -> "Tezos.source"
+| TezosSource -> 
+  sprintf "Tezos.source"
 
-| TezosSender -> "Tezos.sender"
+| TezosSender -> 
+  sprintf "Tezos.sender"
 
-| TezosSelf -> "Tezos.self"
+| TezosSelf -> 
+  sprintf "Tezos.self"
 
-| TezosSetDelegate (a) -> "Tezos.set_delegate (" ^ to_ligo_expr ast a ^ ")"
+| TezosSetDelegate (a) -> 
+  sprintf "Tezos.set_delegate (%s)" @@ pp_lexpr ast a
 
 | TezosTransfer (ct, par, v) -> 
-  "Tezos.transaction (" ^ to_ligo_expr ast par ^ ") (" ^ to_ligo_expr ast v ^ ") (" ^ to_ligo_expr ast ct ^ ")"
+  sprintf "Tezos.transaction (%s) (%s) (%s)" 
+  (pp_lexpr ast par) 
+  (pp_lexpr ast v)
+  (pp_lexpr ast ct)
 
-| TezosSelfAddress -> "Tezos.self_address"
+| TezosSelfAddress -> 
+  sprintf "Tezos.self_address"
 
 | TezosCreateContract (cs, kho, mt) -> 
-  "let create_contract: (key_hash option * tez * innerStorage) -> (operation * address) =\n"
-  ^ "\t[%Michelson ( {| \n"
-  ^ "{\n"
-  ^ "  UNPPAIIR ; \n"
-  ^ "  CREATE_CONTRACT \n"
-  ^ "  #include \"oc.tz\" \n"
-  ^ "  ; \n"
-  ^ "  PAIR\n"
-  ^ "}\n"
-  ^ "\t|} : (key_hash option * tez * innerStorage) -> (operation * address))] in\n"
-  ^ "\tcreate_contract (" ^ to_ligo_expr ast kho ^ ") (" ^ to_ligo_expr ast mt ^ ")\n"
+  sprintf "let create_contract: (key_hash option * tez * innerStorage) -> (operation * address) =\n
+  \t[%%Michelson ( {| \n
+  {\n
+    UNPPAIIR ; \n
+    CREATE_CONTRACT \n
+    #include \"oc.tz\" \n
+    ; \n
+    PAIR\n
+  }\n
+  \t|} : (key_hash option * tez * innerStorage) -> (operation * address))] in\n
+  \tcreate_contract (%s) (%s)\n"
+  (pp_lexpr ast kho) 
+  (pp_lexpr ast mt)
+
 (*
 | TezosImplicitAccount of expr
 *)
 
 | CryptoBlake2B (a) -> 
-  sprintf "Crypto.blake2b (%s)" @@ to_ligo_expr ast a
+  sprintf "Crypto.blake2b (%s)" @@ pp_lexpr ast a
 
 | CryptoCheckSignature (a,b,c) -> 
   sprintf "Crypto.check_signature (%s) (%s) (%s)" 
-  (to_ligo_expr ast a) 
-  (to_ligo_expr ast b)
-  (to_ligo_expr ast c)
+  (pp_lexpr ast a) 
+  (pp_lexpr ast b)
+  (pp_lexpr ast c)
 
 | CryptoHashKey (a) -> 
-  sprintf "Crypto.hask_key (%s)" @@ to_ligo_expr ast a
+  sprintf "Crypto.hask_key (%s)" @@ pp_lexpr ast a
 
 | CryptoSha256 (a) -> 
-  sprintf "Crypto.sha256 (%s)" @@ to_ligo_expr ast a
+  sprintf "Crypto.sha256 (%s)" @@ pp_lexpr ast a
 
 | CryptoSha512 (a) -> 
-  sprintf "Crypto.sha512 (%s)" @@ to_ligo_expr ast a
+  sprintf "Crypto.sha512 (%s)" @@ pp_lexpr ast a
 
 
-| LocalRef (id) -> id
-| StorageRef (id) -> sprintf "s.%s" id
-| GlobalRef (id) -> id
+| GlobalRef (id)
+| LocalRef (id) -> 
+  sprintf "%s" id
+
+| StorageRef (id) -> 
+  sprintf "s.%s" id
 
 
 | None -> 
@@ -162,7 +238,7 @@ match e with
   sprintf "(\"%s\": key_hash)" a
 
 | Some(a) -> 
-  sprintf "Some (%s)" @@ to_ligo_expr ast a
+  sprintf "Some (%s)" @@ pp_lexpr ast a
 
 | Bytes (s) -> 
   sprintf "(\"%s\": bytes)" (Bytes.to_string s)
@@ -172,91 +248,110 @@ match e with
 
 (* ChainId of int *)
 
-| EnumValue (i) -> (match te with | TEnum(e) -> sprintf "%dn" @@ enum_index e i 0)
+| EnumValue (i) -> 
+  (match te with | TEnum(e) -> sprintf "%dn" @@ enum_index e i 0)
 
 | Typed (e, t) -> 
   sprintf "(%s: %s)" 
-  (to_ligo_expr ast e) 
-  (to_ligo_type t)
+  (pp_lexpr ast e) 
+  (pp_ltype t)
   
-| List (el) -> "[" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
-| Set (el) -> "set [" ^ merge_list el "; " (fun e -> to_ligo_expr ast e) ^ "]"
+| List (el) -> 
+  "[" ^ merge_list el "; " (fun e -> pp_lexpr ast e) ^ "]"
+
+| Set (el) -> 
+  "set [" ^ merge_list el "; " (fun e -> pp_lexpr ast e) ^ "]"
 
 | Map (el) -> 
   "Map.literal [" ^
-  merge_list el "; " (fun (a, b) -> "(" ^ to_ligo_expr ast a ^ "), (" ^ to_ligo_expr ast b ^ ")")
+  merge_list el "; " (fun (a, b) -> "(" ^ pp_lexpr ast a ^ "), (" ^ pp_lexpr ast b ^ ")")
   ^ "]"
 
 | BigMap (el) -> 
   "Big_map.literal [" ^
-  merge_list el "; " (fun (a, b) -> "(" ^ to_ligo_expr ast a ^ "), (" ^ to_ligo_expr ast b ^ ")")
+  merge_list el "; " (fun (a, b) -> "(" ^ pp_lexpr ast a ^ "), (" ^ pp_lexpr ast b ^ ")")
   ^ "]"
 
 | Tuple (el) -> 
-  "(" ^ merge_list el ", " (fun v -> to_ligo_expr ast v) ^ ")"
+  "(" ^ merge_list el ", " (fun v -> pp_lexpr ast v) ^ ")"
 
 | Lambda (il, e) -> 
   (
     if List.length il = 0 then 
       "( fun (override: unit) "
     else 
-      "(fun (" ^ merge_list il ", " (fun (i,t) -> i) ^ (if List.length il > 0 then ": " else "") ^ merge_list il " * " (fun (i,t) -> to_ligo_type t)  ^ ") "
+      "(fun (" ^ merge_list il ", " (fun (i,t) -> i) ^ (if List.length il > 0 then ": " else "") ^ merge_list il " * " (fun (i,t) -> pp_ltype t)  ^ ") "
   )
-  ^ "-> " ^ to_ligo_expr ast e ^ ")"
-  (* "(fun (" ^ merge_list (List.split il) ", " (fun (i,t) -> i ^ ": " ^ to_ligo_type t) ^ ") -> " ^ to_ligo_expr ast e ^ ")" *)
+  ^ "-> " ^ pp_lexpr ast e ^ ")"
+  (* "(fun (" ^ merge_list (List.split il) ", " (fun (i,t) -> i ^ ": " ^ pp_ltype t) ^ ") -> " ^ pp_lexpr ast e ^ ")" *)
 
 | Record (il) -> 
-  "{ " ^ merge_list il "; " (fun (i, e) -> i ^ "=" ^ to_ligo_expr ast e) ^ " }"
+  "{ " ^ merge_list il "; " (fun (i, e) -> i ^ "=" ^ pp_lexpr ast e) ^ " }"
   
 | RecordAccess (e, i) -> 
-  sprintf "%s.%s" (to_ligo_expr ast e) i
+  sprintf "%s.%s" (pp_lexpr ast e) i
 
 (* option *)
 | OptionGetSome (oe) -> 
-  sprintf "(match (%s) with | Some(v) -> v | None -> failwith \"Expect some value\")" (to_ligo_expr ast oe)
+  sprintf "(match (%s) with | Some(v) -> v | None -> failwith \"Expect some value\")" (pp_lexpr ast oe)
 
 | OptionIsSome(oe) -> 
-  sprintf "(match (%s) with | Some(v) -> true | None -> false)" (to_ligo_expr ast oe)
+  sprintf "(match (%s) with | Some(v) -> true | None -> false)" (pp_lexpr ast oe)
 
 | OptionIsNone(oe) -> 
-  sprintf "(match (%s) with | Some(v) -> true | None -> true)" (to_ligo_expr ast oe)
+  sprintf "(match (%s) with | Some(v) -> true | None -> true)" (pp_lexpr ast oe)
 
 
 (* map *)
 | MapMem (mape, vkey) -> 
   sprintf "(match Map.find_opt (%s) %s with | None -> false | Some (v) -> true)"
-  (to_ligo_expr ast vkey)
-  (to_ligo_expr ast mape)
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape)
 
 | MapFold (le, ll, initial) -> 
   sprintf "Map.fold (%s) (%s) (%s)" 
-  (to_ligo_expr ast ll)
-  (to_ligo_expr ast le)
-  (to_ligo_expr ast initial)
+  (pp_lexpr ast ll)
+  (pp_lexpr ast le)
+  (pp_lexpr ast initial)
 
 | MapMapWith (le, ll) -> 
   sprintf "Map.map (%s) (%s)" 
-  (to_ligo_expr ast ll) 
-  (to_ligo_expr ast le)
+  (pp_lexpr ast ll) 
+  (pp_lexpr ast le)
 
 | MapSize (mape) -> 
-  sprintf "Map.size (%s)" @@ to_ligo_expr ast mape
+  sprintf "Map.size (%s)" @@ pp_lexpr ast mape
 
 | MapEmpty -> "Map.empty"
 
 | MapGetForce (mape, vkey) -> 
   let mapvt = match fst mape with | TMap (a, b) -> b in
-  "(match Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
-  ^ " with | None -> ((failwith \"Key not present\"): " ^ show_ttype mapvt ^ ") | Some (v) -> v)"
+  sprintf "(match Map.find_opt (%s) %s with | None -> ((failwith \"Key not present\"): %s) | Some (v) -> v)"
+  (pp_lexpr ast vkey) 
+  (pp_lexpr ast mape)
+  (pp_ltype mapvt)
+
 | MapGet (mape, vkey, vdef) ->
-  "(match Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
-  ^ " with | None -> " ^ to_ligo_expr ast vdef ^ " | Some (v) -> v)"
+  sprintf "(match Map.find_opt (%s) %s with | None -> %s | Some (v) -> v)"
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape)
+  (pp_lexpr ast vdef)
+
 | MapGetOpt (mape, vkey) ->
-  "Map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape
+  sprintf "Map.find_opt (%s) %s" 
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape)
+
 | MapUpdate (mape, vkey, vval) -> 
-  ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape ^ "")
+  sprintf "Map.update (%s) (Some (%s)) %s" 
+  (pp_lexpr ast vkey) 
+  (pp_lexpr ast vval) 
+  (pp_lexpr ast mape)
+
 | MapRemove (mape, vkey) -> 
-  ("Map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape)
+  sprintf "Map.update (%s) (None) %s"
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape)
   
 
 (* bigmap *)
@@ -264,48 +359,91 @@ match e with
   sprintf "Big_map.empty"
 
 | BigMapMem (mape, vkey) -> 
-  "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
-  ^ " with | None -> false | Some (v) -> true)"
+  sprintf "(match Big_map.find_opt (%s) %s  with | None -> false | Some (v) -> true)"
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape )
+
 | BigMapGetForce (mape, vkey) -> 
   let mapvt = match fst mape with | TMap (a, b) -> b in
-  "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
-  ^ " with | None -> ((failwith \"Key not present\"): " ^ show_ttype mapvt ^ ") | Some (v) -> v)"
+  sprintf "(match Big_map.find_opt (%s) %s with | None -> ((failwith \"Key not present\"): %s) | Some (v) -> v)"
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape)
+  (show_ttype mapvt)
+
 | BigMapGet (mape, vkey, vdef) ->
-  "(match Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape 
-  ^ " with | None -> " ^ to_ligo_expr ast vdef ^ " | Some (v) -> v)"
+  sprintf "(match Big_map.find_opt (%s) %s with | None -> %s | Some (v) -> v)"
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape)
+  (pp_lexpr ast vdef)
+
 | BigMapGetOpt (mape, vkey) ->
-  "Big_map.find_opt (" ^ to_ligo_expr ast vkey ^ ") " ^ to_ligo_expr ast mape
+  sprintf "Big_map.find_opt (%s) %s" 
+  (pp_lexpr ast vkey) 
+  (pp_lexpr ast mape)
+
 | BigMapUpdate (mape, vkey, vval) -> 
-  "Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (Some (" ^ to_ligo_expr ast vval ^ ")) " ^ to_ligo_expr ast mape
+  sprintf "Big_map.update (%s) (Some (%s)) %s"
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast vval)
+  (pp_lexpr ast mape)
+
 | BigMapRemove (mape, vkey) -> 
-  "Big_map.update (" ^ to_ligo_expr ast vkey ^ ") (None) " ^ to_ligo_expr ast mape
+  sprintf "Big_map.update (%s) (None) %s"
+  (pp_lexpr ast vkey)
+  (pp_lexpr ast mape)
+
 
 (* set *)
 | SetEmpty -> 
   sprintf "Set.empty"
 
 | SetSize (le) ->
-  sprintf "Set.size (%s)" @@ to_ligo_expr ast le
+  sprintf "Set.size (%s)" @@ pp_lexpr ast le
 
 | SetMem (le, lv) ->
-  "Set.mem (" ^ to_ligo_expr ast lv ^ ") (" ^ to_ligo_expr ast le ^ ")"
+  sprintf "Set.mem (%s) (%s)" 
+  (pp_lexpr ast lv) 
+  (pp_lexpr ast le)
+
 | SetUpdate (se, sv, cc) -> 
-  "if (" ^ to_ligo_expr ast cc ^ ") then (Set.add (" ^ to_ligo_expr ast sv ^ ") (" ^ to_ligo_expr ast se ^ ")) else (Set.remove (" ^ to_ligo_expr ast sv ^ ") (" ^ to_ligo_expr ast se ^ "))"
+  sprintf "if (%s) then (Set.add (%s) (%s)) else (Set.remove (%s) (%s))"
+  (pp_lexpr ast cc)
+  (pp_lexpr ast sv)
+  (pp_lexpr ast se)
+  (pp_lexpr ast sv)
+  (pp_lexpr ast se)
 
 (* list *)
 | ListEmpty -> 
   sprintf "[]"
 
 | ListMapWith (le, ll) -> 
-  "List.map (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ")"
+  sprintf "List.map (%s) (%s)" 
+  (pp_lexpr ast ll)
+  (pp_lexpr ast le)
+
 | ListPrepend (le, el) -> 
-  "(" ^ to_ligo_expr ast el ^ ") :: (" ^ to_ligo_expr ast le ^ ")"
+  sprintf "(%s) :: (%s)"
+  (pp_lexpr ast el) 
+  (pp_lexpr ast le)
+
 | ListSize (le) ->
-  "List.size (" ^ to_ligo_expr ast le ^ ")"
+  sprintf "List.size (%s)" @@ pp_lexpr ast le
+
 | ListFold (le, ll, initial) -> 
-  "List.fold (" ^ to_ligo_expr ast ll ^ ") (" ^ to_ligo_expr ast le ^ ") (" ^ to_ligo_expr ast initial ^ ")"
+  sprintf "List.fold (%s) (%s) (%s)" 
+  (pp_lexpr ast ll) 
+  (pp_lexpr ast le)
+  (pp_lexpr ast initial)
+
 | ListFilter ((TList(lt), le), ll) ->
-  "List.fold (fun (acc, e: " ^ to_ligo_type (TList(lt)) ^ " * " ^ to_ligo_type (lt) ^ " ) -> if (" ^ to_ligo_expr ast ll ^ ")(e) then e::acc else acc) (" ^ to_ligo_expr ast (TList(lt), le) ^ ") ([]: " ^ to_ligo_type (TList(lt)) ^ ")"
+  sprintf "List.fold (fun (acc, e: %s * %s) -> if (%s)(e) then e::acc else acc) (%s) ([]: %s)"
+  (pp_ltype (TList(lt)))
+  (pp_ltype (lt))
+  (pp_lexpr ast ll)
+  (pp_lexpr ast (TList(lt), le))
+  (pp_ltype (TList(lt)))
+
 (*
 | ListHead of expr
 | ListTail of expr
@@ -314,20 +452,20 @@ match e with
 | StringSlice of expr * expr * expr
 *)
 | StringSize (s) -> 
-  sprintf "String.length (%s)" @@ to_ligo_expr ast s
+  sprintf "String.length (%s)" @@ pp_lexpr ast s
 
 | StringConcat (a, b) -> 
   pp_infix2 "^" a b
 
 (* bytes *)
 | BytesPack(a) -> 
-  sprintf "Bytes.pack (%s)" @@ to_ligo_expr ast a
+  sprintf "Bytes.pack (%s)" @@ pp_lexpr ast a
 
 | BytesUnpack(a) -> 
-  sprintf "Bytes.unpack (%s)" @@ to_ligo_expr ast a
+  sprintf "Bytes.unpack (%s)" @@ pp_lexpr ast a
 
 | BytesSize (s) -> 
-  sprintf "Bytes.length (%s)" @@ to_ligo_expr ast s
+  sprintf "Bytes.length (%s)" @@ pp_lexpr ast s
 
 (* BytesSlice(a,b,c) *)
 
@@ -355,16 +493,16 @@ match e with
   pp_infix2 "/" a b
   
 | Abs(a) -> 
-  sprintf "abs(%s)" @@ to_ligo_expr ast a
+  sprintf "abs(%s)" @@ pp_lexpr ast a
 
 | ToInt(a) -> 
-  sprintf "int(%s)" @@ to_ligo_expr ast a
+  sprintf "int(%s)" @@ pp_lexpr ast a
 
 | IsNat(a) -> 
-  sprintf "Michelson.is_nat(%s)" @@ to_ligo_expr ast a
+  sprintf "Michelson.is_nat(%s)" @@ pp_lexpr ast a
 
 | Neg(a) -> 
-  sprintf "- (%s)" @@ to_ligo_expr ast a
+  sprintf "- (%s)" @@ pp_lexpr ast a
 
 | Mod (a, b) -> 
   pp_infix2 "mod" a b
@@ -372,7 +510,7 @@ match e with
 
 (* bool *)
 | Not(a) -> 
-  sprintf "! (%s)" @@ to_ligo_expr ast a
+  sprintf "! (%s)" @@ pp_lexpr ast a
 
 | And(a,b) -> 
   pp_infix2 "&&" a b
@@ -400,89 +538,94 @@ match e with
 
 | IfThenElse (c, a, b) -> 
   sprintf "(if %s then %s else %s)" 
-  (to_ligo_expr ast c) 
-  (to_ligo_expr ast a) 
-  (to_ligo_expr ast b)
+  (pp_lexpr ast c) 
+  (pp_lexpr ast a) 
+  (pp_lexpr ast b)
 
 | Apply((tce, Entrypoint((tci, ContractInstance(e)), i)), pp) ->
-  "(Tezos.transaction (" ^ to_ligo_expr ast pp ^ ") (0mutez) (" ^ to_ligo_expr ast (tce, Entrypoint((tci, ContractInstance(e)), i)) ^"))"
+  sprintf "(Tezos.transaction (%s) (0mutez) (%s))"
+  (pp_lexpr ast pp)
+  (pp_lexpr ast (tce, Entrypoint((tci, ContractInstance(e)), i)))
 
 | Apply(lam, par) -> 
   sprintf "%s (%s)" 
-  (to_ligo_expr ast lam) 
-  (to_ligo_expr ast par)
+  (pp_lexpr ast lam) 
+  (pp_lexpr ast par)
 
 | MatchWith (e, el) -> 
   let rec rr el = (match el with 
   | [] -> ""
   | (e', te')::((_, CaseDefault), tee')::el' -> 
-    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ": " ^ to_ligo_type te ^ ") else (" ^ to_ligo_expr ast tee' ^ ": " ^ to_ligo_type te ^ ")"
+    "if tmwttemp = (" ^ pp_lexpr ast e' ^ ") then (" ^ pp_lexpr ast te' ^ ": " ^ pp_ltype te ^ ") else (" ^ pp_lexpr ast tee' ^ ": " ^ pp_ltype te ^ ")"
   | (e', te')::elle::el' -> 
-    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ": " ^ to_ligo_type te ^ ") else " ^ rr @@ elle::el' 
+    "if tmwttemp = (" ^ pp_lexpr ast e' ^ ") then (" ^ pp_lexpr ast te' ^ ": " ^ pp_ltype te ^ ") else " ^ rr @@ elle::el' 
   | (e', te')::[] -> 
-    "if tmwttemp = (" ^ to_ligo_expr ast e' ^ ") then (" ^ to_ligo_expr ast te' ^ ": " ^ to_ligo_type te ^ ") " 
-  ) in "let tmwttemp = " ^ to_ligo_expr ast e ^ " in " ^ rr el
+    "if tmwttemp = (" ^ pp_lexpr ast e' ^ ") then (" ^ pp_lexpr ast te' ^ ": " ^ pp_ltype te ^ ") " 
+  ) in 
+  sprintf "let tmwttemp = %s in %s" 
+  (pp_lexpr ast e) 
+  (rr el)
 
   
 | FailIfMessage (e, m) -> 
   sprintf "if (%s) then failwith (%s) else ()"
-  (to_ligo_expr ast e)
-  (to_ligo_expr ast m)
+  (pp_lexpr ast e)
+  (pp_lexpr ast m)
 
 | FailIf (e) -> 
   sprintf "if (%s) then failwith \"Assertion\" else ()"
-  (to_ligo_expr ast e)
+  (pp_lexpr ast e)
 
 | Fail (e) -> 
-  sprintf "failwith (%s)" @@ to_ligo_expr ast e
+  sprintf "failwith (%s)" @@ pp_lexpr ast e
 
 | Assert (e) -> 
-  sprintf "if (%s) then () else (failwith \"Assertion\")" @@ to_ligo_expr ast e
+  sprintf "if (%s) then () else (failwith \"Assertion\")" @@ pp_lexpr ast e
 
 | Copy (e) -> 
-  sprintf "(%s)" @@ to_ligo_expr ast e
+  sprintf "(%s)" @@ pp_lexpr ast e
      
 | Let (id, tt, e) -> 
   sprintf "let %s: %s = %s in " 
   id 
-  (to_ligo_type tt) 
-  (to_ligo_expr ast e)
+  (pp_ltype tt) 
+  (pp_lexpr ast e)
 
 | LetIn (id, tt, e, e2) -> 
   sprintf "let %s: %s = %s in %s " 
   id 
-  (to_ligo_type tt) 
-  (to_ligo_expr ast e) 
-  (to_ligo_expr ast e2)
+  (pp_ltype tt) 
+  (pp_lexpr ast e) 
+  (pp_lexpr ast e2)
 
 | LetTuple (il, e) -> 
-  "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ to_ligo_expr ast e ^ " in "
+  "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ pp_lexpr ast e ^ " in "
 
 | LetTupleIn (il, e, e2) -> 
-  "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ to_ligo_expr ast e ^ " in " ^ to_ligo_expr ast e2
+  "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ pp_lexpr ast e ^ " in " ^ pp_lexpr ast e2
 
 | SAssign (i, e) -> 
   sprintf "let s = { s with %s=%s } in " 
-  i (to_ligo_expr ast e)
+  i (pp_lexpr ast e)
 
 | SRecAssign (i, ii, expr) -> 
   sprintf "let s = { s with %s= {s.%s with %s=%s} } in " 
-  i i ii (to_ligo_expr ast expr)
+  i i ii (pp_lexpr ast expr)
 
 | Seq(a, b) -> 
   (match a with 
-  | (TUnit, LetTuple(_, _)) -> to_ligo_expr ast a
-  | (TUnit, LetTupleIn(_, _, _)) -> to_ligo_expr ast a
-  | (TUnit, LetIn(_, _, _, _)) -> to_ligo_expr ast a
-  | (TUnit, Let(_, _, _)) -> to_ligo_expr ast a
-  | (TUnit, SAssign(_, _)) -> to_ligo_expr ast a
-  | (TUnit, SRecAssign(_, _, _)) -> to_ligo_expr ast a
-  | (TUnit, _) -> let_surround (to_ligo_expr ast a)
-  | _ -> to_ligo_expr ast a)
+  | (TUnit, LetTuple(_, _)) -> pp_lexpr ast a
+  | (TUnit, LetTupleIn(_, _, _)) -> pp_lexpr ast a
+  | (TUnit, LetIn(_, _, _, _)) -> pp_lexpr ast a
+  | (TUnit, Let(_, _, _)) -> pp_lexpr ast a
+  | (TUnit, SAssign(_, _)) -> pp_lexpr ast a
+  | (TUnit, SRecAssign(_, _, _)) -> pp_lexpr ast a
+  | (TUnit, _) -> let_surround (pp_lexpr ast a)
+  | _ -> pp_lexpr ast a)
   ^ "\n" ^
   (match b with 
-  | (tl, List(e)) -> sprintf "(%s: operation list)" @@ to_ligo_expr ast (tl, List(e))
-  | _ -> to_ligo_expr ast b)
+  | (tl, List(e)) -> sprintf "(%s: operation list)" @@ pp_lexpr ast (tl, List(e))
+  | _ -> pp_lexpr ast b)
 
 
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
@@ -496,7 +639,7 @@ let generate_ligo_code (ast: t) (contract: string) =
 
   (* dump const *)
   let consts = (List.map (fun (i, (t,e)) -> 
-    Str ("let " ^ i ^ " = " ^ to_ligo_expr ast (t,e) ^ "\n")
+    Str ("let " ^ i ^ " = " ^ pp_lexpr ast (t,e) ^ "\n")
   ) ast.consts) in 
 
   (* generate the storage record *)
@@ -505,7 +648,7 @@ let generate_ligo_code (ast: t) (contract: string) =
       Str("type storage = unit")
     else 
       Str ("type storage = {\n" ^
-      merge_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ to_ligo_type t) ^
+      merge_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ pp_ltype t) ^
       ";\n}");
     Empty; Empty
   ] in 
@@ -518,7 +661,7 @@ let generate_ligo_code (ast: t) (contract: string) =
       Str("type action = "); 
       Level(List.map (fun e -> 
         Str("| " ^ String.capitalize_ascii e.id ^ 
-          if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> to_ligo_type it)
+          if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> pp_ltype it)
           else " of unit")
         ) ce.entries
       ); Empty; Empty
@@ -530,8 +673,8 @@ let generate_ligo_code (ast: t) (contract: string) =
     List.map (fun e -> 
     Str("let " ^ e.id ^ " (" ^
       list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
-      "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> to_ligo_type it) ^
-      "storage) = \n" ^ to_ligo_expr ast e.expr ^ ", (s: storage)\n\n"
+      "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> pp_ltype it) ^
+      "storage) = \n" ^ pp_lexpr ast e.expr ^ ", (s: storage)\n\n"
     )
   ) ce.entries in
 
