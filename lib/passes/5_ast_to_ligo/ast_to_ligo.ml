@@ -6,10 +6,12 @@ open Parsing
 open Format
 open Helpers.Gen_utils
 
-let list_to_string l = List.fold_left (fun acc ll -> acc ^ ll) "" l
-let merge_list2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l)
-let merge_list l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l)
-let let_surround s = sprintf "let ovverraidable = %s in " s
+let temp_i = ref 0
+let temp_v () = temp_i := !temp_i + 1; sprintf "a__%d" !temp_i
+let temp_c () = sprintf "a__%d" !temp_i
+
+let let_surround s = sprintf "let %s = %s in " (temp_v ()) s
+
 let rec enum_index e i ii = match e with 
 | [] -> failwith "Enum value not found"
 | x::xe when x = i -> ii
@@ -66,7 +68,6 @@ let rec pp_ltype (a: ttype) = match a with
 
 | TEnum (el) -> 
   sprintf "nat"
-(* List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " | ") ^ x) "" el *)
 
 | TList (t) -> 
   sprintf "%s list" @@ pp_ltype t
@@ -94,12 +95,12 @@ let rec pp_ltype (a: ttype) = match a with
 | TContract (t) -> 
   sprintf "%s contract" @@ pp_ltype t
 
-| _ -> raise @@ TypeError (None, "Type '" ^ show_ttype a ^ "' is not translable to ligo")
+| _ -> raise @@ TypeError (None, sprintf "Type '%s' is not translable to ligo" (show_ttype a))
 
 
 
-let rec pp_lexpr (ast: t) ((te,e): texpr) = 
-  let pp_infix2 op a b = sprintf "(%s) %s (%s)" (pp_lexpr ast a) op (pp_lexpr ast b) in
+let rec pp_lexpr ((te,e): texpr) = 
+  let pp_infix2 op a b = sprintf "(%s) %s (%s)" (pp_lexpr a) op (pp_lexpr b) in
   let pp_mergelist l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l) in
   let pp_mergelist2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l) in
   
@@ -110,7 +111,7 @@ match e with
 | Entrypoint((te2, ContractInstance((tt,e))), (TString, String(i))) -> 
   sprintf "match ((Tezos.get_entrypoint_opt \"%%%s\" (%s)): (%s) option) with | None -> (failwith \"Invalid entrypoint\": %s) | Some (ep) -> ep"
   i 
-  (pp_lexpr ast (tt,e)) 
+  (pp_lexpr (tt,e)) 
   (pp_ltype te) 
   (pp_ltype te)
 
@@ -126,7 +127,7 @@ match e with
 
 | TezosContractOfAddress (ad) -> 
   sprintf "match (Tezos.get_contract_opt %s : unit contract option) with | None -> (failwith \"invalid contract\": unit contract) | Some(c) -> c"
-  (pp_lexpr ast ad)
+  (pp_lexpr ad)
 
 | TezosNow -> 
   sprintf "Tezos.now"
@@ -150,13 +151,13 @@ match e with
   sprintf "Tezos.self"
 
 | TezosSetDelegate (a) -> 
-  sprintf "Tezos.set_delegate (%s)" @@ pp_lexpr ast a
+  sprintf "Tezos.set_delegate (%s)" @@ pp_lexpr a
 
 | TezosTransfer (ct, par, v) -> 
   sprintf "Tezos.transaction (%s) (%s) (%s)" 
-  (pp_lexpr ast par) 
-  (pp_lexpr ast v)
-  (pp_lexpr ast ct)
+  (pp_lexpr par) 
+  (pp_lexpr v)
+  (pp_lexpr ct)
 
 | TezosSelfAddress -> 
   sprintf "Tezos.self_address"
@@ -173,30 +174,30 @@ match e with
   }\n
   \t|} : (key_hash option * tez * innerStorage) -> (operation * address))] in\n
   \tcreate_contract (%s) (%s)\n"
-  (pp_lexpr ast kho) 
-  (pp_lexpr ast mt)
+  (pp_lexpr kho) 
+  (pp_lexpr mt)
 
 (*
 | TezosImplicitAccount of expr
 *)
 
 | CryptoBlake2B (a) -> 
-  sprintf "Crypto.blake2b (%s)" @@ pp_lexpr ast a
+  sprintf "Crypto.blake2b (%s)" @@ pp_lexpr a
 
 | CryptoCheckSignature (a,b,c) -> 
   sprintf "Crypto.check_signature (%s) (%s) (%s)" 
-  (pp_lexpr ast a) 
-  (pp_lexpr ast b)
-  (pp_lexpr ast c)
+  (pp_lexpr a) 
+  (pp_lexpr b)
+  (pp_lexpr c)
 
 | CryptoHashKey (a) -> 
-  sprintf "Crypto.hask_key (%s)" @@ pp_lexpr ast a
+  sprintf "Crypto.hask_key (%s)" @@ pp_lexpr a
 
 | CryptoSha256 (a) -> 
-  sprintf "Crypto.sha256 (%s)" @@ pp_lexpr ast a
+  sprintf "Crypto.sha256 (%s)" @@ pp_lexpr a
 
 | CryptoSha512 (a) -> 
-  sprintf "Crypto.sha512 (%s)" @@ pp_lexpr ast a
+  sprintf "Crypto.sha512 (%s)" @@ pp_lexpr a
 
 
 | GlobalRef (id)
@@ -238,7 +239,7 @@ match e with
   sprintf "(\"%s\": key_hash)" a
 
 | Some(a) -> 
-  sprintf "Some (%s)" @@ pp_lexpr ast a
+  sprintf "Some (%s)" @@ pp_lexpr a
 
 | Bytes (s) -> 
   sprintf "(\"%s\": bytes)" (Bytes.to_string s)
@@ -253,105 +254,104 @@ match e with
 
 | Typed (e, t) -> 
   sprintf "(%s: %s)" 
-  (pp_lexpr ast e) 
+  (pp_lexpr e) 
   (pp_ltype t)
   
 | List (el) -> 
-  "[" ^ merge_list el "; " (fun e -> pp_lexpr ast e) ^ "]"
+  "[" ^ pp_list el "; " (fun e -> pp_lexpr e) ^ "]"
 
 | Set (el) -> 
-  "set [" ^ merge_list el "; " (fun e -> pp_lexpr ast e) ^ "]"
+  "set [" ^ pp_list el "; " (fun e -> pp_lexpr e) ^ "]"
 
 | Map (el) -> 
   "Map.literal [" ^
-  merge_list el "; " (fun (a, b) -> "(" ^ pp_lexpr ast a ^ "), (" ^ pp_lexpr ast b ^ ")")
+  pp_list el "; " (fun (a, b) -> "(" ^ pp_lexpr a ^ "), (" ^ pp_lexpr b ^ ")")
   ^ "]"
 
 | BigMap (el) -> 
   "Big_map.literal [" ^
-  merge_list el "; " (fun (a, b) -> "(" ^ pp_lexpr ast a ^ "), (" ^ pp_lexpr ast b ^ ")")
+  pp_list el "; " (fun (a, b) -> "(" ^ pp_lexpr a ^ "), (" ^ pp_lexpr b ^ ")")
   ^ "]"
 
 | Tuple (el) -> 
-  "(" ^ merge_list el ", " (fun v -> pp_lexpr ast v) ^ ")"
+  "(" ^ pp_list el ", " (fun v -> pp_lexpr v) ^ ")"
 
 | Lambda (il, e) -> 
   (
     if List.length il = 0 then 
       "( fun (override: unit) "
     else 
-      "(fun (" ^ merge_list il ", " (fun (i,t) -> i) ^ (if List.length il > 0 then ": " else "") ^ merge_list il " * " (fun (i,t) -> pp_ltype t)  ^ ") "
+      "(fun (" ^ pp_list il ", " (fun (i,t) -> i) ^ (if List.length il > 0 then ": " else "") ^ pp_list il " * " (fun (i,t) -> pp_ltype t)  ^ ") "
   )
-  ^ "-> " ^ pp_lexpr ast e ^ ")"
-  (* "(fun (" ^ merge_list (List.split il) ", " (fun (i,t) -> i ^ ": " ^ pp_ltype t) ^ ") -> " ^ pp_lexpr ast e ^ ")" *)
+  ^ "-> " ^ pp_lexpr e ^ ")"
+  (* "(fun (" ^ pp_list (List.split il) ", " (fun (i,t) -> i ^ ": " ^ pp_ltype t) ^ ") -> " ^ pp_lexpr e ^ ")" *)
 
 | Record (il) -> 
-  "{ " ^ merge_list il "; " (fun (i, e) -> i ^ "=" ^ pp_lexpr ast e) ^ " }"
+  "{ " ^ pp_list il "; " (fun (i, e) -> sprintf "%s=%s" i @@ pp_lexpr e) ^ " }"
   
 | RecordAccess (e, i) -> 
-  sprintf "%s.%s" (pp_lexpr ast e) i
+  sprintf "%s.%s" (pp_lexpr e) i
 
 (* option *)
 | OptionGetSome (oe) -> 
-  sprintf "(match (%s) with | Some(v) -> v | None -> failwith \"Expect some value\")" (pp_lexpr ast oe)
+  sprintf "(match (%s) with | Some(v) -> v | None -> failwith \"Expect some value\")" (pp_lexpr oe)
 
 | OptionIsSome(oe) -> 
-  sprintf "(match (%s) with | Some(v) -> true | None -> false)" (pp_lexpr ast oe)
+  sprintf "(match (%s) with | Some(v) -> true | None -> false)" (pp_lexpr oe)
 
 | OptionIsNone(oe) -> 
-  sprintf "(match (%s) with | Some(v) -> true | None -> true)" (pp_lexpr ast oe)
+  sprintf "(match (%s) with | Some(v) -> true | None -> true)" (pp_lexpr oe)
 
 
 (* map *)
 | MapMem (mape, vkey) -> 
   sprintf "(match Map.find_opt (%s) %s with | None -> false | Some (v) -> true)"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape)
+  (pp_lexpr vkey)
+  (pp_lexpr mape)
 
 | MapFold (le, ll, initial) -> 
   sprintf "Map.fold (%s) (%s) (%s)" 
-  (pp_lexpr ast ll)
-  (pp_lexpr ast le)
-  (pp_lexpr ast initial)
+  (pp_lexpr ll)
+  (pp_lexpr le)
+  (pp_lexpr initial)
 
 | MapMapWith (le, ll) -> 
   sprintf "Map.map (%s) (%s)" 
-  (pp_lexpr ast ll) 
-  (pp_lexpr ast le)
+  (pp_lexpr ll) 
+  (pp_lexpr le)
 
 | MapSize (mape) -> 
-  sprintf "Map.size (%s)" @@ pp_lexpr ast mape
+  sprintf "Map.size (%s)" @@ pp_lexpr mape
 
 | MapEmpty -> "Map.empty"
 
 | MapGetForce (mape, vkey) -> 
-  let mapvt = match fst mape with | TMap (a, b) -> b in
   sprintf "(match Map.find_opt (%s) %s with | None -> ((failwith \"Key not present\"): %s) | Some (v) -> v)"
-  (pp_lexpr ast vkey) 
-  (pp_lexpr ast mape)
-  (pp_ltype mapvt)
+  (pp_lexpr vkey) 
+  (pp_lexpr mape)
+  (pp_ltype @@ match fst mape with | TMap (a, b) -> b)
 
 | MapGet (mape, vkey, vdef) ->
   sprintf "(match Map.find_opt (%s) %s with | None -> %s | Some (v) -> v)"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape)
-  (pp_lexpr ast vdef)
+  (pp_lexpr vkey)
+  (pp_lexpr mape)
+  (pp_lexpr vdef)
 
 | MapGetOpt (mape, vkey) ->
   sprintf "Map.find_opt (%s) %s" 
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape)
+  (pp_lexpr vkey)
+  (pp_lexpr mape)
 
 | MapUpdate (mape, vkey, vval) -> 
   sprintf "Map.update (%s) (Some (%s)) %s" 
-  (pp_lexpr ast vkey) 
-  (pp_lexpr ast vval) 
-  (pp_lexpr ast mape)
+  (pp_lexpr vkey) 
+  (pp_lexpr vval) 
+  (pp_lexpr mape)
 
 | MapRemove (mape, vkey) -> 
   sprintf "Map.update (%s) (None) %s"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape)
+  (pp_lexpr vkey)
+  (pp_lexpr mape)
   
 
 (* bigmap *)
@@ -360,37 +360,36 @@ match e with
 
 | BigMapMem (mape, vkey) -> 
   sprintf "(match Big_map.find_opt (%s) %s  with | None -> false | Some (v) -> true)"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape )
+  (pp_lexpr vkey)
+  (pp_lexpr mape )
 
 | BigMapGetForce (mape, vkey) -> 
-  let mapvt = match fst mape with | TMap (a, b) -> b in
   sprintf "(match Big_map.find_opt (%s) %s with | None -> ((failwith \"Key not present\"): %s) | Some (v) -> v)"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape)
-  (show_ttype mapvt)
+  (pp_lexpr vkey)
+  (pp_lexpr mape)
+  (show_ttype @@ match fst mape with | TMap (a, b) -> b)
 
 | BigMapGet (mape, vkey, vdef) ->
   sprintf "(match Big_map.find_opt (%s) %s with | None -> %s | Some (v) -> v)"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape)
-  (pp_lexpr ast vdef)
+  (pp_lexpr vkey)
+  (pp_lexpr mape)
+  (pp_lexpr vdef)
 
 | BigMapGetOpt (mape, vkey) ->
   sprintf "Big_map.find_opt (%s) %s" 
-  (pp_lexpr ast vkey) 
-  (pp_lexpr ast mape)
+  (pp_lexpr vkey) 
+  (pp_lexpr mape)
 
 | BigMapUpdate (mape, vkey, vval) -> 
   sprintf "Big_map.update (%s) (Some (%s)) %s"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast vval)
-  (pp_lexpr ast mape)
+  (pp_lexpr vkey)
+  (pp_lexpr vval)
+  (pp_lexpr mape)
 
 | BigMapRemove (mape, vkey) -> 
   sprintf "Big_map.update (%s) (None) %s"
-  (pp_lexpr ast vkey)
-  (pp_lexpr ast mape)
+  (pp_lexpr vkey)
+  (pp_lexpr mape)
 
 
 (* set *)
@@ -398,20 +397,20 @@ match e with
   sprintf "Set.empty"
 
 | SetSize (le) ->
-  sprintf "Set.size (%s)" @@ pp_lexpr ast le
+  sprintf "Set.size (%s)" @@ pp_lexpr le
 
 | SetMem (le, lv) ->
   sprintf "Set.mem (%s) (%s)" 
-  (pp_lexpr ast lv) 
-  (pp_lexpr ast le)
+  (pp_lexpr lv) 
+  (pp_lexpr le)
 
 | SetUpdate (se, sv, cc) -> 
   sprintf "if (%s) then (Set.add (%s) (%s)) else (Set.remove (%s) (%s))"
-  (pp_lexpr ast cc)
-  (pp_lexpr ast sv)
-  (pp_lexpr ast se)
-  (pp_lexpr ast sv)
-  (pp_lexpr ast se)
+  (pp_lexpr cc)
+  (pp_lexpr sv)
+  (pp_lexpr se)
+  (pp_lexpr sv)
+  (pp_lexpr se)
 
 (* list *)
 | ListEmpty -> 
@@ -419,29 +418,29 @@ match e with
 
 | ListMapWith (le, ll) -> 
   sprintf "List.map (%s) (%s)" 
-  (pp_lexpr ast ll)
-  (pp_lexpr ast le)
+  (pp_lexpr ll)
+  (pp_lexpr le)
 
 | ListPrepend (le, el) -> 
   sprintf "(%s) :: (%s)"
-  (pp_lexpr ast el) 
-  (pp_lexpr ast le)
+  (pp_lexpr el) 
+  (pp_lexpr le)
 
 | ListSize (le) ->
-  sprintf "List.size (%s)" @@ pp_lexpr ast le
+  sprintf "List.size (%s)" @@ pp_lexpr le
 
 | ListFold (le, ll, initial) -> 
   sprintf "List.fold (%s) (%s) (%s)" 
-  (pp_lexpr ast ll) 
-  (pp_lexpr ast le)
-  (pp_lexpr ast initial)
+  (pp_lexpr ll) 
+  (pp_lexpr le)
+  (pp_lexpr initial)
 
 | ListFilter ((TList(lt), le), ll) ->
   sprintf "List.fold (fun (acc, e: %s * %s) -> if (%s)(e) then e::acc else acc) (%s) ([]: %s)"
   (pp_ltype (TList(lt)))
   (pp_ltype (lt))
-  (pp_lexpr ast ll)
-  (pp_lexpr ast (TList(lt), le))
+  (pp_lexpr ll)
+  (pp_lexpr (TList(lt), le))
   (pp_ltype (TList(lt)))
 
 (*
@@ -452,20 +451,20 @@ match e with
 | StringSlice of expr * expr * expr
 *)
 | StringSize (s) -> 
-  sprintf "String.length (%s)" @@ pp_lexpr ast s
+  sprintf "String.length (%s)" @@ pp_lexpr s
 
 | StringConcat (a, b) -> 
   pp_infix2 "^" a b
 
 (* bytes *)
 | BytesPack(a) -> 
-  sprintf "Bytes.pack (%s)" @@ pp_lexpr ast a
+  sprintf "Bytes.pack (%s)" @@ pp_lexpr a
 
 | BytesUnpack(a) -> 
-  sprintf "Bytes.unpack (%s)" @@ pp_lexpr ast a
+  sprintf "Bytes.unpack (%s)" @@ pp_lexpr a
 
 | BytesSize (s) -> 
-  sprintf "Bytes.length (%s)" @@ pp_lexpr ast s
+  sprintf "Bytes.length (%s)" @@ pp_lexpr s
 
 (* BytesSlice(a,b,c) *)
 
@@ -493,16 +492,16 @@ match e with
   pp_infix2 "/" a b
   
 | Abs(a) -> 
-  sprintf "abs(%s)" @@ pp_lexpr ast a
+  sprintf "abs(%s)" @@ pp_lexpr a
 
 | ToInt(a) -> 
-  sprintf "int(%s)" @@ pp_lexpr ast a
+  sprintf "int(%s)" @@ pp_lexpr a
 
 | IsNat(a) -> 
-  sprintf "Michelson.is_nat(%s)" @@ pp_lexpr ast a
+  sprintf "Michelson.is_nat(%s)" @@ pp_lexpr a
 
 | Neg(a) -> 
-  sprintf "- (%s)" @@ pp_lexpr ast a
+  sprintf "- (%s)" @@ pp_lexpr a
 
 | Mod (a, b) -> 
   pp_infix2 "mod" a b
@@ -510,7 +509,7 @@ match e with
 
 (* bool *)
 | Not(a) -> 
-  sprintf "! (%s)" @@ pp_lexpr ast a
+  sprintf "! (%s)" @@ pp_lexpr a
 
 | And(a,b) -> 
   pp_infix2 "&&" a b
@@ -538,94 +537,113 @@ match e with
 
 | IfThenElse (c, a, b) -> 
   sprintf "(if %s then %s else %s)" 
-  (pp_lexpr ast c) 
-  (pp_lexpr ast a) 
-  (pp_lexpr ast b)
+  (pp_lexpr c) 
+  (pp_lexpr a) 
+  (pp_lexpr b)
 
 | Apply((tce, Entrypoint((tci, ContractInstance(e)), i)), pp) ->
   sprintf "(Tezos.transaction (%s) (0mutez) (%s))"
-  (pp_lexpr ast pp)
-  (pp_lexpr ast (tce, Entrypoint((tci, ContractInstance(e)), i)))
+  (pp_lexpr pp)
+  (pp_lexpr (tce, Entrypoint((tci, ContractInstance(e)), i)))
 
 | Apply(lam, par) -> 
   sprintf "%s (%s)" 
-  (pp_lexpr ast lam) 
-  (pp_lexpr ast par)
+  (pp_lexpr lam) 
+  (pp_lexpr par)
 
 | MatchWith (e, el) -> 
   let rec rr el = (match el with 
   | [] -> ""
   | (e', te')::((_, CaseDefault), tee')::el' -> 
-    "if tmwttemp = (" ^ pp_lexpr ast e' ^ ") then (" ^ pp_lexpr ast te' ^ ": " ^ pp_ltype te ^ ") else (" ^ pp_lexpr ast tee' ^ ": " ^ pp_ltype te ^ ")"
+    sprintf "if %s = (%s) then (%s: %s) else (%s: %s)"
+    "tmatchwithtemp"
+    (pp_lexpr e')
+    (pp_lexpr te')
+    (pp_ltype te)
+    (pp_lexpr tee')
+    (pp_ltype te)
+
   | (e', te')::elle::el' -> 
-    "if tmwttemp = (" ^ pp_lexpr ast e' ^ ") then (" ^ pp_lexpr ast te' ^ ": " ^ pp_ltype te ^ ") else " ^ rr @@ elle::el' 
+    sprintf "if %s = (%s) then (%s: %s) else %s" 
+    "tmatchwithtemp"
+    (pp_lexpr e')
+    (pp_lexpr te')
+    (pp_ltype te)
+    (rr @@ elle::el')
+
   | (e', te')::[] -> 
-    "if tmwttemp = (" ^ pp_lexpr ast e' ^ ") then (" ^ pp_lexpr ast te' ^ ": " ^ pp_ltype te ^ ") " 
+    sprintf "if %s = (%s) then (%s: %s) " 
+    "tmatchwithtemp"
+    (pp_lexpr e')
+    (pp_lexpr te')
+    (pp_ltype te)
+
   ) in 
-  sprintf "let tmwttemp = %s in %s" 
-  (pp_lexpr ast e) 
+  sprintf "let %s = %s in %s" 
+  "tmatchwithtemp"
+  (pp_lexpr e) 
   (rr el)
 
   
 | FailIfMessage (e, m) -> 
   sprintf "if (%s) then failwith (%s) else ()"
-  (pp_lexpr ast e)
-  (pp_lexpr ast m)
+  (pp_lexpr e)
+  (pp_lexpr m)
 
 | FailIf (e) -> 
   sprintf "if (%s) then failwith \"Assertion\" else ()"
-  (pp_lexpr ast e)
+  (pp_lexpr e)
 
 | Fail (e) -> 
-  sprintf "failwith (%s)" @@ pp_lexpr ast e
+  sprintf "failwith (%s)" @@ pp_lexpr e
 
 | Assert (e) -> 
-  sprintf "if (%s) then () else (failwith \"Assertion\")" @@ pp_lexpr ast e
+  sprintf "if (%s) then () else (failwith \"Assertion\")" @@ pp_lexpr e
 
 | Copy (e) -> 
-  sprintf "(%s)" @@ pp_lexpr ast e
+  sprintf "(%s)" @@ pp_lexpr e
      
 | Let (id, tt, e) -> 
   sprintf "let %s: %s = %s in " 
   id 
   (pp_ltype tt) 
-  (pp_lexpr ast e)
+  (pp_lexpr e)
 
 | LetIn (id, tt, e, e2) -> 
   sprintf "let %s: %s = %s in %s " 
   id 
   (pp_ltype tt) 
-  (pp_lexpr ast e) 
-  (pp_lexpr ast e2)
+  (pp_lexpr e) 
+  (pp_lexpr e2)
 
 | LetTuple (il, e) -> 
-  "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ pp_lexpr ast e ^ " in "
+  "let (" ^ pp_list il ", " (fun (id, t) -> id) ^ ") = " ^ pp_lexpr e ^ " in "
 
 | LetTupleIn (il, e, e2) -> 
-  "let (" ^ merge_list il ", " (fun (id, t) -> id) ^ ") = " ^ pp_lexpr ast e ^ " in " ^ pp_lexpr ast e2
+  "let (" ^ pp_list il ", " (fun (id, t) -> id) ^ ") = " ^ pp_lexpr e ^ " in " ^ pp_lexpr e2
 
 | SAssign (i, e) -> 
   sprintf "let s = { s with %s=%s } in " 
-  i (pp_lexpr ast e)
+  i (pp_lexpr e)
 
 | SRecAssign (i, ii, expr) -> 
   sprintf "let s = { s with %s= {s.%s with %s=%s} } in " 
-  i i ii (pp_lexpr ast expr)
+  i i ii (pp_lexpr expr)
 
 | Seq(a, b) -> 
   (match a with 
-  | (TUnit, LetTuple(_, _)) -> pp_lexpr ast a
-  | (TUnit, LetTupleIn(_, _, _)) -> pp_lexpr ast a
-  | (TUnit, LetIn(_, _, _, _)) -> pp_lexpr ast a
-  | (TUnit, Let(_, _, _)) -> pp_lexpr ast a
-  | (TUnit, SAssign(_, _)) -> pp_lexpr ast a
-  | (TUnit, SRecAssign(_, _, _)) -> pp_lexpr ast a
-  | (TUnit, _) -> let_surround (pp_lexpr ast a)
-  | _ -> pp_lexpr ast a)
+  | (TUnit, LetTuple(_, _)) 
+  | (TUnit, LetTupleIn(_, _, _))
+  | (TUnit, LetIn(_, _, _, _))
+  | (TUnit, Let(_, _, _)) 
+  | (TUnit, SAssign(_, _)) 
+  | (TUnit, SRecAssign(_, _, _)) -> pp_lexpr a
+  | (TUnit, _) -> let_surround (pp_lexpr a)
+  | _ -> pp_lexpr a)
   ^ "\n" ^
   (match b with 
-  | (tl, List(e)) -> sprintf "(%s: operation list)" @@ pp_lexpr ast (tl, List(e))
-  | _ -> pp_lexpr ast b)
+  | (tl, List(e)) -> sprintf "(%s: operation list)" @@ pp_lexpr (tl, List(e))
+  | _ -> pp_lexpr b)
 
 
 (* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
@@ -639,69 +657,63 @@ let generate_ligo_code (ast: t) (contract: string) =
 
   (* dump const *)
   let consts = (List.map (fun (i, (t,e)) -> 
-    Str ("let " ^ i ^ " = " ^ pp_lexpr ast (t,e) ^ "\n")
+    sprintf "let %s = %s\n" 
+    i 
+    (pp_lexpr (t,e))
   ) ast.consts) in 
 
   (* generate the storage record *)
-  let str = [
+  let str =
     if List.length ce.fields = 0 then 
-      Str("type storage = unit")
+      "type storage = unit\n\n"
     else 
-      Str ("type storage = {\n" ^
-      merge_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ pp_ltype t) ^
-      ";\n}");
-    Empty; Empty
-  ] in 
+      "type storage = {\n" ^
+      pp_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ pp_ltype t) ^
+      ";\n}\n\n"
+  in 
 
   (* generate the action variant *)
   let act = 
-    if List.length ce.entries = 0 then ([])
+    if List.length ce.entries = 0 then ""
     else (
-    [ 
-      Str("type action = "); 
-      Level(List.map (fun e -> 
-        Str("| " ^ String.capitalize_ascii e.id ^ 
-          if List.length e.arg > 0 then " of " ^ merge_list e.arg " * " (fun (ii, it) -> pp_ltype it)
+      "type action = " ^
+      (list_to_string (List.map (fun e -> 
+        "| " ^ String.capitalize_ascii e.id ^ 
+          (if List.length e.arg > 0 then " of " ^ pp_list e.arg " * " (fun (ii, it) -> pp_ltype it)
           else " of unit")
         ) ce.entries
-      ); Empty; Empty
-    ]
+      ) )
+      ^"\n\n"
   ) in 
 
   (* write entries *)
   let entrs = 
     List.map (fun e -> 
-    Str("let " ^ e.id ^ " (" ^
+    "let " ^ e.id ^ " (" ^
       list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
-      "s: " ^ merge_list2 e.arg " * " (fun (ii, it) -> pp_ltype it) ^
-      "storage) = \n" ^ pp_lexpr ast e.expr ^ ", (s: storage)\n\n"
-    )
+      "s: " ^ pp_list2 e.arg " * " (fun (ii, it) -> pp_ltype it) ^
+      "storage) = \n" ^ pp_lexpr e.expr ^ ", (s: storage)\n\n"
   ) ce.entries in
 
   (* write the main *)
   let main =
     if List.length ce.entries = 0 then (
-      [
-        Str ("let main(a, s: unit * storage): (operation list * storage) = ");
-        Str ("([]: operation list), s")
-      ]
-    ) else ([
-      Str ("let main(a, s: action * storage): (operation list * storage) = ");
-      Level([
-        Str ("match a with");
-        Level (List.map (fun e -> 
-            Str ("| " ^ String.capitalize_ascii e.id ^ " (arg) -> " ^ 
-            if List.length e.arg > 0 then 
-              "let (" ^ merge_list e.arg ", " (fun (ii, it) -> ii)
-              ^ ") = arg in " ^ e.id ^ "(" ^ merge_list2 e.arg ", " (fun (ii, it) -> ii) ^ "s)"
-            else 
-              e.id ^ "(s)")
-        ) ce.entries)
-      ])
-    ])
+      "let main(a, s: unit * storage): (operation list * storage) = " ^
+      "([]: operation list), s"
+    ) else (
+      "let main(a, s: action * storage): (operation list * storage) = " ^
+      "match a with" ^
+      (List.map (fun e -> 
+        "| " ^ String.capitalize_ascii e.id ^ " (arg) -> " ^ 
+        if List.length e.arg > 0 then 
+          "let (" ^ pp_list e.arg ", " (fun (ii, it) -> ii)
+          ^ ") = arg in " ^ e.id ^ "(" ^ pp_list2 e.arg ", " (fun (ii, it) -> ii) ^ "s)"
+        else 
+          e.id ^ "(s)") ce.entries |> list_to_string) 
+    )
   in
-  Level (consts@str@act@entrs@main)
+  (consts@[str]@[act]@entrs@[main]) |> list_to_string
 
 
 let generate_ligo (ast: t) (contract: string) = 
-  generate_ligo_code ast contract |> code_to_string
+  generate_ligo_code ast contract
