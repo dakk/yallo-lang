@@ -12,7 +12,9 @@ let temp_c () = sprintf "a__%d" !temp_i
 
 let let_surround s = sprintf "let %s = %s in " (temp_v ()) s
 
-let rec enum_index e i ii = match e with 
+let rec enum_index e i ii = 
+  
+match e with 
 | [] -> failwith "Enum value not found"
 | x::xe when x = i -> ii
 | x::xe -> enum_index xe i (ii+1)
@@ -100,6 +102,8 @@ let rec pp_ltype (a: ttype) = match a with
 
 
 let rec pp_lexpr ((te,e): texpr) = 
+  let pp_par fmt ((ti, tt): string * ttype) = 
+    fprintf fmt "%s: %s" ti @@ pp_ltype tt in
   let pp_infix2 op a b = sprintf "(%s) %s (%s)" (pp_lexpr a) op (pp_lexpr b) in
   let pp_mergelist l sep f = list_to_string (List.mapi (fun i v -> f v ^ (if i < (List.length l) - 1 then sep else "")) l) in
   let pp_mergelist2 l sep f = list_to_string (List.map (fun v -> f v ^ sep) l) in
@@ -646,9 +650,63 @@ match e with
   | _ -> pp_lexpr b)
 
 
-(* | _ -> failwith @@ "Unable to generate ligo code for expression " ^ show_expr e *)
-(* | _ -> "<<translation not handled: " ^ show_expr e ^ ">>" *)
 
+let pp_consts fmt consts = 
+  let pp_const fmt (i, (t, e)) =
+    fprintf fmt "let %s = @[%s@]\n" 
+    i 
+    (pp_lexpr (t,e))
+  in
+  (pp_list3 "@." pp_const) sfmt consts
+
+
+let pp_storage fmt fields = 
+  if List.length fields = 0 then 
+    "type storage = unit\n\n"
+  else 
+    "type storage = {\n" ^
+    pp_list fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ pp_ltype t) ^
+    ";\n}\n\n"
+
+
+let pp_actions fmt entries = 
+  if List.length entries = 0 then ""
+  else (
+    "type action = " ^
+    (list_to_string (List.map (fun e -> 
+      "| " ^ String.capitalize_ascii e.id ^ 
+        (if List.length e.arg > 0 then " of " ^ pp_list e.arg " * " (fun (ii, it) -> pp_ltype it)
+        else " of unit")
+      ) entries
+    ) )
+    ^"\n\n"
+) 
+
+
+let pp_entries fmt entries = 
+  List.map (fun e -> 
+  "let " ^ e.id ^ " (" ^
+    list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
+    "s: " ^ pp_list2 e.arg " * " (fun (ii, it) -> pp_ltype it) ^
+    "storage) = \n" ^ pp_lexpr e.expr ^ ", (s: storage)\n\n"
+  ) entries
+
+
+let pp_main fmt entries = 
+  if List.length entries = 0 then (
+    "let main(a, s: unit * storage): (operation list * storage) = " ^
+    "([]: operation list), s"
+  ) else (
+    "let main(a, s: action * storage): (operation list * storage) = " ^
+    "match a with" ^
+    (List.map (fun e -> 
+      "| " ^ String.capitalize_ascii e.id ^ " (arg) -> " ^ 
+      if List.length e.arg > 0 then 
+        "let (" ^ pp_list e.arg ", " (fun (ii, it) -> ii)
+        ^ ") = arg in " ^ e.id ^ "(" ^ pp_list2 e.arg ", " (fun (ii, it) -> ii) ^ "s)"
+      else 
+        e.id ^ "(s)") entries |> list_to_string) 
+  )
 
 
 
@@ -656,63 +714,22 @@ let generate_ligo_code (ast: t) (contract: string) =
   let ce = List.assoc contract ast.contracts in
 
   (* dump const *)
-  let consts = (List.map (fun (i, (t,e)) -> 
-    sprintf "let %s = %s\n" 
-    i 
-    (pp_lexpr (t,e))
-  ) ast.consts) in 
+  pp_consts sfmt ast.consts;
 
   (* generate the storage record *)
-  let str =
-    if List.length ce.fields = 0 then 
-      "type storage = unit\n\n"
-    else 
-      "type storage = {\n" ^
-      pp_list ce.fields ";\n" (fun (i, t) -> "  " ^ i ^ ": " ^ pp_ltype t) ^
-      ";\n}\n\n"
-  in 
+  let str = pp_storage sfmt ce.fields in 
 
   (* generate the action variant *)
-  let act = 
-    if List.length ce.entries = 0 then ""
-    else (
-      "type action = " ^
-      (list_to_string (List.map (fun e -> 
-        "| " ^ String.capitalize_ascii e.id ^ 
-          (if List.length e.arg > 0 then " of " ^ pp_list e.arg " * " (fun (ii, it) -> pp_ltype it)
-          else " of unit")
-        ) ce.entries
-      ) )
-      ^"\n\n"
-  ) in 
+  let act = pp_actions sfmt ce.entries in 
 
   (* write entries *)
-  let entrs = 
-    List.map (fun e -> 
-    "let " ^ e.id ^ " (" ^
-      list_to_string (List.mapi (fun i (ii,it) -> ii ^ ", ") e.arg) ^
-      "s: " ^ pp_list2 e.arg " * " (fun (ii, it) -> pp_ltype it) ^
-      "storage) = \n" ^ pp_lexpr e.expr ^ ", (s: storage)\n\n"
-  ) ce.entries in
+  let entrs = pp_entries sfmt ce.entries in
 
   (* write the main *)
-  let main =
-    if List.length ce.entries = 0 then (
-      "let main(a, s: unit * storage): (operation list * storage) = " ^
-      "([]: operation list), s"
-    ) else (
-      "let main(a, s: action * storage): (operation list * storage) = " ^
-      "match a with" ^
-      (List.map (fun e -> 
-        "| " ^ String.capitalize_ascii e.id ^ " (arg) -> " ^ 
-        if List.length e.arg > 0 then 
-          "let (" ^ pp_list e.arg ", " (fun (ii, it) -> ii)
-          ^ ") = arg in " ^ e.id ^ "(" ^ pp_list2 e.arg ", " (fun (ii, it) -> ii) ^ "s)"
-        else 
-          e.id ^ "(s)") ce.entries |> list_to_string) 
-    )
-  in
-  (consts@[str]@[act]@entrs@[main]) |> list_to_string
+  let main = pp_main sfmt ce.entries in
+
+  let s = ([str]@[act]@entrs@[main]) |> list_to_string
+  in sget () ^ s
 
 
 let generate_ligo (ast: t) (contract: string) = 
