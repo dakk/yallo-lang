@@ -9,6 +9,7 @@ B /home/dakk/.opam/default/lib/bin_prot
 B /home/dakk/.opam/default/lib/bin_prot/shape
 B /home/dakk/.opam/default/lib/fieldslib
 B /home/dakk/.opam/default/lib/jane-street-headers
+B /home/dakk/.opam/default/lib/num
 B /home/dakk/.opam/default/lib/ppx_assert/runtime-lib
 B /home/dakk/.opam/default/lib/ppx_bench/runtime-lib
 B /home/dakk/.opam/default/lib/ppx_compare/runtime-lib
@@ -45,6 +46,7 @@ S /home/dakk/.opam/default/lib/bin_prot
 S /home/dakk/.opam/default/lib/bin_prot/shape
 S /home/dakk/.opam/default/lib/fieldslib
 S /home/dakk/.opam/default/lib/jane-street-headers
+S /home/dakk/.opam/default/lib/num
 S /home/dakk/.opam/default/lib/ppx_assert/runtime-lib
 S /home/dakk/.opam/default/lib/ppx_bench/runtime-lib
 S /home/dakk/.opam/default/lib/ppx_compare/runtime-lib

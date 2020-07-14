@@ -1,4 +1,8 @@
 open Ttype
+open Big_int
+
+let pp_big_int fmt i = 
+  Format.fprintf fmt "%s" (string_of_big_int i)
 
 type expr = 
 | ContractInstance of texpr 
@@ -34,9 +38,9 @@ type expr =
 | None
 | Unit 
 | Bool of bool
-| Nat of int 
-| Int of int 
-| Mutez of int
+| Nat of big_int 
+| Int of big_int 
+| Mutez of big_int
 | ChainId of int
 | Address of string
 | String of string

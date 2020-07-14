@@ -18,6 +18,7 @@ B /home/dakk/.opam/default/lib/core_kernel/version_util
 B /home/dakk/.opam/default/lib/fieldslib
 B /home/dakk/.opam/default/lib/jane-street-headers
 B /home/dakk/.opam/default/lib/menhirLib
+B /home/dakk/.opam/default/lib/num
 B /home/dakk/.opam/default/lib/parsexp
 B /home/dakk/.opam/default/lib/ppx_assert/runtime-lib
 B /home/dakk/.opam/default/lib/ppx_bench/runtime-lib
@@ -77,6 +78,7 @@ S /home/dakk/.opam/default/lib/core_kernel/version_util
 S /home/dakk/.opam/default/lib/fieldslib
 S /home/dakk/.opam/default/lib/jane-street-headers
 S /home/dakk/.opam/default/lib/menhirLib
+S /home/dakk/.opam/default/lib/num
 S /home/dakk/.opam/default/lib/parsexp
 S /home/dakk/.opam/default/lib/ppx_assert/runtime-lib
 S /home/dakk/.opam/default/lib/ppx_bench/runtime-lib

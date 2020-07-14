@@ -14,7 +14,7 @@
  (name parsing)
  (public_name yallo.parsing)
  (preprocess (pps ppx_jane ppx_deriving.show))
- (libraries ppx_deriving menhirLib helpers parse_tree)
+ (libraries num ppx_deriving menhirLib helpers parse_tree)
  (modules parsing parser_messages parser lexer pt_loc))
 
 

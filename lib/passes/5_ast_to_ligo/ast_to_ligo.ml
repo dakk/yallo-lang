@@ -5,6 +5,7 @@ open Helpers.Errors
 open Parsing
 open Format
 open Helpers.Gen_utils
+open Big_int
 
 let temp_i = ref 0
 let temp_v () = temp_i := !temp_i + 1; sprintf "a__%d" !temp_i
@@ -61,8 +62,8 @@ let rec pp_ltype fmt (a: ttype) = match a with
 
 | TLambda (p, r) -> 
   fprintf fmt "(%a -> %a)" 
-  pp_ltype p
-  pp_ltype r
+    pp_ltype p
+    pp_ltype r
 
 | TEnum (el) -> 
   fprintf fmt "nat"
@@ -75,13 +76,13 @@ let rec pp_ltype fmt (a: ttype) = match a with
 
 | TMap (t, t') -> 
   fprintf fmt "(%a, %a) map" 
-  pp_ltype t
-  pp_ltype t'
+    pp_ltype t
+    pp_ltype t'
 
 | TBigMap (t, t') -> 
   fprintf fmt "(%a, %a) big_map" 
-  pp_ltype t 
-  pp_ltype t'
+    pp_ltype t 
+    pp_ltype t'
 
 | TOption (t) -> 
   fprintf fmt "%a option" pp_ltype t
@@ -93,7 +94,7 @@ let rec pp_ltype fmt (a: ttype) = match a with
 
 | TTuple (tl) -> 
   (* "(" ^ List.fold_left (fun acc x -> acc ^ (if acc = "" then "" else " * ") ^ pp_ltype x) "" tl ^ ")" *)
-  fprintf fmt "( %a )" 
+  fprintf fmt "(%a)" 
     (pp_list " * " pp_ltype) tl
 
 | TContract (t) -> 
@@ -105,6 +106,11 @@ let rec pp_ltype fmt (a: ttype) = match a with
 let pp_par fmt ((ti, tt): string * ttype) = 
   fprintf fmt "%s: %a" ti pp_ltype tt
 
+let pp_mpar fmt il =
+  fprintf fmt "%a: %a"
+    (pp_list ", " pp_str) (fst @@ List.split il)
+    (pp_list " * " pp_ltype) (snd @@ List.split il)
+
 let rec pp_lexpr fmt ((te,e): texpr) = 
   let let_surround fmt s = fprintf fmt "let %s = @[%a@] in " (temp_v ()) pp_lexpr s in
   let pp_infix2 fmt op a b = fprintf fmt "(%a) %s (%a)" pp_lexpr a op pp_lexpr b in
@@ -115,10 +121,10 @@ match e with
 
 | Entrypoint((te2, ContractInstance((tt,e))), (TString, String(i))) -> 
   fprintf fmt "match ((Tezos.get_entrypoint_opt \"%%%s\" (%a)): (%a) option) with @[| None -> (failwith \"Invalid entrypoint\": %a)@\n| Some (ep) -> ep@]"
-  i 
-  pp_lexpr (tt,e)
-  pp_ltype te
-  pp_ltype te
+    i 
+    pp_lexpr (tt,e)
+    pp_ltype te
+    pp_ltype te
 
 (* 
 | ContractInstance of expr 
@@ -132,7 +138,7 @@ match e with
 
 | TezosContractOfAddress (ad) -> 
   fprintf fmt "match (Tezos.get_contract_opt %a : unit contract option) with @[| None -> (failwith \"invalid contract\": unit contract) @\n| Some(c) -> c@]"
-  pp_lexpr ad
+    pp_lexpr ad
 
 | TezosNow -> 
   fprintf fmt "Tezos.now"
@@ -160,9 +166,9 @@ match e with
 
 | TezosTransfer (ct, par, v) -> 
   fprintf fmt "Tezos.transaction @[@\n(%a)@\n(%a)@\n(%a)@]" 
-  pp_lexpr par
-  pp_lexpr v
-  pp_lexpr ct
+    pp_lexpr par
+    pp_lexpr v
+    pp_lexpr ct
 
 | TezosSelfAddress -> 
   fprintf fmt "Tezos.self_address"
@@ -223,13 +229,13 @@ match e with
   fprintf fmt "%b" i
 
 | Nat (i) -> 
-  fprintf fmt "%dn" i
+  fprintf fmt "%sn" @@ string_of_big_int i
 
 | Int (i) -> 
-  fprintf fmt "%d" i
+  fprintf fmt "%s" @@ string_of_big_int i
 
 | Mutez (i) -> 
-  fprintf fmt "%dmutez" i
+  fprintf fmt "%smutez" @@ string_of_big_int i
 
 | Address (a) -> 
   fprintf fmt "(\"%s\": address)" a
@@ -259,40 +265,34 @@ match e with
 
 | Typed (e, t) -> 
   fprintf fmt "(%a: %a)" 
-  pp_lexpr e
-  pp_ltype t
+    pp_lexpr e
+    pp_ltype t
   
 | List (el) -> 
-  fprintf fmt "[ %a ]"
-  (pp_list "; " pp_lexpr) el
+  fprintf fmt "[ %a ]" (pp_list "; " pp_lexpr) el
 
 | Set (el) -> 
-  fprintf fmt "set [ %a ]"
-  (pp_list "; " pp_lexpr) el
+  fprintf fmt "set [ %a ]" (pp_list "; " pp_lexpr) el
 
 | Map (el) -> 
   let pp_el fmt (a, b) = fprintf fmt "(%a), (%a)" pp_lexpr a pp_lexpr b in 
-  fprintf fmt "Map.literal [@[%a@]]"
-  (pp_list "; " pp_el) el
+  fprintf fmt "Map.literal [@[%a@]]" (pp_list "; " pp_el) el
   
 
 | BigMap (el) -> 
   let pp_el fmt (a, b) = fprintf fmt "(%a), (%a)" pp_lexpr a pp_lexpr b in 
-  fprintf fmt "Big_map.literal [@[%a@]]"
-  (pp_list "; " pp_el) el
+  fprintf fmt "Big_map.literal [@[%a@]]" (pp_list "; " pp_el) el
 
 | Tuple (el) -> 
-  fprintf fmt "( %a )"
-  (pp_list ", " pp_lexpr) el
+  fprintf fmt "( %a )" (pp_list ", " pp_lexpr) el
 
 | Lambda (il, e) -> 
   if List.length il = 0 then 
-    fprintf fmt "( fun (override: unit) -> @[%a@] )" pp_lexpr e 
+    fprintf fmt "( fun (override: unit) -> @[@\n%a@] )" pp_lexpr e 
   else 
-    fprintf fmt "(fun (%a:%a) -> @[%a@]"    
-    (pp_list ", " pp_str) (fst @@ List.split il)
-    (pp_list " * " pp_ltype) (snd @@ List.split il)
-    pp_lexpr e
+    fprintf fmt "(fun (%a) -> @[%a@])"    
+      pp_mpar il
+      pp_lexpr e
 
 | Record (il) -> 
   let pp_rec_as fmt (i, e) = fprintf fmt "%s=%a" i pp_lexpr e in
@@ -692,11 +692,10 @@ let pp_storage fmt fields =
 let pp_actions fmt entries = 
   let pp_act fmt e =
     if List.length e.arg = 0 then 
-      fprintf fmt "| %s of unit"
-        (String.capitalize_ascii e.id)
+      fprintf fmt "| %a of unit" pp_capit e.id
     else 
-      fprintf fmt "| %s of %a"
-        (String.capitalize_ascii e.id)
+      fprintf fmt "| %a of %a"
+        pp_capit e.id
         (pp_list " * " pp_ltype) (snd @@ List.split e.arg)
   in
   if List.length entries = 0 then fprintf fmt "@\n"
@@ -725,10 +724,10 @@ let pp_entries fmt entries =
 let pp_main fmt entries = 
   let pp_actcall fmt e =
     if List.length e.arg = 0 then 
-      fprintf fmt "| %s (arg) -> %s (s)" (String.capitalize_ascii e.id) (e.id)
+      fprintf fmt "| %a (arg) -> %s (s)" pp_capit e.id e.id
     else 
-      fprintf fmt "| %s (arg) -> @[@\nlet (%a) = arg in %s (%a, s)"
-      (String.capitalize_ascii e.id)
+      fprintf fmt "| %a (arg) -> @[@\nlet (%a) = arg in %s (%a, s)"
+      pp_capit e.id
       (pp_list ", " pp_str) (fst @@ List.split e.arg)
       e.id
       (pp_list ", " pp_str) (fst @@ List.split e.arg)

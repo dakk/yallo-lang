@@ -21,9 +21,9 @@
 %token <string> SIGNATURE
 %token <string> KEY
 %token <string> KEY_HASH
-%token <int> INT
-%token <int> NAT
-%token <int> MTZ
+%token <Big_int.big_int> INT
+%token <Big_int.big_int> NAT
+%token <Big_int.big_int> MTZ
 %token <string> CONT
 %token <string> IDENT
 

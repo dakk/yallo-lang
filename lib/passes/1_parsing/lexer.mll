@@ -1,6 +1,7 @@
 {
   open Parser
   open Lexing
+	open Big_int
 	
 	exception SyntaxError2 of string
 
@@ -71,10 +72,10 @@ let chain_id = '0' 'x' hex_digit hex_digit hex_digit hex_digit hex_digit hex_dig
 rule token = parse 
   | newline         { Lexing.new_line lexbuf; token lexbuf }
   | blank+          { token lexbuf }
-  | int as i 			  { INT (int_of_string i) }
-  | nat as i 			  { NAT (int_of_string (String.sub i 0 ((String.length i) - 1))) }
-  | mtz as i 			  { MTZ (int_of_string (String.sub i 0 ((String.length i) - 3))) } 
-  | tz as i 			  { MTZ (int_of_float (1000000. *. float_of_string (String.sub i 0 ((String.length i) - 2)))) } 
+  | int as i 			  { INT (big_int_of_string i) }
+  | nat as i 			  { NAT (big_int_of_string (String.sub i 0 ((String.length i) - 1))) }
+  | mtz as i 			  { MTZ (big_int_of_string (String.sub i 0 ((String.length i) - 3))) } 
+  | tz as i 			  { MTZ (big_int_of_int @@ int_of_float (1000000. *. float_of_string (String.sub i 0 ((String.length i) - 2)))) } 
 
   | "interface"     { INTERFACE }
   | "contract"      { CONTRACT }

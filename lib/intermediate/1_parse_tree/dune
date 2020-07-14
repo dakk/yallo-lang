@@ -2,7 +2,7 @@
  (name parse_tree)
  (public_name yallo.intermediate.parse_tree)
  (preprocess (pps ppx_jane ppx_deriving.show))
- (libraries ppx_deriving helpers)
+ (libraries num ppx_deriving helpers)
  (modules parse_tree))
 
 

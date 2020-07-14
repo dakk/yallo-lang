@@ -1,3 +1,8 @@
+open Big_int
+
+let pp_big_int fmt i = 
+  Format.fprintf fmt "%s" (string_of_big_int i)
+
 type iden = string [@@deriving show {with_path = false}]
 
 type ptype = 
@@ -19,10 +24,10 @@ and pexpr =
   | PEUnit
   | PENone
   | PEBool of bool
-  | PENat of int 
-  | PEInt of int 
+  | PENat of big_int 
+  | PEInt of big_int 
   | PEChainId of int
-  | PEMutez of int
+  | PEMutez of big_int
   | PEString of string
   | PEBytes of string
   | PEAddress of string

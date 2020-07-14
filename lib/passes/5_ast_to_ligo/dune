@@ -1,7 +1,7 @@
 (library
  (name ast_to_ligo)
  (public_name yallo.passes.ast_to_ligo)
- (libraries helpers ast)
+ (libraries num helpers ast)
  (modules ast_to_ligo))
 
 

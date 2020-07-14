@@ -4,6 +4,7 @@ open Ast_expr
 open Helpers.Errors
 open Parsing
 open Translate_ptype
+open Big_int
 
 let show_ttype_got_expect t1 t2 = "got: '" ^ show_ttype t1 ^ "' expect '" ^ show_ttype t2 ^ "'"
 let show_ttype_between_na t1 t2 = "between '" ^ show_ttype t1 ^ "' and '" ^ show_ttype t2 ^ "' is not allowed"
@@ -203,12 +204,12 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
     if List.length c <> 2 then raise @@ APIError (pel, "Timestamp.duration needs two argument");
     let (ht,hm) = transform_expr (List.nth c 0) env' ic in 
     let un = (match transform_expr (List.nth c 1) env' ic with 
-    | (TString, String("seconds")) -> Int (1)
-    | (TString, String("minutes")) -> Int (60)
-    | (TString, String("hours")) -> Int (60 * 60)
-    | (TString, String("days")) -> Int (60 * 60 * 24)
-    | (TString, String("weeks")) -> Int (60 * 60 * 24 * 7)
-    | (TString, String("years")) -> Int (60 * 60 * 24 * 365)
+    | (TString, String("seconds")) -> Int (big_int_of_int 1)
+    | (TString, String("minutes")) -> Int (big_int_of_int 60)
+    | (TString, String("hours")) -> Int (big_int_of_int @@ 60 * 60)
+    | (TString, String("days")) -> Int (big_int_of_int @@ 60 * 60 * 24)
+    | (TString, String("weeks")) -> Int (big_int_of_int @@ 60 * 60 * 24 * 7)
+    | (TString, String("years")) -> Int (big_int_of_int @@ 60 * 60 * 24 * 365)
     | (TString, String(a)) -> raise @@ APIError (pel, "Timestamp.duration invalid unit: " ^ a)
     | (_, _) -> raise @@ APIError (pel, "Timestamp.duration invalid arguments"))
     in
@@ -626,7 +627,7 @@ let rec transform_expr (pe: Parse_tree.pexpr) (env': Env.t) (ic: bindings) : tex
       in
       (* let (ptt, pee) = transform_expr (List.hd el) env' ic in  *)
       if ptt <> ttl then raise @@ InvalidExpression (pel, "Invalid arguments for callback");
-      TOperation, TezosTransfer((tt, ee), (ptt, pee), (TMutez, Mutez (0)))
+      TOperation, TezosTransfer((tt, ee), (ptt, pee), (TMutez, Mutez (big_int_of_int 0)))
 
     (* Apply on contract name, it is a buildcontractcodeandstorage, which is the argument of create_contract *)
     | TContractCode (tl) -> 
