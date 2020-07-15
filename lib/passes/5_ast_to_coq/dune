@@ -2,7 +2,7 @@
  (name ast_to_coq)
  (public_name yallo.passes.ast_to_coq)
  (libraries helpers ast)
- (modules ast_to_coq))
+ (modules ast_to_coq pp_cexpr pp_ctype))
 
 
 (env

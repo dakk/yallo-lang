@@ -1,0 +1,21 @@
+type aT = (int, nat);
+
+const aV: int = 12;
+
+function sum (a: nat): int {
+	aV + int(a)
+}
+
+contract TC {
+	field res: int;
+
+	entry summa (a: nat) {
+		this.res = sum (a);
+		[]
+	}
+
+	entry summa2 (a: nat) {
+		this.res = sum (a);
+		[]
+	}
+}
