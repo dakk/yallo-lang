@@ -16,7 +16,7 @@ let pp_consts fmt consts =
     i 
     pp_lexpr (t,e)
   in
-  (pp_list "@\n" pp_const) fmt consts
+  (pp_list "@\n" pp_const) fmt @@ List.rev consts
 
 
 let pp_storage fmt fields = 

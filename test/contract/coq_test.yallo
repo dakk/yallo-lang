@@ -1,9 +1,10 @@
 type aT = (int, nat);
 
 const aV: int = 12;
+const aV2: int = 12;
 
 function sum (a: nat): int {
-	aV + int(a)
+	aV + aV2 + int(a)
 }
 
 contract TC {

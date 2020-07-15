@@ -3,6 +3,8 @@ import "test/contract/token.yallo";
 const tokenContractAddress: address = @KT1ThEdxfUcWUwqsdergy3QnbCWGHSUHeHJq;
 
 contract usingAToken {
+	field balance: nat;
+
 	entry checkBalance(a: address) {
 		let op = IToken.of(tokenContractAddress).getBalance(a, this.checkBalanceCallback); 
 		[op]
@@ -14,7 +16,7 @@ contract usingAToken {
 	}
 
 	entry sendTezosInCall2(a: address) {
-		let getBalance: (address, nat contract) contract = Tezos.contract(tokenContractAddress, "getBalance") in
+		let getBalance = (Tezos.contract(tokenContractAddress, "getBalance"): (address, nat contract) contract) in
 		let op = getBalance(a, this.checkBalanceCallback) in
 		[ op ]
 	}
@@ -25,6 +27,7 @@ contract usingAToken {
 	}
 
 	entry checkBalanceCallback(b: nat) {
+		this.balance = b;
 		[]
 	}
 }

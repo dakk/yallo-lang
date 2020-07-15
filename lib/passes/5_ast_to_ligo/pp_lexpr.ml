@@ -33,12 +33,22 @@ match e with
   fprintf fmt "((Tezos.self \"%%%s\"): %a)" i pp_ltype te
 
 | Entrypoint((te2, ContractInstance((tt,e))), (TString, String(i))) -> 
+  (* TODO: check that i exists in interface e *)
+
   fprintf fmt "match ((Tezos.get_entrypoint_opt \"%%%s\" (%a)): (%a) option) with @[| None -> (failwith \"Invalid entrypoint\": %a)@\n| Some (ep) -> ep@]"
     i 
     pp_lexpr (tt,e)
     pp_ltype te
     pp_ltype te
 
+| Entrypoint((TAddress, ee), (TString, String(i))) -> 
+  show_expr e |> print_endline;
+  fprintf fmt "match ((Tezos.get_entrypoint_opt \"%%%s\" (%a)): (%a) option) with @[| None -> (failwith \"Invalid entrypoint\": %a)@\n| Some (ep) -> ep@]"
+    i 
+    pp_lexpr (TAddress, ee)
+    pp_ltype te
+    pp_ltype te
+    
 (* 
 | ContractInstance of expr 
 
@@ -582,3 +592,5 @@ match e with
   | (tl, List(e)) -> (fun fmt un -> fprintf fmt "(%a: operation list)" pp_lexpr (tl, List(e)))
   | _ -> (fun fmt un -> fprintf fmt "%a" pp_lexpr b))
   ()
+
+  | _ -> show_expr e |> print_endline

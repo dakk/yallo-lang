@@ -93,6 +93,7 @@ let () =
       "base_fun", `Quick, compile opt None "test/function/base_fun.yallo" None;
     ];
     "contract", [
+      "coq_test", `Quick, compile optt None "test/contract/coq_test.yallo" None;
       "assert_test", `Quick, compile optt None "test/contract/assert_test.yallo" None;
       "view", `Quick, compile optt None "test/contract/view.yallo" None;
       "itoken", `Quick, compile opt None "test/contract/itoken.yallo" None;
@@ -102,7 +103,7 @@ let () =
       "token", `Quick, compile optt None "test/contract/token.yallo" None;
       "token_with_view", `Quick, compile optt None "test/contract/token_with_view.yallo" None;
       "token_create", `Quick, compile optlc None "test/contract/token_create.yallo" None;
-      "token_using", `Quick, compile optt None "test/contract/token_using.yallo" None;
+      "token_using", `Quick, compile optt None "test/contract/token_using.yallo" (Some("usingAToken"));
       "field_record", `Quick, compile optt None "test/contract/field_record.yallo" None;
       "field_list", `Quick, compile optt None "test/contract/field_list.yallo" None;
       "field_enum", `Quick, compile optt None "test/contract/field_enum.yallo" None;
