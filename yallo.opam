@@ -11,9 +11,9 @@ authors: [
 ]
 
 homepage: "https://github.com/dakk/nmea"
-bug-reports: "https://github.com/dakk/nmea/issues"
+bug-reports: "https://github.com/dakk/yallo-lang/issues"
 license: "MIT"
-dev-repo: "git+https://github.com/dakk/nmea.git"
+dev-repo: "git+https://github.com/dakk/yallo-lang.git"
 build: ["dune" "build" "-p" name "-j" jobs]
 
 depends: [
